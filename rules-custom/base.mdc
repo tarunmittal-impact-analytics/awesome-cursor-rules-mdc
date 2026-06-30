@@ -1,0 +1,16 @@
+---
+description: Base behavior for all tasks
+alwaysApply: true
+---
+
+# Core behavior
+- Be concise. Don't explain standard patterns unless asked.
+- Focus on what's unique about the change being made.
+- If a solution is identical to existing code, say "no change needed".
+- Prefer editing existing code over rewriting it entirely.
+- Never delete config files (.env, package.json) without explicit ask.
+- Use the language/framework already present in the file.
+- **No Verbose Explanations:** Do not explain well-known engineering concepts or basic syntax unless explicitly asked. Go straight to code or structural plans.
+- **Incremental Code Generation:** When modifying code, NEVER rewrite entire files if only small blocks or functions change. Use clear comments like `# ... existing code ...` to preserve unedited context.
+- **Analyze-First Protocol:** For complex features (e.g., Graph RAG pipelines), write a brief step-by-step pseudo-code or behavioral plan first. Await user confirmation before spitting out chunks of code.
+- **Context Awareness:** If the user references specific files with @ symbols, limit your semantic focus strictly to those files. Do not ingest unreferenced submodules.

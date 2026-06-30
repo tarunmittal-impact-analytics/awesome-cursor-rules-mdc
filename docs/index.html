@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cursor Rules Catalog</title>
+  <meta name="description" content="Browse and install 240+ Cursor MDC rules for libraries and frameworks.">
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --surface: #141820;
+      --surface-2: #1b2230;
+      --border: #2a3344;
+      --text: #e8edf5;
+      --muted: #8b98ad;
+      --accent: #6ea8fe;
+      --accent-2: #3dd68c;
+      --chip: #222b3a;
+      --chip-active: #2f4568;
+      --radius: 12px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #121826 0%, var(--bg) 45%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin: 0;
+      max-width: 640px;
+      line-height: 1.5;
+    }
+
+    .stats {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      min-width: 110px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.4rem;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .toolbar {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    input[type="search"] {
+      flex: 1 1 280px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-size: 1rem;
+    }
+
+    input[type="search"]:focus {
+      outline: 2px solid rgba(110, 168, 254, 0.35);
+      border-color: var(--accent);
+    }
+
+    .tabs {
+      display: inline-flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px;
+    }
+
+    .tab {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .tab.active {
+      background: var(--chip-active);
+      color: var(--text);
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-height: 120px;
+      overflow: auto;
+      padding-bottom: 4px;
+    }
+
+    .tag {
+      border: 1px solid var(--border);
+      background: var(--chip);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .tag.active {
+      background: var(--chip-active);
+      border-color: var(--accent);
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .selection-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .selection-bar.visible { display: flex; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+      padding: 18px;
+    }
+
+    .card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .card:hover {
+      border-color: #3f516d;
+      transform: translateY(-1px);
+    }
+
+    .card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(110, 168, 254, 0.25);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      word-break: break-word;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .mini-tag {
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: #111722;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 8px;
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto;
+      align-items: center;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      background: #111722;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    button.primary {
+      background: linear-gradient(180deg, #4d86db, #3a6fbe);
+      border-color: #4d86db;
+      color: white;
+    }
+
+    button.ghost:hover,
+    button.primary:hover {
+      filter: brightness(1.08);
+    }
+
+    .command-box {
+      margin-top: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .command-box label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+      background: #0a0f17;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .empty {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--muted);
+      grid-column: 1 / -1;
+    }
+
+    footer {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #17301f;
+      border: 1px solid rgba(61, 214, 140, 0.35);
+      color: var(--accent-2);
+      padding: 12px 16px;
+      border-radius: 10px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: 0.2s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 720px) {
+      .selection-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Cursor Rules Catalog</h1>
+        <p class="subtitle">
+          Browse 240+ MDC rules for libraries and frameworks. Copy an install command or pick a preset stack for your use case.
+        </p>
+      </div>
+      <div class="stats">
+        <div class="stat"><strong id="stat-rules">—</strong><span>Rules</span></div>
+        <div class="stat"><strong id="stat-custom">—</strong><span>Personal</span></div>
+        <div class="stat"><strong id="stat-stacks">—</strong><span>Stacks</span></div>
+        <div class="stat"><strong id="stat-tags">—</strong><span>Tags</span></div>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="search-row">
+        <input id="search" type="search" placeholder="Search rules, tags, or stacks…">
+        <div class="tabs">
+          <button class="tab active" data-view="rules">Rules</button>
+          <button class="tab" data-view="custom">Personal</button>
+          <button class="tab" data-view="stacks">Stacks</button>
+        </div>
+      </div>
+      <div id="tag-filters" class="tags"></div>
+    </div>
+
+    <section class="panel">
+      <div id="selection-bar" class="selection-bar">
+        <span id="selection-count">0 selected</span>
+        <div>
+          <button id="copy-selected-curl" class="primary">Copy curl install</button>
+          <button id="copy-selected-uv" class="ghost">Copy uv install</button>
+          <button id="clear-selection" class="ghost">Clear</button>
+        </div>
+      </div>
+      <div id="content" class="grid"></div>
+    </section>
+
+    <div class="command-box">
+      <label>Quick install (curl — no clone required)</label>
+      <pre id="quick-curl">Loading…</pre>
+    </div>
+
+    <footer>
+      Part of <a id="repo-link" href="#" target="_blank" rel="noreferrer">awesome-cursor-rules-mdc</a>.
+      Rules install into <code>.cursor/rules/</code> in your project.
+    </footer>
+  </div>
+
+  <div id="toast" class="toast">Copied to clipboard</div>
+
+  <script>
+    const state = {
+      catalog: null,
+      view: "rules",
+      query: "",
+      activeTags: new Set(),
+      selectedRules: new Set(),
+      selectedCustom: new Set(),
+    };
+
+    const els = {
+      content: document.getElementById("content"),
+      search: document.getElementById("search"),
+      tagFilters: document.getElementById("tag-filters"),
+      selectionBar: document.getElementById("selection-bar"),
+      selectionCount: document.getElementById("selection-count"),
+      quickCurl: document.getElementById("quick-curl"),
+      toast: document.getElementById("toast"),
+      statRules: document.getElementById("stat-rules"),
+      statCustom: document.getElementById("stat-custom"),
+      statStacks: document.getElementById("stat-stacks"),
+      statTags: document.getElementById("stat-tags"),
+    };
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      setTimeout(() => els.toast.classList.remove("show"), 1800);
+    }
+
+    async function copyText(text) {
+      await navigator.clipboard.writeText(text);
+      showToast("Copied to clipboard");
+    }
+
+    function curlInstallCustom(rules) {
+      const base = state.catalog.installShUrl;
+      return `curl -fsSL ${base} | bash -s -- --custom ${rules.join(" ")} --here`;
+    }
+
+    function uvInstallCustom(rules) {
+      return `uv run src/install_rules.py install --custom ${rules.join(" ")} --here --source github`;
+    }
+
+    function curlInstall(rules, stack) {
+      const base = state.catalog.installShUrl;
+      if (stack) {
+        return `curl -fsSL ${base} | bash -s -- --stack ${stack} --here`;
+      }
+      return `curl -fsSL ${base} | bash -s -- ${rules.join(" ")} --here`;
+    }
+
+    function uvInstall(rules, stack) {
+      if (stack) {
+        return `uv run src/install_rules.py install --stack ${stack} --here --source github`;
+      }
+      return `uv run src/install_rules.py install ${rules.join(" ")} --here --source github`;
+    }
+
+    function matchesQuery(text) {
+      if (!state.query) return true;
+      return text.toLowerCase().includes(state.query.toLowerCase());
+    }
+
+    function ruleMatchesTags(tags) {
+      if (state.activeTags.size === 0) return true;
+      const ruleTags = new Set(tags.map((t) => t.toLowerCase()));
+      for (const tag of state.activeTags) {
+        if (ruleTags.has(tag)) return true;
+      }
+      return false;
+    }
+
+    function renderTags() {
+      els.tagFilters.innerHTML = "";
+      if (state.view !== "rules") {
+        els.tagFilters.style.display = "none";
+        return;
+      }
+      els.tagFilters.style.display = "flex";
+
+      state.catalog.tags.slice(0, 30).forEach(({ name, count }) => {
+        const btn = document.createElement("button");
+        btn.className = "tag" + (state.activeTags.has(name) ? " active" : "");
+        btn.textContent = `${name} (${count})`;
+        btn.onclick = () => {
+          if (state.activeTags.has(name)) state.activeTags.delete(name);
+          else state.activeTags.add(name);
+          renderTags();
+          renderContent();
+        };
+        els.tagFilters.appendChild(btn);
+      });
+    }
+
+    function toggleRule(name) {
+      if (state.selectedRules.has(name)) state.selectedRules.delete(name);
+      else state.selectedRules.add(name);
+      updateSelectionBar();
+      renderContent();
+    }
+
+    function updateSelectionBar() {
+      const count = state.view === "custom" ? state.selectedCustom.size : state.selectedRules.size;
+      els.selectionCount.textContent = `${count} selected`;
+      els.selectionBar.classList.toggle("visible", count > 0 && (state.view === "rules" || state.view === "custom"));
+    }
+
+    function renderCustomRules() {
+      const rules = state.catalog.customRules || [];
+      const filtered = rules.filter((rule) => {
+        const haystack = [rule.name, rule.description || "", ...rule.tags].join(" ");
+        return matchesQuery(haystack);
+      });
+
+      if (filtered.length === 0) {
+        els.content.innerHTML = '<div class="empty">No personal rules match your search.</div>';
+        return;
+      }
+
+      els.content.innerHTML = filtered.map((rule) => {
+        const selected = state.selectedCustom.has(rule.name);
+        const tags = rule.tags.slice(0, 6).map((t) => `<span class="mini-tag">${t}</span>`).join("");
+        return `
+          <article class="card${selected ? " selected" : ""}">
+            <div class="card-header">
+              <h3>${rule.name}</h3>
+              <button class="ghost" data-select-custom="${rule.name}">${selected ? "Selected" : "Select"}</button>
+            </div>
+            <p>${rule.description || ""}</p>
+            <div class="card-tags">${tags}</div>
+            <div class="card-actions">
+              <button class="primary" data-custom-curl="${rule.name}">Copy curl</button>
+              <button class="ghost" data-custom-uv="${rule.name}">Copy uv</button>
+              <a href="${state.catalog.customRulesBase}/${rule.name}.mdc" target="_blank" rel="noreferrer">View rule</a>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      els.content.querySelectorAll("[data-select-custom]").forEach((btn) => {
+        btn.onclick = () => {
+          const name = btn.dataset.selectCustom;
+          if (state.selectedCustom.has(name)) state.selectedCustom.delete(name);
+          else state.selectedCustom.add(name);
+          updateSelectionBar();
+          renderContent();
+        };
+      });
+      els.content.querySelectorAll("[data-custom-curl]").forEach((btn) => {
+        btn.onclick = () => copyText(curlInstallCustom([btn.dataset.customCurl]));
+      });
+      els.content.querySelectorAll("[data-custom-uv]").forEach((btn) => {
+        btn.onclick = () => copyText(uvInstallCustom([btn.dataset.customUv]));
+      });
+    }
+
+    function renderRules() {
+      const filtered = state.catalog.rules.filter((rule) => {
+        const haystack = [rule.name, ...rule.tags].join(" ");
+        return matchesQuery(haystack) && ruleMatchesTags(rule.tags);
+      });
+
+      if (filtered.length === 0) {
+        els.content.innerHTML = '<div class="empty">No rules match your search.</div>';
+        return;
+      }
+
+      els.content.innerHTML = filtered.map((rule) => {
+        const selected = state.selectedRules.has(rule.name);
+        const tags = rule.tags.slice(0, 6).map((t) => `<span class="mini-tag">${t}</span>`).join("");
+        return `
+          <article class="card${selected ? " selected" : ""}">
+            <div class="card-header">
+              <h3>${rule.name}</h3>
+              <button class="ghost" data-select="${rule.name}">${selected ? "Selected" : "Select"}</button>
+            </div>
+            <div class="card-tags">${tags}</div>
+            <div class="card-actions">
+              <button class="primary" data-curl="${rule.name}">Copy curl</button>
+              <button class="ghost" data-uv="${rule.name}">Copy uv</button>
+              <a href="${state.catalog.rulesMdcBase}/${rule.name}.mdc" target="_blank" rel="noreferrer">View rule</a>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      els.content.querySelectorAll("[data-select]").forEach((btn) => {
+        btn.onclick = () => toggleRule(btn.dataset.select);
+      });
+      els.content.querySelectorAll("[data-curl]").forEach((btn) => {
+        btn.onclick = () => copyText(curlInstall([btn.dataset.curl]));
+      });
+      els.content.querySelectorAll("[data-uv]").forEach((btn) => {
+        btn.onclick = () => copyText(uvInstall([btn.dataset.uv]));
+      });
+    }
+
+    function renderStacks() {
+      const entries = Object.entries(state.catalog.stacks).filter(([name, stack]) => {
+        const haystack = [name, stack.description, ...stack.rules].join(" ");
+        return matchesQuery(haystack);
+      });
+
+      if (entries.length === 0) {
+        els.content.innerHTML = '<div class="empty">No stacks match your search.</div>';
+        return;
+      }
+
+      els.content.innerHTML = entries.map(([name, stack]) => {
+        const rules = stack.rules.map((r) => `<span class="mini-tag">${r}</span>`).join("");
+        return `
+          <article class="card">
+            <h3>${name}</h3>
+            <p>${stack.description}</p>
+            <div class="card-tags">${rules}</div>
+            <div class="card-actions">
+              <button class="primary" data-stack-curl="${name}">Copy curl</button>
+              <button class="ghost" data-stack-uv="${name}">Copy uv</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      els.content.querySelectorAll("[data-stack-curl]").forEach((btn) => {
+        btn.onclick = () => copyText(curlInstall([], btn.dataset.stackCurl));
+      });
+      els.content.querySelectorAll("[data-stack-uv]").forEach((btn) => {
+        btn.onclick = () => copyText(uvInstall([], btn.dataset.stackUv));
+      });
+    }
+
+    function renderContent() {
+      if (state.view === "rules") renderRules();
+      else if (state.view === "custom") renderCustomRules();
+      else renderStacks();
+      updateSelectionBar();
+    }
+
+    function setView(view) {
+      state.view = view;
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.view === view);
+      });
+      renderTags();
+      renderContent();
+    }
+
+    async function init() {
+      const response = await fetch("catalog.json");
+      state.catalog = await response.json();
+
+      els.statRules.textContent = state.catalog.rules.length;
+      els.statCustom.textContent = (state.catalog.customRules || []).length;
+      els.statStacks.textContent = Object.keys(state.catalog.stacks).length;
+      els.statTags.textContent = state.catalog.tags.length;
+      els.quickCurl.textContent = curlInstall([], "personal");
+
+      const repoLink = document.getElementById("repo-link");
+      repoLink.href = state.catalog.githubUrl;
+      repoLink.textContent = state.catalog.repo;
+
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.onclick = () => setView(tab.dataset.view);
+      });
+
+      els.search.addEventListener("input", (event) => {
+        state.query = event.target.value.trim();
+        renderContent();
+      });
+
+      document.getElementById("copy-selected-curl").onclick = () => {
+        if (state.view === "custom") copyText(curlInstallCustom([...state.selectedCustom]));
+        else copyText(curlInstall([...state.selectedRules]));
+      };
+      document.getElementById("copy-selected-uv").onclick = () => {
+        if (state.view === "custom") copyText(uvInstallCustom([...state.selectedCustom]));
+        else copyText(uvInstall([...state.selectedRules]));
+      };
+      document.getElementById("clear-selection").onclick = () => {
+        state.selectedRules.clear();
+        renderContent();
+      };
+
+      renderTags();
+      renderContent();
+    }
+
+    init().catch((error) => {
+      els.content.innerHTML = `<div class="empty">Failed to load catalog: ${error.message}</div>`;
+    });
+  </script>
+</body>
+</html>

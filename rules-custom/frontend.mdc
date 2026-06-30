@@ -1,0 +1,8 @@
+---
+description: UI component conventions
+globs: ["**/components/**", "**/pages/**", "**/*.tsx", "**/*.jsx"]
+alwaysApply: false
+---
+- Prefer server components unless interactivity requires client.
+- Keep components under 150 lines. Extract if larger.
+- Co-locate styles with the component file.

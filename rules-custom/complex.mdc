@@ -1,0 +1,10 @@
+---
+description: Use for architecture, system design, large refactors
+alwaysApply: false
+---
+
+- Think step-by-step before suggesting changes.
+- Explain trade-offs between approaches.
+- Consider downstream impact across the codebase.
+- Note any breaking changes explicitly.
+- Suggest the simplest solution that satisfies requirements.

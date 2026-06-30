@@ -1,0 +1,10 @@
+---
+description: Docs, tests, and small files — keep responses minimal
+globs: ["**/*.md", "**/*.test.*", "**/*.spec.*", "**/docs/**"]
+alwaysApply: false
+---
+
+- One-liner suggestions preferred.
+- Do not suggest structural refactors.
+- For tests: add the simplest passing test, don't redesign the suite.
+- For docs: match existing tone and length.

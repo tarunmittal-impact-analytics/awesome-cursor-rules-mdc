@@ -28,6 +28,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
 
+[project.scripts]
+cursor-rules = "src.install_rules:main"
+
 [dependency-groups]
 dev = [
     "pytest>=8.3.5",

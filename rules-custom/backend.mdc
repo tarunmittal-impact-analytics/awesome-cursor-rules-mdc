@@ -1,0 +1,8 @@
+---
+description: API, DB, and server-side code conventions
+globs: ["**/api/**", "**/server/**", "**/models/**", "**/db/**"]
+alwaysApply: false
+---
+- Always handle errors with try/catch and return typed responses.
+- Never expose raw DB errors to the client.
+- Use parameterized queries, never string interpolation in SQL.

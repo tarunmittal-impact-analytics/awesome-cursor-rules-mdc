@@ -1,0 +1,29 @@
+{
+  "rules": [
+    {
+      "name": "base",
+      "description": "Base behavior for all tasks (always applied)",
+      "tags": ["personal", "custom", "always-apply"]
+    },
+    {
+      "name": "simple",
+      "description": "Docs, tests, and small files — keep responses minimal",
+      "tags": ["personal", "custom", "docs", "testing"]
+    },
+    {
+      "name": "complex",
+      "description": "Architecture, system design, and large refactors",
+      "tags": ["personal", "custom", "architecture"]
+    },
+    {
+      "name": "frontend",
+      "description": "UI component conventions for React/Next.js",
+      "tags": ["personal", "custom", "frontend"]
+    },
+    {
+      "name": "backend",
+      "description": "API, DB, and server-side code conventions",
+      "tags": ["personal", "custom", "backend"]
+    }
+  ]
+}

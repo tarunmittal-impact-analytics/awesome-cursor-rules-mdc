@@ -1,10 +1,14 @@
 # MDC Rules Generator
 
 > **Disclaimer:** This project is not officially associated with or endorsed by Cursor. It is a community-driven initiative to enhance the Cursor experience.
+>
+> Forked from [sanjeed5/awesome-cursor-rules-mdc](https://github.com/sanjeed5/awesome-cursor-rules-mdc).
 
 This project generates Cursor MDC (Markdown Cursor) rule files from a structured JSON file containing library information. It uses Exa for semantic search and LLM (Gemini) for content generation.
 
-[![Star History Chart](https://api.star-history.com/svg?repos=sanjeed5/awesome-cursor-rules-mdc&type=Date)](https://www.star-history.com/#sanjeed5/awesome-cursor-rules-mdc&Date)
+**📖 [Complete Usage Guide →](GUIDE.md)** — full reference for installing rules, preset stacks, personal rules, web catalog, curl/CLI, and new project setup.
+
+[![Star History Chart](https://api.star-history.com/svg?repos=tarunmittal-impact-analytics/awesome-cursor-rules-mdc&type=Date)](https://www.star-history.com/#tarunmittal-impact-analytics/awesome-cursor-rules-mdc&Date)
 
 ## Features
 
@@ -27,7 +31,7 @@ This project generates Cursor MDC (Markdown Cursor) rule files from a structured
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/sanjeed5/awesome-cursor-rules-mdc.git
+   git clone https://github.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc.git
    cd awesome-cursor-rules-mdc
    ```
 
@@ -83,6 +87,159 @@ uv run src/generate_mdc_files.py --tag python
 uv run src/generate_mdc_files.py --library react
 ```
 
+## Install Rules in Your Project
+
+Browse and install rules into any project's `.cursor/rules` folder.
+
+### Quick start
+
+From this repo:
+
+```bash
+# Install specific libraries into your project
+uv run src/install_rules.py install react fastapi --target ~/my-app/.cursor/rules
+
+# Or from inside your project
+cd ~/my-app
+uv run /path/to/awesome-cursor-rules-mdc/src/install_rules.py install react --here
+```
+
+From any machine (no clone required):
+
+```bash
+# Fetch rules directly from GitHub
+uv run src/install_rules.py install react fastapi --here --source github
+```
+
+### Browse the catalog
+
+```bash
+uv run src/install_rules.py list                    # all 241 rules
+uv run src/install_rules.py list --tag python       # filter by tag
+uv run src/install_rules.py tags                    # all tags with counts
+uv run src/install_rules.py search fastapi          # search by name/tag
+uv run src/install_rules.py stacks                  # preset bundles
+```
+
+### Install by use case
+
+**By tag** (installs every rule matching any of the tags):
+
+```bash
+uv run src/install_rules.py install --tag python --tag backend --here
+```
+
+**By preset stack** (curated bundles in `stacks.json`):
+
+```bash
+uv run src/install_rules.py install --stack python-backend --here
+uv run src/install_rules.py install --stack react-ts --here
+uv run src/install_rules.py install --stack ai-llm --here
+```
+
+Available stacks: `python-backend`, `python-django`, `python-flask`, `react-ts`, `next-js-fullstack`, `vue-frontend`, `angular-frontend`, `data-ml`, `ai-llm`, `devops`, `aws-cloud`, `rust-web`, `go-backend`, `mobile-flutter`, `e2e-testing`, `personal`, `personal-python-backend`, `personal-react-ts`
+
+### Personal / custom rules
+
+Personal workflow rules live in `rules-custom/` (from `Desktop/Personal/cursor_rules`):
+
+| Rule | Purpose |
+|------|---------|
+| `base` | Always-on core behavior (concise, incremental edits) |
+| `simple` | Docs, tests, small files |
+| `complex` | Architecture and large refactors |
+| `frontend` | UI component conventions |
+| `backend` | API/DB/server conventions |
+
+```bash
+# Install all personal rules
+uv run src/install_rules.py install --custom-all --here
+
+# Pick specific personal rules
+uv run src/install_rules.py install --custom base frontend backend --here
+
+# Personal rules + library stack
+uv run src/install_rules.py install --stack personal-python-backend --here --source github
+
+# List personal rules
+uv run src/install_rules.py list-custom
+```
+
+Curl equivalent:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh | bash -s -- --custom-all --here
+curl -fsSL .../install.sh | bash -s -- --custom base frontend --here
+curl -fsSL .../install.sh | bash -s -- --stack personal --here
+```
+
+### Options
+
+| Flag | Description |
+|------|-------------|
+| `--here` | Install into `./.cursor/rules` in the current directory |
+| `--target PATH` | Install into a specific `.cursor/rules` directory |
+| `--source local` | Copy from local `rules-mdc/` (default) |
+| `--source github` | Fetch from GitHub raw URLs (no clone needed) |
+| `--force` | Overwrite existing rule files |
+| `--dry-run` | Preview without copying |
+| `--custom NAME` | Install personal rules from `rules-custom/` |
+| `--custom-all` | Install all personal rules |
+| `--custom-tag TAG` | Install personal rules matching tag |
+
+### Curl installer (no Python required)
+
+```bash
+# Install specific rules
+curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh | bash -s -- react fastapi --here
+
+# Install a preset stack
+curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh | bash -s -- --stack python-backend --here
+
+# Install by tag
+curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh | bash -s -- --tag python --tag backend --here
+```
+
+Options: `--here`, `--target PATH`, `--stack NAME`, `--tag TAG`, `--custom`, `--custom-all`, `--force`, `--dry-run`
+
+Override repo source with env vars: `CURSOR_RULES_REPO=owner/repo CURSOR_RULES_BRANCH=main`
+
+### Web catalog
+
+Browse all rules visually and copy install commands:
+
+**https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/**
+
+The catalog supports search, tag filters, multi-select, preset stacks, and one-click copy for curl/uv commands.
+
+To regenerate `docs/catalog.json` after updating `rules.json` or `repo.json`:
+
+```bash
+uv run src/generate_catalog.py
+```
+
+GitHub Pages deploys automatically from `docs/` on push to `main` (enable Pages → Source: GitHub Actions in repo settings).
+
+### Fork configuration
+
+Repo URLs are centralized in `repo.json`. After forking, update it once:
+
+```json
+{
+  "repo": "your-github-username/awesome-cursor-rules-mdc",
+  "branch": "main",
+  "upstream": "sanjeed5/awesome-cursor-rules-mdc"
+}
+```
+
+Then sync generated URLs:
+
+```bash
+uv run src/generate_catalog.py
+```
+
+This updates `docs/catalog.json`, curl examples in `install.sh`, and GitHub Pages install links. Python tools also auto-detect `origin` from git when run locally.
+
 ## Adding New Rules
 
 Adding support for new libraries is simple:
@@ -120,14 +277,26 @@ The script uses a `config.yaml` file for configuration. You can modify this file
 
 ```
 .
+├── repo.json             # Fork repo coordinates (owner/repo, branch, upstream)
+├── docs/                 # Static web catalog (GitHub Pages)
+│   ├── index.html
+│   └── catalog.json
+├── install.sh            # Curl-based installer script
 ├── src/                  # Main source code directory
 │   ├── generate_mdc_files.py  # Main generator script
+│   ├── install_rules.py  # CLI to browse and install rules
+│   ├── generate_catalog.py  # Build docs/catalog.json and sync fork URLs
+│   ├── repo_config.py    # Resolve repo slug from repo.json / git / env
 │   ├── config.yaml       # Configuration file
 │   ├── mdc-instructions.txt   # Instructions for MDC generation
 │   ├── logs/             # Log files directory
 │   └── exa_results/      # Directory for Exa search results
 ├── rules-mdc/            # Output directory for generated MDC files
+├── rules-custom/         # Personal/custom MDC rules
+├── custom-rules.json     # Catalog for personal rules
 ├── rules.json            # Input file with library information
+├── stacks.json           # Preset rule bundles for common stacks
+├── GUIDE.md              # Complete usage guide (install, stacks, custom rules)
 ├── pyproject.toml        # Project dependencies and metadata
 ├── .env.example          # Example environment variables
 └── LICENSE               # MIT License

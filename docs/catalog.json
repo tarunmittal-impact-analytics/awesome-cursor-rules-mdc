@@ -1,0 +1,3353 @@
+{
+  "repo": "tarunmittal-impact-analytics/awesome-cursor-rules-mdc",
+  "branch": "main",
+  "upstream": "sanjeed5/awesome-cursor-rules-mdc",
+  "githubUrl": "https://github.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc",
+  "pagesUrl": "https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/",
+  "installShUrl": "https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh",
+  "rulesMdcBase": "https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/rules-mdc",
+  "customRulesBase": "https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/rules-custom",
+  "rules": [
+    {
+      "name": "actix-web",
+      "tags": [
+        "backend",
+        "framework",
+        "rust"
+      ]
+    },
+    {
+      "name": "aiohttp",
+      "tags": [
+        "web",
+        "python",
+        "http-client",
+        "async"
+      ]
+    },
+    {
+      "name": "amazon-ec2",
+      "tags": [
+        "cloud",
+        "infrastructure",
+        "aws",
+        "virtual-machines"
+      ]
+    },
+    {
+      "name": "amazon-s3",
+      "tags": [
+        "cloud",
+        "storage",
+        "aws",
+        "object-storage"
+      ]
+    },
+    {
+      "name": "android-sdk",
+      "tags": [
+        "mobile",
+        "framework",
+        "java",
+        "kotlin"
+      ]
+    },
+    {
+      "name": "angular",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript",
+        "typescript"
+      ]
+    },
+    {
+      "name": "ansible",
+      "tags": [
+        "devops",
+        "infrastructure",
+        "automation",
+        "configuration-management"
+      ]
+    },
+    {
+      "name": "ant-design",
+      "tags": [
+        "ui",
+        "component-library",
+        "react",
+        "design-system"
+      ]
+    },
+    {
+      "name": "anyio",
+      "tags": [
+        "python",
+        "async",
+        "compatibility-layer"
+      ]
+    },
+    {
+      "name": "apollo-client",
+      "tags": [
+        "web",
+        "api",
+        "graphql",
+        "javascript"
+      ]
+    },
+    {
+      "name": "apollo-graphql",
+      "tags": [
+        "web",
+        "api",
+        "graphql",
+        "javascript"
+      ]
+    },
+    {
+      "name": "asp-net",
+      "tags": [
+        "backend",
+        "framework",
+        "csharp",
+        "microsoft"
+      ]
+    },
+    {
+      "name": "astro",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript",
+        "ssr",
+        "static-site"
+      ]
+    },
+    {
+      "name": "asyncio",
+      "tags": [
+        "python",
+        "async",
+        "standard-library"
+      ]
+    },
+    {
+      "name": "auth0",
+      "tags": [
+        "authentication",
+        "security",
+        "identity",
+        "saas"
+      ]
+    },
+    {
+      "name": "autogen",
+      "tags": [
+        "ai",
+        "ml",
+        "llm",
+        "python",
+        "agent-framework",
+        "multi-agent"
+      ]
+    },
+    {
+      "name": "aws",
+      "tags": [
+        "cloud",
+        "major-platform"
+      ]
+    },
+    {
+      "name": "aws-amplify",
+      "tags": [
+        "cloud",
+        "frontend",
+        "aws",
+        "full-stack"
+      ]
+    },
+    {
+      "name": "aws-cli",
+      "tags": [
+        "cloud",
+        "devops",
+        "aws",
+        "command-line"
+      ]
+    },
+    {
+      "name": "aws-dynamodb",
+      "tags": [
+        "database",
+        "nosql",
+        "aws",
+        "cloud"
+      ]
+    },
+    {
+      "name": "aws-ecs",
+      "tags": [
+        "cloud",
+        "containerization",
+        "aws",
+        "orchestration"
+      ]
+    },
+    {
+      "name": "aws-lambda",
+      "tags": [
+        "cloud",
+        "serverless",
+        "aws"
+      ]
+    },
+    {
+      "name": "aws-rds",
+      "tags": [
+        "database",
+        "sql",
+        "aws",
+        "cloud"
+      ]
+    },
+    {
+      "name": "axios",
+      "tags": [
+        "web",
+        "javascript",
+        "http-client"
+      ]
+    },
+    {
+      "name": "azure",
+      "tags": [
+        "cloud",
+        "major-platform"
+      ]
+    },
+    {
+      "name": "azure-pipelines",
+      "tags": [
+        "devops",
+        "ci-cd",
+        "microsoft",
+        "cloud"
+      ]
+    },
+    {
+      "name": "bash",
+      "tags": [
+        "shell",
+        "scripting",
+        "unix",
+        "command-line"
+      ]
+    },
+    {
+      "name": "beautifulsoup4",
+      "tags": [
+        "python",
+        "web-scraping",
+        "html-parsing"
+      ]
+    },
+    {
+      "name": "behave",
+      "tags": [
+        "development",
+        "testing",
+        "python",
+        "bdd"
+      ]
+    },
+    {
+      "name": "black",
+      "tags": [
+        "development",
+        "python",
+        "formatter",
+        "linting"
+      ]
+    },
+    {
+      "name": "boto3",
+      "tags": [
+        "cloud",
+        "aws",
+        "python",
+        "sdk"
+      ]
+    },
+    {
+      "name": "bottle",
+      "tags": [
+        "backend",
+        "framework",
+        "python",
+        "microframework"
+      ]
+    },
+    {
+      "name": "bun",
+      "tags": [
+        "backend",
+        "javascript",
+        "runtime",
+        "nodejs-alternative"
+      ]
+    },
+    {
+      "name": "c-sharp",
+      "tags": [
+        "language",
+        "microsoft",
+        "dotnet",
+        "backend"
+      ]
+    },
+    {
+      "name": "chakra-ui",
+      "tags": [
+        "ui",
+        "component-library",
+        "react"
+      ]
+    },
+    {
+      "name": "cheerio",
+      "tags": [
+        "web-scraping",
+        "javascript",
+        "html-parsing",
+        "nodejs"
+      ]
+    },
+    {
+      "name": "circleci",
+      "tags": [
+        "devops",
+        "ci-cd",
+        "cloud",
+        "automation"
+      ]
+    },
+    {
+      "name": "clerk",
+      "tags": [
+        "authentication",
+        "security",
+        "identity",
+        "saas"
+      ]
+    },
+    {
+      "name": "click",
+      "tags": [
+        "python",
+        "utilities",
+        "cli"
+      ]
+    },
+    {
+      "name": "cloudflare",
+      "tags": [
+        "cloud",
+        "deployment",
+        "edge-computing",
+        "cdn"
+      ]
+    },
+    {
+      "name": "codemirror",
+      "tags": [
+        "editor",
+        "javascript",
+        "text-editor",
+        "code-editor"
+      ]
+    },
+    {
+      "name": "crewai",
+      "tags": [
+        "ai",
+        "ml",
+        "llm",
+        "python",
+        "agent-framework",
+        "multi-agent"
+      ]
+    },
+    {
+      "name": "css",
+      "tags": [
+        "web",
+        "frontend",
+        "styling",
+        "language"
+      ]
+    },
+    {
+      "name": "cuda",
+      "tags": [
+        "ai",
+        "ml",
+        "gpu-computing",
+        "parallel-computing"
+      ]
+    },
+    {
+      "name": "customtkinter",
+      "tags": [
+        "ui",
+        "gui",
+        "python",
+        "desktop",
+        "tkinter"
+      ]
+    },
+    {
+      "name": "cypress",
+      "tags": [
+        "testing",
+        "e2e",
+        "javascript",
+        "browser"
+      ]
+    },
+    {
+      "name": "d3",
+      "tags": [
+        "data-visualization",
+        "javascript",
+        "svg",
+        "charts"
+      ]
+    },
+    {
+      "name": "dask",
+      "tags": [
+        "ai",
+        "ml",
+        "data-science",
+        "python",
+        "parallel-computing",
+        "big-data"
+      ]
+    },
+    {
+      "name": "databricks",
+      "tags": [
+        "api",
+        "cloud",
+        "data-platform",
+        "databricks"
+      ]
+    },
+    {
+      "name": "datadog",
+      "tags": [
+        "monitoring",
+        "observability",
+        "devops",
+        "cloud"
+      ]
+    },
+    {
+      "name": "deno",
+      "tags": [
+        "javascript",
+        "runtime",
+        "typescript",
+        "nodejs-alternative"
+      ]
+    },
+    {
+      "name": "detox",
+      "tags": [
+        "development",
+        "testing",
+        "javascript",
+        "react-native",
+        "e2e"
+      ]
+    },
+    {
+      "name": "digitalocean",
+      "tags": [
+        "cloud",
+        "hosting",
+        "infrastructure",
+        "paas"
+      ]
+    },
+    {
+      "name": "discord-api",
+      "tags": [
+        "api",
+        "messaging",
+        "gaming",
+        "communication"
+      ]
+    },
+    {
+      "name": "django",
+      "tags": [
+        "backend",
+        "framework",
+        "python",
+        "orm",
+        "full-stack"
+      ]
+    },
+    {
+      "name": "django-orm",
+      "tags": [
+        "database",
+        "orm",
+        "python",
+        "sql",
+        "django"
+      ]
+    },
+    {
+      "name": "django-rest-framework",
+      "tags": [
+        "api",
+        "python",
+        "django",
+        "rest"
+      ]
+    },
+    {
+      "name": "docker",
+      "tags": [
+        "development",
+        "containerization",
+        "devops"
+      ]
+    },
+    {
+      "name": "drizzle",
+      "tags": [
+        "database",
+        "orm",
+        "typescript",
+        "sql"
+      ]
+    },
+    {
+      "name": "duckdb",
+      "tags": [
+        "database",
+        "analytics",
+        "sql",
+        "olap"
+      ]
+    },
+    {
+      "name": "elasticsearch",
+      "tags": [
+        "search",
+        "database",
+        "full-text",
+        "analytics"
+      ]
+    },
+    {
+      "name": "electron",
+      "tags": [
+        "cross-platform",
+        "desktop",
+        "javascript"
+      ]
+    },
+    {
+      "name": "elk-stack",
+      "tags": [
+        "logging",
+        "monitoring",
+        "search",
+        "analytics"
+      ]
+    },
+    {
+      "name": "emacs",
+      "tags": [
+        "editor",
+        "text-editor",
+        "lisp",
+        "extensible"
+      ]
+    },
+    {
+      "name": "esbuild",
+      "tags": [
+        "build-tool",
+        "javascript",
+        "bundler",
+        "performance"
+      ]
+    },
+    {
+      "name": "eslint",
+      "tags": [
+        "linting",
+        "javascript",
+        "static-analysis",
+        "code-quality"
+      ]
+    },
+    {
+      "name": "expo",
+      "tags": [
+        "cross-platform",
+        "mobile",
+        "react-native"
+      ]
+    },
+    {
+      "name": "express",
+      "tags": [
+        "backend",
+        "framework",
+        "javascript",
+        "nodejs"
+      ]
+    },
+    {
+      "name": "fabric-js",
+      "tags": [
+        "canvas",
+        "graphics",
+        "javascript",
+        "interactive"
+      ]
+    },
+    {
+      "name": "fastapi",
+      "tags": [
+        "backend",
+        "framework",
+        "python",
+        "api",
+        "async"
+      ]
+    },
+    {
+      "name": "ffmpeg",
+      "tags": [
+        "multimedia",
+        "video",
+        "audio",
+        "conversion"
+      ]
+    },
+    {
+      "name": "fiber",
+      "tags": [
+        "backend",
+        "framework",
+        "go"
+      ]
+    },
+    {
+      "name": "firebase",
+      "tags": [
+        "backend-as-service",
+        "database",
+        "authentication",
+        "google"
+      ]
+    },
+    {
+      "name": "flake8",
+      "tags": [
+        "development",
+        "python",
+        "linting"
+      ]
+    },
+    {
+      "name": "flask",
+      "tags": [
+        "backend",
+        "framework",
+        "python",
+        "microframework"
+      ]
+    },
+    {
+      "name": "flask-restful",
+      "tags": [
+        "web",
+        "api",
+        "python",
+        "flask"
+      ]
+    },
+    {
+      "name": "flutter",
+      "tags": [
+        "cross-platform",
+        "mobile",
+        "dart"
+      ]
+    },
+    {
+      "name": "fontawesome",
+      "tags": [
+        "icons",
+        "ui",
+        "web",
+        "design"
+      ]
+    },
+    {
+      "name": "gcp",
+      "tags": [
+        "cloud",
+        "major-platform"
+      ]
+    },
+    {
+      "name": "gcp-cli",
+      "tags": [
+        "cloud",
+        "google",
+        "command-line",
+        "devops"
+      ]
+    },
+    {
+      "name": "gensim",
+      "tags": [
+        "python",
+        "nlp",
+        "topic-modeling"
+      ]
+    },
+    {
+      "name": "git",
+      "tags": [
+        "development",
+        "version-control"
+      ]
+    },
+    {
+      "name": "github-actions",
+      "tags": [
+        "development",
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "name": "gitlab-ci",
+      "tags": [
+        "devops",
+        "ci-cd",
+        "automation",
+        "git"
+      ]
+    },
+    {
+      "name": "go",
+      "tags": [
+        "language",
+        "backend",
+        "performance",
+        "google"
+      ]
+    },
+    {
+      "name": "godot",
+      "tags": [
+        "game-development",
+        "engine",
+        "cross-platform",
+        "open-source"
+      ]
+    },
+    {
+      "name": "google-maps-js",
+      "tags": [
+        "maps",
+        "geolocation",
+        "javascript",
+        "api"
+      ]
+    },
+    {
+      "name": "gradle",
+      "tags": [
+        "build-tool",
+        "java",
+        "android",
+        "automation"
+      ]
+    },
+    {
+      "name": "grafana",
+      "tags": [
+        "monitoring",
+        "visualization",
+        "dashboards",
+        "observability"
+      ]
+    },
+    {
+      "name": "graphql",
+      "tags": [
+        "web",
+        "api",
+        "query-language"
+      ]
+    },
+    {
+      "name": "guzzle",
+      "tags": [
+        "web",
+        "php",
+        "http-client"
+      ]
+    },
+    {
+      "name": "hardhat",
+      "tags": [
+        "blockchain",
+        "ethereum",
+        "development",
+        "javascript"
+      ]
+    },
+    {
+      "name": "heroku",
+      "tags": [
+        "cloud",
+        "paas",
+        "hosting",
+        "deployment"
+      ]
+    },
+    {
+      "name": "htmx",
+      "tags": [
+        "web",
+        "javascript",
+        "modern-patterns"
+      ]
+    },
+    {
+      "name": "httpx",
+      "tags": [
+        "web",
+        "python",
+        "http-client",
+        "async"
+      ]
+    },
+    {
+      "name": "huggingface",
+      "tags": [
+        "ai",
+        "ml",
+        "llm",
+        "python",
+        "transformers"
+      ]
+    },
+    {
+      "name": "hypothesis",
+      "tags": [
+        "development",
+        "testing",
+        "python",
+        "property-based"
+      ]
+    },
+    {
+      "name": "insomnia",
+      "tags": [
+        "api",
+        "testing",
+        "development",
+        "http-client"
+      ]
+    },
+    {
+      "name": "ionic",
+      "tags": [
+        "mobile",
+        "framework",
+        "cross-platform",
+        "javascript"
+      ]
+    },
+    {
+      "name": "isort",
+      "tags": [
+        "development",
+        "python",
+        "formatter",
+        "imports"
+      ]
+    },
+    {
+      "name": "java",
+      "tags": [
+        "language",
+        "backend",
+        "enterprise",
+        "jvm"
+      ]
+    },
+    {
+      "name": "jax",
+      "tags": [
+        "ai",
+        "ml",
+        "numerical-computing",
+        "python"
+      ]
+    },
+    {
+      "name": "jenkins",
+      "tags": [
+        "devops",
+        "ci-cd",
+        "automation",
+        "build"
+      ]
+    },
+    {
+      "name": "jest",
+      "tags": [
+        "development",
+        "testing",
+        "javascript"
+      ]
+    },
+    {
+      "name": "jetpack-compose",
+      "tags": [
+        "ui",
+        "mobile",
+        "android",
+        "kotlin"
+      ]
+    },
+    {
+      "name": "jquery",
+      "tags": [
+        "javascript",
+        "dom",
+        "library",
+        "frontend"
+      ]
+    },
+    {
+      "name": "junit",
+      "tags": [
+        "testing",
+        "java",
+        "unit-testing",
+        "framework"
+      ]
+    },
+    {
+      "name": "keras",
+      "tags": [
+        "ai",
+        "ml",
+        "machine-learning",
+        "python",
+        "deep-learning"
+      ]
+    },
+    {
+      "name": "kivy",
+      "tags": [
+        "ui",
+        "gui",
+        "python",
+        "cross-platform",
+        "mobile"
+      ]
+    },
+    {
+      "name": "kubernetes",
+      "tags": [
+        "development",
+        "containerization",
+        "orchestration",
+        "devops"
+      ]
+    },
+    {
+      "name": "langchain",
+      "tags": [
+        "ai",
+        "ml",
+        "llm",
+        "python"
+      ]
+    },
+    {
+      "name": "langchain-js",
+      "tags": [
+        "ai",
+        "ml",
+        "llm",
+        "javascript"
+      ]
+    },
+    {
+      "name": "langgraph",
+      "tags": [
+        "ai",
+        "ml",
+        "llm",
+        "python",
+        "agent-framework",
+        "workflow"
+      ]
+    },
+    {
+      "name": "laravel",
+      "tags": [
+        "backend",
+        "framework",
+        "php"
+      ]
+    },
+    {
+      "name": "lightgbm",
+      "tags": [
+        "ai",
+        "ml",
+        "machine-learning",
+        "python",
+        "gradient-boosting"
+      ]
+    },
+    {
+      "name": "llama-index",
+      "tags": [
+        "ai",
+        "ml",
+        "llm",
+        "python",
+        "rag"
+      ]
+    },
+    {
+      "name": "llamaindex-js",
+      "tags": [
+        "ai",
+        "ml",
+        "llm",
+        "javascript",
+        "rag"
+      ]
+    },
+    {
+      "name": "llvm",
+      "tags": [
+        "compiler",
+        "infrastructure",
+        "optimization",
+        "toolchain"
+      ]
+    },
+    {
+      "name": "material-ui",
+      "tags": [
+        "ui",
+        "component-library",
+        "react"
+      ]
+    },
+    {
+      "name": "matplotlib",
+      "tags": [
+        "ai",
+        "ml",
+        "data-science",
+        "python",
+        "data-visualization"
+      ]
+    },
+    {
+      "name": "maven",
+      "tags": [
+        "build-tool",
+        "java",
+        "dependency-management",
+        "project-management"
+      ]
+    },
+    {
+      "name": "microsoft-teams",
+      "tags": [
+        "collaboration",
+        "communication",
+        "microsoft",
+        "enterprise"
+      ]
+    },
+    {
+      "name": "mkdocs",
+      "tags": [
+        "development",
+        "documentation",
+        "markdown"
+      ]
+    },
+    {
+      "name": "mlx",
+      "tags": [
+        "ai",
+        "ml",
+        "apple",
+        "deep-learning"
+      ]
+    },
+    {
+      "name": "mobx",
+      "tags": [
+        "state-management",
+        "javascript",
+        "react"
+      ]
+    },
+    {
+      "name": "mockito",
+      "tags": [
+        "testing",
+        "java",
+        "mocking",
+        "unit-testing"
+      ]
+    },
+    {
+      "name": "modal",
+      "tags": [
+        "ai",
+        "ml",
+        "cloud-inference",
+        "serverless",
+        "deployment"
+      ]
+    },
+    {
+      "name": "mongodb",
+      "tags": [
+        "database",
+        "nosql",
+        "document"
+      ]
+    },
+    {
+      "name": "mypy",
+      "tags": [
+        "development",
+        "python",
+        "type-checking",
+        "static-analysis"
+      ]
+    },
+    {
+      "name": "neo4j",
+      "tags": [
+        "database",
+        "graph",
+        "nosql",
+        "relationships"
+      ]
+    },
+    {
+      "name": "nestjs",
+      "tags": [
+        "backend",
+        "framework",
+        "javascript",
+        "typescript",
+        "nodejs"
+      ]
+    },
+    {
+      "name": "netlify",
+      "tags": [
+        "hosting",
+        "deployment",
+        "jamstack",
+        "frontend"
+      ]
+    },
+    {
+      "name": "next-js",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript",
+        "react",
+        "ssr"
+      ]
+    },
+    {
+      "name": "nginx",
+      "tags": [
+        "web-server",
+        "proxy",
+        "load-balancer",
+        "performance"
+      ]
+    },
+    {
+      "name": "nltk",
+      "tags": [
+        "python",
+        "nlp",
+        "text-processing"
+      ]
+    },
+    {
+      "name": "nose2",
+      "tags": [
+        "development",
+        "testing",
+        "python"
+      ]
+    },
+    {
+      "name": "notion-api",
+      "tags": [
+        "api",
+        "productivity",
+        "collaboration",
+        "integration"
+      ]
+    },
+    {
+      "name": "numba",
+      "tags": [
+        "ai",
+        "ml",
+        "gpu-computing",
+        "python",
+        "jit-compiler"
+      ]
+    },
+    {
+      "name": "numpy",
+      "tags": [
+        "ai",
+        "ml",
+        "data-science",
+        "python",
+        "numerical-computing"
+      ]
+    },
+    {
+      "name": "nuxt",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript",
+        "vue",
+        "ssr"
+      ]
+    },
+    {
+      "name": "openai",
+      "tags": [
+        "ai",
+        "ml",
+        "llm",
+        "api"
+      ]
+    },
+    {
+      "name": "opencv-python",
+      "tags": [
+        "python",
+        "image-processing",
+        "computer-vision"
+      ]
+    },
+    {
+      "name": "pandas",
+      "tags": [
+        "ai",
+        "ml",
+        "data-science",
+        "python",
+        "data-analysis"
+      ]
+    },
+    {
+      "name": "pdoc",
+      "tags": [
+        "development",
+        "documentation",
+        "python",
+        "auto-generation"
+      ]
+    },
+    {
+      "name": "peewee",
+      "tags": [
+        "database",
+        "orm",
+        "python",
+        "sql"
+      ]
+    },
+    {
+      "name": "phoenix",
+      "tags": [
+        "backend",
+        "framework",
+        "elixir"
+      ]
+    },
+    {
+      "name": "php",
+      "tags": [
+        "language",
+        "backend",
+        "web",
+        "server-side"
+      ]
+    },
+    {
+      "name": "pillow",
+      "tags": [
+        "python",
+        "image-processing"
+      ]
+    },
+    {
+      "name": "playwright",
+      "tags": [
+        "development",
+        "testing",
+        "javascript",
+        "e2e",
+        "browser"
+      ]
+    },
+    {
+      "name": "plotly",
+      "tags": [
+        "ai",
+        "ml",
+        "data-science",
+        "python",
+        "interactive-visualization"
+      ]
+    },
+    {
+      "name": "poetry",
+      "tags": [
+        "development",
+        "build-tool",
+        "python",
+        "dependency-management"
+      ]
+    },
+    {
+      "name": "pony",
+      "tags": [
+        "database",
+        "orm",
+        "python",
+        "sql"
+      ]
+    },
+    {
+      "name": "postgresql",
+      "tags": [
+        "database",
+        "sql",
+        "relational"
+      ]
+    },
+    {
+      "name": "postman",
+      "tags": [
+        "api",
+        "testing",
+        "development",
+        "http-client"
+      ]
+    },
+    {
+      "name": "prisma",
+      "tags": [
+        "database",
+        "orm",
+        "typescript",
+        "javascript"
+      ]
+    },
+    {
+      "name": "puppeteer",
+      "tags": [
+        "web-scraping",
+        "browser-automation",
+        "testing",
+        "javascript"
+      ]
+    },
+    {
+      "name": "pydantic",
+      "tags": [
+        "development",
+        "python",
+        "data-validation",
+        "type-checking"
+      ]
+    },
+    {
+      "name": "pygame",
+      "tags": [
+        "ui",
+        "gui",
+        "python",
+        "game-development"
+      ]
+    },
+    {
+      "name": "pylint",
+      "tags": [
+        "development",
+        "python",
+        "linting",
+        "static-analysis"
+      ]
+    },
+    {
+      "name": "pyqt",
+      "tags": [
+        "ui",
+        "gui",
+        "python",
+        "desktop",
+        "qt"
+      ]
+    },
+    {
+      "name": "pyramid",
+      "tags": [
+        "backend",
+        "framework",
+        "python"
+      ]
+    },
+    {
+      "name": "pyright",
+      "tags": [
+        "development",
+        "python",
+        "type-checking",
+        "static-analysis"
+      ]
+    },
+    {
+      "name": "pyside",
+      "tags": [
+        "ui",
+        "gui",
+        "python",
+        "desktop",
+        "qt"
+      ]
+    },
+    {
+      "name": "pytest",
+      "tags": [
+        "development",
+        "testing",
+        "python"
+      ]
+    },
+    {
+      "name": "python",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "name": "pytorch",
+      "tags": [
+        "ai",
+        "ml",
+        "machine-learning",
+        "python",
+        "deep-learning"
+      ]
+    },
+    {
+      "name": "qwik",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript"
+      ]
+    },
+    {
+      "name": "railway",
+      "tags": [
+        "hosting",
+        "deployment",
+        "paas",
+        "devops"
+      ]
+    },
+    {
+      "name": "react",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript"
+      ]
+    },
+    {
+      "name": "react-mobx",
+      "tags": [
+        "frontend",
+        "javascript",
+        "state-management"
+      ]
+    },
+    {
+      "name": "react-native",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript",
+        "mobile",
+        "cross-platform"
+      ]
+    },
+    {
+      "name": "react-query",
+      "tags": [
+        "frontend",
+        "javascript",
+        "data-fetching"
+      ]
+    },
+    {
+      "name": "react-redux",
+      "tags": [
+        "frontend",
+        "javascript",
+        "state-management"
+      ]
+    },
+    {
+      "name": "redis",
+      "tags": [
+        "database",
+        "nosql",
+        "key-value",
+        "in-memory"
+      ]
+    },
+    {
+      "name": "redux",
+      "tags": [
+        "state-management",
+        "javascript",
+        "react"
+      ]
+    },
+    {
+      "name": "remix",
+      "tags": [
+        "frontend",
+        "framework",
+        "react",
+        "javascript"
+      ]
+    },
+    {
+      "name": "requests",
+      "tags": [
+        "web",
+        "python",
+        "http-client"
+      ]
+    },
+    {
+      "name": "rich",
+      "tags": [
+        "python",
+        "utilities",
+        "terminal",
+        "formatting"
+      ]
+    },
+    {
+      "name": "riverpod",
+      "tags": [
+        "state-management",
+        "flutter",
+        "dart"
+      ]
+    },
+    {
+      "name": "rocket",
+      "tags": [
+        "backend",
+        "framework",
+        "rust"
+      ]
+    },
+    {
+      "name": "ros",
+      "tags": [
+        "robotics",
+        "framework",
+        "middleware",
+        "distributed-systems"
+      ]
+    },
+    {
+      "name": "ruby",
+      "tags": [
+        "language",
+        "backend",
+        "web",
+        "scripting"
+      ]
+    },
+    {
+      "name": "rust",
+      "tags": [
+        "language",
+        "systems",
+        "performance",
+        "safety"
+      ]
+    },
+    {
+      "name": "sanic",
+      "tags": [
+        "backend",
+        "framework",
+        "python",
+        "async"
+      ]
+    },
+    {
+      "name": "scikit-image",
+      "tags": [
+        "python",
+        "image-processing",
+        "scientific-computing"
+      ]
+    },
+    {
+      "name": "scikit-learn",
+      "tags": [
+        "ai",
+        "ml",
+        "machine-learning",
+        "python",
+        "data-science"
+      ]
+    },
+    {
+      "name": "scipy",
+      "tags": [
+        "ai",
+        "ml",
+        "data-science",
+        "python",
+        "scientific-computing"
+      ]
+    },
+    {
+      "name": "scrapy",
+      "tags": [
+        "python",
+        "web-scraping",
+        "crawler",
+        "framework"
+      ]
+    },
+    {
+      "name": "seaborn",
+      "tags": [
+        "ai",
+        "ml",
+        "data-science",
+        "python",
+        "data-visualization"
+      ]
+    },
+    {
+      "name": "selenium",
+      "tags": [
+        "python",
+        "web-scraping",
+        "browser-automation",
+        "testing"
+      ]
+    },
+    {
+      "name": "sentry",
+      "tags": [
+        "error-tracking",
+        "monitoring",
+        "debugging",
+        "observability"
+      ]
+    },
+    {
+      "name": "servemux",
+      "tags": [
+        "backend",
+        "framework",
+        "go"
+      ]
+    },
+    {
+      "name": "setuptools",
+      "tags": [
+        "development",
+        "build-tool",
+        "python",
+        "packaging"
+      ]
+    },
+    {
+      "name": "shadcn",
+      "tags": [
+        "ui",
+        "component-library",
+        "react"
+      ]
+    },
+    {
+      "name": "smolagents",
+      "tags": [
+        "ai",
+        "ml",
+        "llm",
+        "python",
+        "agent-framework",
+        "lightweight"
+      ]
+    },
+    {
+      "name": "socket-io",
+      "tags": [
+        "websockets",
+        "real-time",
+        "javascript",
+        "communication"
+      ]
+    },
+    {
+      "name": "solidity",
+      "tags": [
+        "blockchain",
+        "ethereum",
+        "smart-contracts",
+        "language"
+      ]
+    },
+    {
+      "name": "solidjs",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript"
+      ]
+    },
+    {
+      "name": "spacy",
+      "tags": [
+        "python",
+        "nlp",
+        "text-processing"
+      ]
+    },
+    {
+      "name": "sphinx",
+      "tags": [
+        "development",
+        "documentation",
+        "python",
+        "rst"
+      ]
+    },
+    {
+      "name": "spring",
+      "tags": [
+        "backend",
+        "framework",
+        "java",
+        "enterprise"
+      ]
+    },
+    {
+      "name": "springboot",
+      "tags": [
+        "backend",
+        "framework",
+        "java"
+      ]
+    },
+    {
+      "name": "sqlalchemy",
+      "tags": [
+        "database",
+        "orm",
+        "python",
+        "sql"
+      ]
+    },
+    {
+      "name": "sqlite",
+      "tags": [
+        "database",
+        "sql",
+        "embedded",
+        "lightweight"
+      ]
+    },
+    {
+      "name": "statsmodels",
+      "tags": [
+        "ai",
+        "ml",
+        "data-science",
+        "python",
+        "statistics"
+      ]
+    },
+    {
+      "name": "streamlit",
+      "tags": [
+        "python",
+        "utilities",
+        "data-apps",
+        "dashboard"
+      ]
+    },
+    {
+      "name": "stripe",
+      "tags": [
+        "payments",
+        "api",
+        "e-commerce",
+        "financial"
+      ]
+    },
+    {
+      "name": "supabase",
+      "tags": [
+        "database",
+        "sql",
+        "postgresql",
+        "backend-as-service"
+      ]
+    },
+    {
+      "name": "svelte",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript"
+      ]
+    },
+    {
+      "name": "sveltekit",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript",
+        "svelte",
+        "ssr"
+      ]
+    },
+    {
+      "name": "tailwind",
+      "tags": [
+        "ui",
+        "css",
+        "utility-first"
+      ]
+    },
+    {
+      "name": "tauri",
+      "tags": [
+        "cross-platform",
+        "desktop",
+        "rust",
+        "javascript"
+      ]
+    },
+    {
+      "name": "tensorflow",
+      "tags": [
+        "ai",
+        "ml",
+        "machine-learning",
+        "python",
+        "deep-learning"
+      ]
+    },
+    {
+      "name": "terraform",
+      "tags": [
+        "development",
+        "infrastructure",
+        "iac",
+        "devops"
+      ]
+    },
+    {
+      "name": "three-js",
+      "tags": [
+        "3d",
+        "graphics",
+        "webgl",
+        "javascript"
+      ]
+    },
+    {
+      "name": "tinygrad",
+      "tags": [
+        "ai",
+        "ml",
+        "deep-learning",
+        "lightweight"
+      ]
+    },
+    {
+      "name": "tkinter",
+      "tags": [
+        "ui",
+        "gui",
+        "python",
+        "desktop"
+      ]
+    },
+    {
+      "name": "tornado",
+      "tags": [
+        "backend",
+        "framework",
+        "python",
+        "async"
+      ]
+    },
+    {
+      "name": "tortoise-orm",
+      "tags": [
+        "database",
+        "orm",
+        "python",
+        "sql",
+        "async"
+      ]
+    },
+    {
+      "name": "tqdm",
+      "tags": [
+        "python",
+        "utilities",
+        "progress-bar"
+      ]
+    },
+    {
+      "name": "transformers",
+      "tags": [
+        "python",
+        "nlp",
+        "deep-learning",
+        "huggingface"
+      ]
+    },
+    {
+      "name": "trio",
+      "tags": [
+        "python",
+        "async"
+      ]
+    },
+    {
+      "name": "trpc",
+      "tags": [
+        "web",
+        "typescript",
+        "api",
+        "modern-patterns"
+      ]
+    },
+    {
+      "name": "turbopack",
+      "tags": [
+        "development",
+        "build-tool",
+        "javascript"
+      ]
+    },
+    {
+      "name": "typer",
+      "tags": [
+        "python",
+        "utilities",
+        "cli"
+      ]
+    },
+    {
+      "name": "typescript",
+      "tags": [
+        "web",
+        "javascript",
+        "type-checking",
+        "language"
+      ]
+    },
+    {
+      "name": "unittest",
+      "tags": [
+        "development",
+        "testing",
+        "python",
+        "standard-library"
+      ]
+    },
+    {
+      "name": "unity",
+      "tags": [
+        "game-development",
+        "engine",
+        "cross-platform",
+        "c-sharp"
+      ]
+    },
+    {
+      "name": "unreal-engine",
+      "tags": [
+        "game-development",
+        "engine",
+        "cross-platform",
+        "c++"
+      ]
+    },
+    {
+      "name": "vercel",
+      "tags": [
+        "cloud",
+        "deployment",
+        "serverless",
+        "frontend"
+      ]
+    },
+    {
+      "name": "vim",
+      "tags": [
+        "editor",
+        "text-editor",
+        "terminal",
+        "productivity"
+      ]
+    },
+    {
+      "name": "vite",
+      "tags": [
+        "development",
+        "build-tool",
+        "javascript"
+      ]
+    },
+    {
+      "name": "vitest",
+      "tags": [
+        "development",
+        "testing",
+        "javascript",
+        "vite"
+      ]
+    },
+    {
+      "name": "vllm",
+      "tags": [
+        "ai",
+        "ml",
+        "llm",
+        "python",
+        "inference"
+      ]
+    },
+    {
+      "name": "vue",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript"
+      ]
+    },
+    {
+      "name": "vue3",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript"
+      ]
+    },
+    {
+      "name": "webpack",
+      "tags": [
+        "development",
+        "build-tool",
+        "javascript"
+      ]
+    },
+    {
+      "name": "xgboost",
+      "tags": [
+        "ai",
+        "ml",
+        "machine-learning",
+        "python",
+        "gradient-boosting"
+      ]
+    },
+    {
+      "name": "zod",
+      "tags": [
+        "web",
+        "typescript",
+        "validation",
+        "type-checking"
+      ]
+    },
+    {
+      "name": "zsh",
+      "tags": [
+        "shell",
+        "command-line",
+        "unix",
+        "terminal"
+      ]
+    },
+    {
+      "name": "zustand",
+      "tags": [
+        "state-management",
+        "javascript",
+        "react"
+      ]
+    }
+  ],
+  "customRules": [
+    {
+      "name": "backend",
+      "description": "API, DB, and server-side code conventions",
+      "tags": [
+        "personal",
+        "custom",
+        "backend"
+      ]
+    },
+    {
+      "name": "base",
+      "description": "Base behavior for all tasks (always applied)",
+      "tags": [
+        "personal",
+        "custom",
+        "always-apply"
+      ]
+    },
+    {
+      "name": "complex",
+      "description": "Architecture, system design, and large refactors",
+      "tags": [
+        "personal",
+        "custom",
+        "architecture"
+      ]
+    },
+    {
+      "name": "frontend",
+      "description": "UI component conventions for React/Next.js",
+      "tags": [
+        "personal",
+        "custom",
+        "frontend"
+      ]
+    },
+    {
+      "name": "simple",
+      "description": "Docs, tests, and small files \u2014 keep responses minimal",
+      "tags": [
+        "personal",
+        "custom",
+        "docs",
+        "testing"
+      ]
+    }
+  ],
+  "stacks": {
+    "python-backend": {
+      "description": "FastAPI API with SQLAlchemy, Pydantic, and testing",
+      "rules": [
+        "fastapi",
+        "sqlalchemy",
+        "pydantic",
+        "pytest",
+        "docker"
+      ]
+    },
+    "python-django": {
+      "description": "Django web app with ORM, DRF, and testing",
+      "rules": [
+        "django",
+        "django-orm",
+        "django-rest-framework",
+        "pytest",
+        "docker"
+      ]
+    },
+    "python-flask": {
+      "description": "Flask REST API with SQLAlchemy and testing",
+      "rules": [
+        "flask",
+        "sqlalchemy",
+        "pydantic",
+        "pytest",
+        "docker"
+      ]
+    },
+    "react-ts": {
+      "description": "React + TypeScript SPA with Vite and Vitest",
+      "rules": [
+        "react",
+        "typescript",
+        "vite",
+        "vitest",
+        "eslint"
+      ]
+    },
+    "next-js-fullstack": {
+      "description": "Next.js full-stack with React, Tailwind, and Prisma",
+      "rules": [
+        "next-js",
+        "react",
+        "typescript",
+        "tailwind",
+        "prisma"
+      ]
+    },
+    "vue-frontend": {
+      "description": "Vue 3 frontend with Vite and testing",
+      "rules": [
+        "vue",
+        "typescript",
+        "vite",
+        "vitest",
+        "eslint"
+      ]
+    },
+    "angular-frontend": {
+      "description": "Angular app with TypeScript and testing",
+      "rules": [
+        "angular",
+        "typescript",
+        "eslint",
+        "cypress",
+        "jest"
+      ]
+    },
+    "data-ml": {
+      "description": "Python data science and machine learning",
+      "rules": [
+        "pandas",
+        "numpy",
+        "scikit-learn",
+        "pytorch",
+        "matplotlib"
+      ]
+    },
+    "ai-llm": {
+      "description": "LLM apps with LangChain and FastAPI",
+      "rules": [
+        "langchain",
+        "openai",
+        "pydantic",
+        "fastapi",
+        "pytest"
+      ]
+    },
+    "devops": {
+      "description": "Infrastructure, containers, and CI/CD",
+      "rules": [
+        "docker",
+        "kubernetes",
+        "terraform",
+        "ansible",
+        "github-actions"
+      ]
+    },
+    "aws-cloud": {
+      "description": "AWS serverless and managed services",
+      "rules": [
+        "aws",
+        "aws-lambda",
+        "aws-rds",
+        "amazon-s3",
+        "terraform"
+      ]
+    },
+    "rust-web": {
+      "description": "Rust web services with Actix",
+      "rules": [
+        "actix-web",
+        "rust",
+        "docker",
+        "postgresql",
+        "redis"
+      ]
+    },
+    "go-backend": {
+      "description": "Go backend API with PostgreSQL",
+      "rules": [
+        "go",
+        "fiber",
+        "postgresql",
+        "redis",
+        "docker"
+      ]
+    },
+    "mobile-flutter": {
+      "description": "Cross-platform mobile with Flutter and Firebase",
+      "rules": [
+        "flutter",
+        "firebase",
+        "expo",
+        "typescript"
+      ]
+    },
+    "e2e-testing": {
+      "description": "End-to-end and browser testing",
+      "rules": [
+        "playwright",
+        "cypress",
+        "vitest",
+        "eslint",
+        "typescript"
+      ]
+    },
+    "personal": {
+      "description": "Personal workflow rules (base, simple, complex, frontend, backend)",
+      "rules": [
+        "custom:base",
+        "custom:simple",
+        "custom:complex",
+        "custom:frontend",
+        "custom:backend"
+      ]
+    },
+    "personal-python-backend": {
+      "description": "Personal workflow rules plus FastAPI backend stack",
+      "rules": [
+        "custom:base",
+        "custom:backend",
+        "custom:complex",
+        "fastapi",
+        "sqlalchemy",
+        "pydantic",
+        "pytest"
+      ]
+    },
+    "personal-react-ts": {
+      "description": "Personal workflow rules plus React TypeScript stack",
+      "rules": [
+        "custom:base",
+        "custom:frontend",
+        "custom:simple",
+        "react",
+        "typescript",
+        "vite",
+        "vitest"
+      ]
+    }
+  },
+  "tags": [
+    {
+      "name": "python",
+      "count": 83
+    },
+    {
+      "name": "javascript",
+      "count": 54
+    },
+    {
+      "name": "framework",
+      "count": 36
+    },
+    {
+      "name": "development",
+      "count": 32
+    },
+    {
+      "name": "ai",
+      "count": 31
+    },
+    {
+      "name": "ml",
+      "count": 31
+    },
+    {
+      "name": "backend",
+      "count": 24
+    },
+    {
+      "name": "cloud",
+      "count": 21
+    },
+    {
+      "name": "frontend",
+      "count": 21
+    },
+    {
+      "name": "database",
+      "count": 18
+    },
+    {
+      "name": "web",
+      "count": 17
+    },
+    {
+      "name": "testing",
+      "count": 16
+    },
+    {
+      "name": "api",
+      "count": 15
+    },
+    {
+      "name": "devops",
+      "count": 13
+    },
+    {
+      "name": "ui",
+      "count": 13
+    },
+    {
+      "name": "llm",
+      "count": 11
+    },
+    {
+      "name": "sql",
+      "count": 11
+    },
+    {
+      "name": "cross-platform",
+      "count": 10
+    },
+    {
+      "name": "async",
+      "count": 9
+    },
+    {
+      "name": "aws",
+      "count": 9
+    },
+    {
+      "name": "react",
+      "count": 9
+    },
+    {
+      "name": "language",
+      "count": 9
+    },
+    {
+      "name": "data-science",
+      "count": 9
+    },
+    {
+      "name": "orm",
+      "count": 8
+    },
+    {
+      "name": "build-tool",
+      "count": 8
+    },
+    {
+      "name": "http-client",
+      "count": 7
+    },
+    {
+      "name": "mobile",
+      "count": 7
+    },
+    {
+      "name": "java",
+      "count": 7
+    },
+    {
+      "name": "typescript",
+      "count": 7
+    },
+    {
+      "name": "deployment",
+      "count": 6
+    },
+    {
+      "name": "gui",
+      "count": 6
+    },
+    {
+      "name": "desktop",
+      "count": 6
+    },
+    {
+      "name": "machine-learning",
+      "count": 6
+    },
+    {
+      "name": "deep-learning",
+      "count": 6
+    },
+    {
+      "name": "state-management",
+      "count": 6
+    },
+    {
+      "name": "infrastructure",
+      "count": 5
+    },
+    {
+      "name": "automation",
+      "count": 5
+    },
+    {
+      "name": "ci-cd",
+      "count": 5
+    },
+    {
+      "name": "web-scraping",
+      "count": 5
+    },
+    {
+      "name": "utilities",
+      "count": 5
+    },
+    {
+      "name": "type-checking",
+      "count": 5
+    },
+    {
+      "name": "component-library",
+      "count": 4
+    },
+    {
+      "name": "microsoft",
+      "count": 4
+    },
+    {
+      "name": "ssr",
+      "count": 4
+    },
+    {
+      "name": "agent-framework",
+      "count": 4
+    },
+    {
+      "name": "command-line",
+      "count": 4
+    },
+    {
+      "name": "nosql",
+      "count": 4
+    },
+    {
+      "name": "linting",
+      "count": 4
+    },
+    {
+      "name": "monitoring",
+      "count": 4
+    },
+    {
+      "name": "hosting",
+      "count": 4
+    },
+    {
+      "name": "performance",
+      "count": 4
+    },
+    {
+      "name": "static-analysis",
+      "count": 4
+    },
+    {
+      "name": "nlp",
+      "count": 4
+    },
+    {
+      "name": "game-development",
+      "count": 4
+    },
+    {
+      "name": "rust",
+      "count": 3
+    },
+    {
+      "name": "authentication",
+      "count": 3
+    },
+    {
+      "name": "major-platform",
+      "count": 3
+    },
+    {
+      "name": "containerization",
+      "count": 3
+    },
+    {
+      "name": "serverless",
+      "count": 3
+    },
+    {
+      "name": "nodejs",
+      "count": 3
+    },
+    {
+      "name": "editor",
+      "count": 3
+    },
+    {
+      "name": "text-editor",
+      "count": 3
+    },
+    {
+      "name": "e2e",
+      "count": 3
+    },
+    {
+      "name": "data-visualization",
+      "count": 3
+    },
+    {
+      "name": "observability",
+      "count": 3
+    },
+    {
+      "name": "paas",
+      "count": 3
+    },
+    {
+      "name": "communication",
+      "count": 3
+    },
+    {
+      "name": "analytics",
+      "count": 3
+    },
+    {
+      "name": "google",
+      "count": 3
+    },
+    {
+      "name": "engine",
+      "count": 3
+    },
+    {
+      "name": "enterprise",
+      "count": 3
+    },
+    {
+      "name": "documentation",
+      "count": 3
+    },
+    {
+      "name": "image-processing",
+      "count": 3
+    },
+    {
+      "name": "terminal",
+      "count": 3
+    },
+    {
+      "name": "lightweight",
+      "count": 3
+    },
+    {
+      "name": "kotlin",
+      "count": 2
+    },
+    {
+      "name": "graphql",
+      "count": 2
+    },
+    {
+      "name": "standard-library",
+      "count": 2
+    },
+    {
+      "name": "security",
+      "count": 2
+    },
+    {
+      "name": "identity",
+      "count": 2
+    },
+    {
+      "name": "saas",
+      "count": 2
+    },
+    {
+      "name": "multi-agent",
+      "count": 2
+    },
+    {
+      "name": "full-stack",
+      "count": 2
+    },
+    {
+      "name": "orchestration",
+      "count": 2
+    },
+    {
+      "name": "shell",
+      "count": 2
+    },
+    {
+      "name": "scripting",
+      "count": 2
+    },
+    {
+      "name": "unix",
+      "count": 2
+    },
+    {
+      "name": "html-parsing",
+      "count": 2
+    },
+    {
+      "name": "formatter",
+      "count": 2
+    },
+    {
+      "name": "microframework",
+      "count": 2
+    },
+    {
+      "name": "runtime",
+      "count": 2
+    },
+    {
+      "name": "nodejs-alternative",
+      "count": 2
+    },
+    {
+      "name": "cli",
+      "count": 2
+    },
+    {
+      "name": "gpu-computing",
+      "count": 2
+    },
+    {
+      "name": "parallel-computing",
+      "count": 2
+    },
+    {
+      "name": "browser",
+      "count": 2
+    },
+    {
+      "name": "react-native",
+      "count": 2
+    },
+    {
+      "name": "django",
+      "count": 2
+    },
+    {
+      "name": "search",
+      "count": 2
+    },
+    {
+      "name": "graphics",
+      "count": 2
+    },
+    {
+      "name": "go",
+      "count": 2
+    },
+    {
+      "name": "backend-as-service",
+      "count": 2
+    },
+    {
+      "name": "dart",
+      "count": 2
+    },
+    {
+      "name": "android",
+      "count": 2
+    },
+    {
+      "name": "php",
+      "count": 2
+    },
+    {
+      "name": "blockchain",
+      "count": 2
+    },
+    {
+      "name": "ethereum",
+      "count": 2
+    },
+    {
+      "name": "modern-patterns",
+      "count": 2
+    },
+    {
+      "name": "numerical-computing",
+      "count": 2
+    },
+    {
+      "name": "unit-testing",
+      "count": 2
+    },
+    {
+      "name": "gradient-boosting",
+      "count": 2
+    },
+    {
+      "name": "rag",
+      "count": 2
+    },
+    {
+      "name": "dependency-management",
+      "count": 2
+    },
+    {
+      "name": "collaboration",
+      "count": 2
+    },
+    {
+      "name": "text-processing",
+      "count": 2
+    },
+    {
+      "name": "productivity",
+      "count": 2
+    },
+    {
+      "name": "browser-automation",
+      "count": 2
+    },
+    {
+      "name": "qt",
+      "count": 2
+    },
+    {
+      "name": "scientific-computing",
+      "count": 2
+    },
+    {
+      "name": "virtual-machines",
+      "count": 1
+    },
+    {
+      "name": "storage",
+      "count": 1
+    },
+    {
+      "name": "object-storage",
+      "count": 1
+    },
+    {
+      "name": "configuration-management",
+      "count": 1
+    },
+    {
+      "name": "design-system",
+      "count": 1
+    },
+    {
+      "name": "compatibility-layer",
+      "count": 1
+    },
+    {
+      "name": "csharp",
+      "count": 1
+    },
+    {
+      "name": "static-site",
+      "count": 1
+    },
+    {
+      "name": "bdd",
+      "count": 1
+    },
+    {
+      "name": "sdk",
+      "count": 1
+    },
+    {
+      "name": "dotnet",
+      "count": 1
+    },
+    {
+      "name": "edge-computing",
+      "count": 1
+    },
+    {
+      "name": "cdn",
+      "count": 1
+    },
+    {
+      "name": "code-editor",
+      "count": 1
+    },
+    {
+      "name": "styling",
+      "count": 1
+    },
+    {
+      "name": "tkinter",
+      "count": 1
+    },
+    {
+      "name": "svg",
+      "count": 1
+    },
+    {
+      "name": "charts",
+      "count": 1
+    },
+    {
+      "name": "big-data",
+      "count": 1
+    },
+    {
+      "name": "data-platform",
+      "count": 1
+    },
+    {
+      "name": "databricks",
+      "count": 1
+    },
+    {
+      "name": "messaging",
+      "count": 1
+    },
+    {
+      "name": "gaming",
+      "count": 1
+    },
+    {
+      "name": "rest",
+      "count": 1
+    },
+    {
+      "name": "olap",
+      "count": 1
+    },
+    {
+      "name": "full-text",
+      "count": 1
+    },
+    {
+      "name": "logging",
+      "count": 1
+    },
+    {
+      "name": "lisp",
+      "count": 1
+    },
+    {
+      "name": "extensible",
+      "count": 1
+    },
+    {
+      "name": "bundler",
+      "count": 1
+    },
+    {
+      "name": "code-quality",
+      "count": 1
+    },
+    {
+      "name": "canvas",
+      "count": 1
+    },
+    {
+      "name": "interactive",
+      "count": 1
+    },
+    {
+      "name": "multimedia",
+      "count": 1
+    },
+    {
+      "name": "video",
+      "count": 1
+    },
+    {
+      "name": "audio",
+      "count": 1
+    },
+    {
+      "name": "conversion",
+      "count": 1
+    },
+    {
+      "name": "flask",
+      "count": 1
+    },
+    {
+      "name": "icons",
+      "count": 1
+    },
+    {
+      "name": "design",
+      "count": 1
+    },
+    {
+      "name": "topic-modeling",
+      "count": 1
+    },
+    {
+      "name": "version-control",
+      "count": 1
+    },
+    {
+      "name": "git",
+      "count": 1
+    },
+    {
+      "name": "open-source",
+      "count": 1
+    },
+    {
+      "name": "maps",
+      "count": 1
+    },
+    {
+      "name": "geolocation",
+      "count": 1
+    },
+    {
+      "name": "visualization",
+      "count": 1
+    },
+    {
+      "name": "dashboards",
+      "count": 1
+    },
+    {
+      "name": "query-language",
+      "count": 1
+    },
+    {
+      "name": "transformers",
+      "count": 1
+    },
+    {
+      "name": "property-based",
+      "count": 1
+    },
+    {
+      "name": "imports",
+      "count": 1
+    },
+    {
+      "name": "jvm",
+      "count": 1
+    },
+    {
+      "name": "build",
+      "count": 1
+    },
+    {
+      "name": "dom",
+      "count": 1
+    },
+    {
+      "name": "library",
+      "count": 1
+    },
+    {
+      "name": "workflow",
+      "count": 1
+    },
+    {
+      "name": "compiler",
+      "count": 1
+    },
+    {
+      "name": "optimization",
+      "count": 1
+    },
+    {
+      "name": "toolchain",
+      "count": 1
+    },
+    {
+      "name": "project-management",
+      "count": 1
+    },
+    {
+      "name": "markdown",
+      "count": 1
+    },
+    {
+      "name": "apple",
+      "count": 1
+    },
+    {
+      "name": "mocking",
+      "count": 1
+    },
+    {
+      "name": "cloud-inference",
+      "count": 1
+    },
+    {
+      "name": "document",
+      "count": 1
+    },
+    {
+      "name": "graph",
+      "count": 1
+    },
+    {
+      "name": "relationships",
+      "count": 1
+    },
+    {
+      "name": "jamstack",
+      "count": 1
+    },
+    {
+      "name": "web-server",
+      "count": 1
+    },
+    {
+      "name": "proxy",
+      "count": 1
+    },
+    {
+      "name": "load-balancer",
+      "count": 1
+    },
+    {
+      "name": "integration",
+      "count": 1
+    },
+    {
+      "name": "jit-compiler",
+      "count": 1
+    },
+    {
+      "name": "vue",
+      "count": 1
+    },
+    {
+      "name": "computer-vision",
+      "count": 1
+    },
+    {
+      "name": "data-analysis",
+      "count": 1
+    },
+    {
+      "name": "auto-generation",
+      "count": 1
+    },
+    {
+      "name": "elixir",
+      "count": 1
+    },
+    {
+      "name": "server-side",
+      "count": 1
+    },
+    {
+      "name": "interactive-visualization",
+      "count": 1
+    },
+    {
+      "name": "relational",
+      "count": 1
+    },
+    {
+      "name": "data-validation",
+      "count": 1
+    },
+    {
+      "name": "data-fetching",
+      "count": 1
+    },
+    {
+      "name": "key-value",
+      "count": 1
+    },
+    {
+      "name": "in-memory",
+      "count": 1
+    },
+    {
+      "name": "formatting",
+      "count": 1
+    },
+    {
+      "name": "flutter",
+      "count": 1
+    },
+    {
+      "name": "robotics",
+      "count": 1
+    },
+    {
+      "name": "middleware",
+      "count": 1
+    },
+    {
+      "name": "distributed-systems",
+      "count": 1
+    },
+    {
+      "name": "systems",
+      "count": 1
+    },
+    {
+      "name": "safety",
+      "count": 1
+    },
+    {
+      "name": "crawler",
+      "count": 1
+    },
+    {
+      "name": "error-tracking",
+      "count": 1
+    },
+    {
+      "name": "debugging",
+      "count": 1
+    },
+    {
+      "name": "packaging",
+      "count": 1
+    },
+    {
+      "name": "websockets",
+      "count": 1
+    },
+    {
+      "name": "real-time",
+      "count": 1
+    },
+    {
+      "name": "smart-contracts",
+      "count": 1
+    },
+    {
+      "name": "rst",
+      "count": 1
+    },
+    {
+      "name": "embedded",
+      "count": 1
+    },
+    {
+      "name": "statistics",
+      "count": 1
+    },
+    {
+      "name": "data-apps",
+      "count": 1
+    },
+    {
+      "name": "dashboard",
+      "count": 1
+    },
+    {
+      "name": "payments",
+      "count": 1
+    },
+    {
+      "name": "e-commerce",
+      "count": 1
+    },
+    {
+      "name": "financial",
+      "count": 1
+    },
+    {
+      "name": "postgresql",
+      "count": 1
+    },
+    {
+      "name": "svelte",
+      "count": 1
+    },
+    {
+      "name": "css",
+      "count": 1
+    },
+    {
+      "name": "utility-first",
+      "count": 1
+    },
+    {
+      "name": "iac",
+      "count": 1
+    },
+    {
+      "name": "3d",
+      "count": 1
+    },
+    {
+      "name": "webgl",
+      "count": 1
+    },
+    {
+      "name": "progress-bar",
+      "count": 1
+    },
+    {
+      "name": "huggingface",
+      "count": 1
+    },
+    {
+      "name": "c-sharp",
+      "count": 1
+    },
+    {
+      "name": "c++",
+      "count": 1
+    },
+    {
+      "name": "vite",
+      "count": 1
+    },
+    {
+      "name": "inference",
+      "count": 1
+    },
+    {
+      "name": "validation",
+      "count": 1
+    }
+  ]
+}

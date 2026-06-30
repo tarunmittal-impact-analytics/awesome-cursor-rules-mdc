@@ -1,0 +1,76 @@
+{
+  "stacks": {
+    "python-backend": {
+      "description": "FastAPI API with SQLAlchemy, Pydantic, and testing",
+      "rules": ["fastapi", "sqlalchemy", "pydantic", "pytest", "docker"]
+    },
+    "python-django": {
+      "description": "Django web app with ORM, DRF, and testing",
+      "rules": ["django", "django-orm", "django-rest-framework", "pytest", "docker"]
+    },
+    "python-flask": {
+      "description": "Flask REST API with SQLAlchemy and testing",
+      "rules": ["flask", "sqlalchemy", "pydantic", "pytest", "docker"]
+    },
+    "react-ts": {
+      "description": "React + TypeScript SPA with Vite and Vitest",
+      "rules": ["react", "typescript", "vite", "vitest", "eslint"]
+    },
+    "next-js-fullstack": {
+      "description": "Next.js full-stack with React, Tailwind, and Prisma",
+      "rules": ["next-js", "react", "typescript", "tailwind", "prisma"]
+    },
+    "vue-frontend": {
+      "description": "Vue 3 frontend with Vite and testing",
+      "rules": ["vue", "typescript", "vite", "vitest", "eslint"]
+    },
+    "angular-frontend": {
+      "description": "Angular app with TypeScript and testing",
+      "rules": ["angular", "typescript", "eslint", "cypress", "jest"]
+    },
+    "data-ml": {
+      "description": "Python data science and machine learning",
+      "rules": ["pandas", "numpy", "scikit-learn", "pytorch", "matplotlib"]
+    },
+    "ai-llm": {
+      "description": "LLM apps with LangChain and FastAPI",
+      "rules": ["langchain", "openai", "pydantic", "fastapi", "pytest"]
+    },
+    "devops": {
+      "description": "Infrastructure, containers, and CI/CD",
+      "rules": ["docker", "kubernetes", "terraform", "ansible", "github-actions"]
+    },
+    "aws-cloud": {
+      "description": "AWS serverless and managed services",
+      "rules": ["aws", "aws-lambda", "aws-rds", "amazon-s3", "terraform"]
+    },
+    "rust-web": {
+      "description": "Rust web services with Actix",
+      "rules": ["actix-web", "rust", "docker", "postgresql", "redis"]
+    },
+    "go-backend": {
+      "description": "Go backend API with PostgreSQL",
+      "rules": ["go", "fiber", "postgresql", "redis", "docker"]
+    },
+    "mobile-flutter": {
+      "description": "Cross-platform mobile with Flutter and Firebase",
+      "rules": ["flutter", "firebase", "expo", "typescript"]
+    },
+    "e2e-testing": {
+      "description": "End-to-end and browser testing",
+      "rules": ["playwright", "cypress", "vitest", "eslint", "typescript"]
+    },
+    "personal": {
+      "description": "Personal workflow rules (base, simple, complex, frontend, backend)",
+      "rules": ["custom:base", "custom:simple", "custom:complex", "custom:frontend", "custom:backend"]
+    },
+    "personal-python-backend": {
+      "description": "Personal workflow rules plus FastAPI backend stack",
+      "rules": ["custom:base", "custom:backend", "custom:complex", "fastapi", "sqlalchemy", "pydantic", "pytest"]
+    },
+    "personal-react-ts": {
+      "description": "Personal workflow rules plus React TypeScript stack",
+      "rules": ["custom:base", "custom:frontend", "custom:simple", "react", "typescript", "vite", "vitest"]
+    }
+  }
+}
