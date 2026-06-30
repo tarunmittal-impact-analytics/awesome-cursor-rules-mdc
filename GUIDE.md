@@ -570,10 +570,86 @@ git commit -m "Add Cursor rules for project"
 
 | Method | Requires clone? | Requires Python? | Best for |
 |--------|-----------------|------------------|----------|
-| **Curl** (`install.sh`) | No | No | Quick one-liner from any terminal |
-| **CLI** (`install_rules.py`) | Optional | Yes (uv) | Browse, search, dry-run, local dev |
-| **Web catalog** | No | No | Visual browse + copy commands |
-| **Manual copy** | Yes | No | Single rule, full control |
+| **Curl** (`install.sh`) | No | No* | Quick one-liner from any terminal |
+| **Quick install** (`quick_install.py`) | No | Yes (python3) | Aliases, stacks, tags from any project |
+| **CLI** (`install_rules.py`) | Yes** | Yes (uv) | Browse, search, dry-run, local dev |
+| **Web catalog** | No | No | Visual browse, download, copy commands |
+| **Manual copy** | No | No | Single rule, full control |
+
+\* Python 3 required for `--stack`, `--tag`, `--alias`, `--custom-all` in `install.sh`.  
+\*\* Script must exist locally — use full path or clone the repo. Do **not** run `uv run src/install_rules.py` from your app folder unless that path exists.
+
+### Install from any project (important)
+
+If you are inside `~/backend` or any app repo, this **will fail**:
+
+```bash
+uv run src/install_rules.py install --custom acid-properties --here --source github
+# error: No such file or directory — src/install_rules.py is not in your app
+```
+
+`--source github` only downloads rule **files** from GitHub. You still need the installer script itself.
+
+**Use one of these instead (from inside your project):**
+
+```bash
+# Recommended — curl + install.sh
+curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh \
+  | bash -s -- --custom acid-properties --here
+
+# Friendly alias (python backend, mern, gen ai, …)
+curl -fsSL .../install.sh | bash -s -- --alias "python backend" --here
+
+# quick_install.py — stacks, tags, aliases, rule names
+curl -fsSL .../src/quick_install.py | python3 - --here --custom acid-properties
+curl -fsSL .../src/quick_install.py | python3 - --here --alias "python backend"
+curl -fsSL .../src/quick_install.py | python3 - --here --stack backend-e2e-fastapi
+curl -fsSL .../src/quick_install.py | python3 - --here --tag python --custom base
+curl -fsSL .../src/quick_install.py | python3 - --list-aliases
+```
+
+**Only if you cloned the rules repo**, use full path:
+
+```bash
+uv run ~/path/to/awesome-cursor-rules-mdc/src/install_rules.py \
+  install --custom acid-properties --here --source github
+```
+
+### Download .mdc files
+
+| Method | Command |
+|--------|---------|
+| Web catalog | Click **Download** on any rule card |
+| Raw GitHub URL | `curl -fsSL .../rules-mdc/react.mdc -o react.mdc` |
+| quick_install.py | `python3 quick_install.py --download react --output ./react.mdc` |
+| Personal rule | `python3 quick_install.py --download custom:acid-properties -o acid-properties.mdc` |
+
+Download the installer script:
+
+```bash
+curl -fsSL .../src/quick_install.py -o quick_install.py
+# Also available on GitHub Pages: .../quick_install.py
+```
+
+### Friendly aliases (`install_aliases.json`)
+
+Natural names map to stacks or tags — no need to memorize stack IDs:
+
+| Alias | Resolves to |
+|-------|-------------|
+| `python backend` | Stack `backend-e2e-fastapi` |
+| `mern` | Stack `mern-full` |
+| `pern` | Stack `pern-full` |
+| `t3` | Stack `t3-stack-full` |
+| `gen ai` | Stack `fullstack-genai-e2e` |
+| `gen ai backend` | Stack `genai-python-backend-e2e` |
+| `data engineering` | Tag `data-engineering` (all matching library rules) |
+| `personal` | Stack `personal` |
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --alias mern --here
+curl -fsSL .../src/quick_install.py | python3 - --here --alias "gen ai backend"
+```
 
 ### 1. Curl installer
 
@@ -597,6 +673,31 @@ curl -fsSL .../install.sh | bash -s -- --stack personal --here
 
 # Preview without installing
 curl -fsSL .../install.sh | bash -s -- --stack personal --here --dry-run
+
+# Friendly alias
+curl -fsSL .../install.sh | bash -s -- --alias "python backend" --here
+```
+
+### 1b. Quick install script (`quick_install.py`)
+
+Standalone Python script — run from **any project** without cloning the rules repo:
+
+```bash
+curl -fsSL .../src/quick_install.py | python3 - --here --custom acid-properties
+curl -fsSL .../src/quick_install.py | python3 - --here --alias mern
+curl -fsSL .../src/quick_install.py | python3 - --here --stack backend-e2e-fastapi
+curl -fsSL .../src/quick_install.py | python3 - --here react fastapi --custom base
+curl -fsSL .../src/quick_install.py | python3 - --here --tag data-engineering
+curl -fsSL .../src/quick_install.py | python3 - --list-aliases
+curl -fsSL .../src/quick_install.py | python3 - --list-stacks
+curl -fsSL .../src/quick_install.py | python3 - --download react --output ./react.mdc
+```
+
+Save locally for repeated use:
+
+```bash
+curl -fsSL .../src/quick_install.py -o quick_install.py
+python3 quick_install.py --here --alias "python backend"
 ```
 
 ### 2. CLI installer
@@ -1496,6 +1597,23 @@ EOF
 
 ## Troubleshooting
 
+### `uv run src/install_rules.py` fails with "No such file or directory"
+
+You ran the command from your **app project** (e.g. `~/backend`), not from the rules repo. The script lives in `awesome-cursor-rules-mdc/src/`, not in your app.
+
+Fix — use curl or pipe `quick_install.py`:
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --custom acid-properties --here
+curl -fsSL .../src/quick_install.py | python3 - --here --custom acid-properties
+```
+
+Or use the full path to the cloned rules repo:
+
+```bash
+uv run ~/path/to/awesome-cursor-rules-mdc/src/install_rules.py install --custom acid-properties --here --source github
+```
+
 ### Curl install fails with 404
 
 Rules aren't on GitHub yet. Push your fork to `main` first:
@@ -1547,7 +1665,17 @@ Update `repo.json` and run `uv run src/generate_catalog.py`.
 ## Quick reference card
 
 ```bash
-# ── Browse ──
+# ── Install from ANY project (no clone) ──
+curl -fsSL .../install.sh | bash -s -- --custom acid-properties --here
+curl -fsSL .../install.sh | bash -s -- --alias "python backend" --here
+curl -fsSL .../src/quick_install.py | python3 - --here --stack backend-e2e-fastapi
+curl -fsSL .../src/quick_install.py | python3 - --list-aliases
+
+# ── Download single rule ──
+curl -fsSL .../rules-custom/acid-properties.mdc -o acid-properties.mdc
+python3 quick_install.py --download custom:acid-properties -o acid-properties.mdc
+
+# ── Browse (requires cloned repo) ──
 uv run src/install_rules.py list
 uv run src/install_rules.py list-custom
 uv run src/install_rules.py search fastapi

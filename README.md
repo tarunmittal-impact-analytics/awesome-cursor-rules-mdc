@@ -96,23 +96,33 @@ Browse and install rules into any project's `.cursor/rules` folder.
 
 ### Quick start
 
-From this repo:
+**From any project folder (recommended — no clone):**
 
 ```bash
-# Install specific libraries into your project
-uv run src/install_rules.py install react fastapi --target ~/my-app/.cursor/rules
-
-# Or from inside your project
 cd ~/my-app
-uv run /path/to/awesome-cursor-rules-mdc/src/install_rules.py install react --here
+
+# Install personal rule
+curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh \
+  | bash -s -- --custom acid-properties --here
+
+# Auto-install by friendly name (python backend, mern, gen ai, …)
+curl -fsSL .../install.sh | bash -s -- --alias "python backend" --here
+
+# Or use quick_install.py (stacks, tags, aliases, download single .mdc)
+curl -fsSL .../src/quick_install.py | python3 - --here --custom acid-properties
+curl -fsSL .../src/quick_install.py | python3 - --here --stack backend-e2e-fastapi
+curl -fsSL .../src/quick_install.py | python3 - --list-aliases
 ```
 
-From any machine (no clone required):
+From this repo (local dev):
 
 ```bash
-# Fetch rules directly from GitHub
-uv run src/install_rules.py install react fastapi --here --source github
+uv run src/install_rules.py install react fastapi --target ~/my-app/.cursor/rules
+cd ~/my-app
+uv run /path/to/awesome-cursor-rules-mdc/src/install_rules.py install react --here --source github
 ```
+
+**Do not** run `uv run src/install_rules.py` from your app folder unless that script path exists locally.
 
 ### Browse the catalog
 
@@ -229,6 +239,7 @@ Override repo source with env vars: `CURSOR_RULES_REPO=owner/repo CURSOR_RULES_B
 |------|-----|
 | **Browse catalog** | https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/ |
 | **Documentation** | https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/guide.html |
+| **Download installer** | https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/quick_install.py |
 
 The catalog supports search, tag filters, multi-select, preset stacks, and one-click copy for curl/uv commands.
 

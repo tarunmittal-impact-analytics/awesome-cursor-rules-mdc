@@ -5,6 +5,8 @@
   "githubUrl": "https://github.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc",
   "pagesUrl": "https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/",
   "installShUrl": "https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh",
+  "quickInstallUrl": "https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/src/quick_install.py",
+  "quickInstallPagesUrl": "https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc//quick_install.py",
   "rulesMdcBase": "https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/rules-mdc",
   "customRulesBase": "https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/rules-custom",
   "rules": [
@@ -5013,6 +5015,152 @@
         "pytest",
         "github-actions"
       ]
+    }
+  },
+  "aliases": {
+    "python backend": {
+      "stack": "backend-e2e-fastapi",
+      "description": "Production FastAPI backend (auth, Postgres, Redis, CI/CD)"
+    },
+    "python-backend": {
+      "stack": "python-backend",
+      "description": "FastAPI + SQLAlchemy + Pydantic"
+    },
+    "fastapi": {
+      "stack": "backend-e2e-fastapi",
+      "description": "End-to-end FastAPI backend"
+    },
+    "fastapi backend": {
+      "stack": "backend-e2e-fastapi",
+      "description": "End-to-end FastAPI backend"
+    },
+    "fastapi e2e": {
+      "stack": "backend-e2e-fastapi",
+      "description": "End-to-end FastAPI backend"
+    },
+    "django backend": {
+      "stack": "backend-e2e-django",
+      "description": "End-to-end Django backend"
+    },
+    "flask backend": {
+      "stack": "backend-e2e-flask",
+      "description": "End-to-end Flask backend"
+    },
+    "nestjs backend": {
+      "stack": "backend-e2e-nestjs",
+      "description": "End-to-end NestJS backend"
+    },
+    "express backend": {
+      "stack": "backend-e2e-express",
+      "description": "End-to-end Express backend"
+    },
+    "node backend": {
+      "stack": "backend-e2e-node-mongodb",
+      "description": "Express + MongoDB backend"
+    },
+    "go backend": {
+      "stack": "backend-e2e-go",
+      "description": "Go Fiber backend"
+    },
+    "spring backend": {
+      "stack": "backend-e2e-spring",
+      "description": "Spring Boot backend"
+    },
+    "react frontend": {
+      "stack": "frontend-e2e-react",
+      "description": "End-to-end React frontend"
+    },
+    "nextjs frontend": {
+      "stack": "frontend-e2e-nextjs",
+      "description": "End-to-end Next.js frontend"
+    },
+    "next.js frontend": {
+      "stack": "frontend-e2e-nextjs",
+      "description": "End-to-end Next.js frontend"
+    },
+    "vue frontend": {
+      "stack": "frontend-e2e-vue",
+      "description": "End-to-end Vue frontend"
+    },
+    "angular frontend": {
+      "stack": "frontend-e2e-angular",
+      "description": "End-to-end Angular frontend"
+    },
+    "mern": {
+      "stack": "mern-full",
+      "description": "MERN full stack"
+    },
+    "mean": {
+      "stack": "mean",
+      "description": "MEAN stack"
+    },
+    "pern": {
+      "stack": "pern-full",
+      "description": "PERN full stack"
+    },
+    "t3": {
+      "stack": "t3-stack-full",
+      "description": "T3 stack (Next.js + tRPC + Prisma)"
+    },
+    "gen ai": {
+      "stack": "fullstack-genai-e2e",
+      "description": "Full-stack Gen-AI (Next.js + FastAPI)"
+    },
+    "genai": {
+      "stack": "fullstack-genai-e2e",
+      "description": "Full-stack Gen-AI"
+    },
+    "gen ai backend": {
+      "stack": "genai-python-backend-e2e",
+      "description": "Gen-AI Python backend end-to-end"
+    },
+    "rag": {
+      "stack": "gen-ai-rag",
+      "description": "RAG pipeline rules"
+    },
+    "graph rag": {
+      "stack": "gen-ai-graph-rag",
+      "description": "Graph RAG with Neo4j"
+    },
+    "multi agent": {
+      "stack": "gen-ai-multi-agent-full",
+      "description": "Multi-agent systems"
+    },
+    "data engineering": {
+      "tag": "data-engineering",
+      "description": "All library rules tagged data-engineering"
+    },
+    "gen-ai": {
+      "tag": "gen-ai",
+      "description": "All library rules tagged gen-ai"
+    },
+    "frontend": {
+      "tag": "frontend",
+      "description": "All library rules tagged frontend"
+    },
+    "backend tag": {
+      "tag": "backend",
+      "description": "All library rules tagged backend"
+    },
+    "personal rules": {
+      "stack": "personal",
+      "description": "Personal workflow rules (base, simple, complex, frontend, backend)"
+    },
+    "personal": {
+      "stack": "personal",
+      "description": "Personal workflow rules"
+    },
+    "security": {
+      "stack": "security-full",
+      "description": "Auth, authorization, rate limiting"
+    },
+    "clickhouse": {
+      "stack": "data-stack-clickhouse",
+      "description": "ClickHouse analytics stack"
+    },
+    "kafka": {
+      "stack": "data-stack-kafka",
+      "description": "Kafka streaming stack"
     }
   },
   "tags": [

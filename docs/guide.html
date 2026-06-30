@@ -30,6 +30,9 @@
         <a href="#file-structure">File structure</a>
         <a href="#use-cases">Use cases</a>
         <a href="#install">How to install</a>
+        <a href="#install-anywhere">Install from any project</a>
+        <a href="#download-rules">Download .mdc files</a>
+        <a href="#aliases">Friendly aliases</a>
         <a href="#mental-model">Mental model</a>
         <a href="#maintainers">For maintainers</a>
       </aside>
@@ -307,6 +310,84 @@ uv run src/install_rules.py install --custom base --here --source github</pre>
           <p>Open <a href="index.html">Browse Catalog</a>, search rules/stacks, click "Copy curl" or "Copy uv".</p>
 
           <p>All methods copy <code>.mdc</code> files into <code>.cursor/rules/</code> in your project. Cursor picks them up automatically.</p>
+        </section>
+
+        <section id="install-anywhere">
+          <h2>Install from any project (no clone)</h2>
+          <div class="callout">
+            <strong>Common mistake:</strong> Running <code>uv run src/install_rules.py</code> inside your app folder fails because that script lives in the rules repo, not your project.
+            <code>--source github</code> only fetches rule <em>files</em> from GitHub — you still need the installer itself.
+          </div>
+
+          <h3>Option 1 — curl + install.sh (recommended)</h3>
+          <pre>cd ~/your-backend-project
+curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh \
+  | bash -s -- --custom acid-properties --here</pre>
+
+          <h3>Option 2 — quick_install.py (aliases, stacks, tags)</h3>
+          <pre>cd ~/your-backend-project
+curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/src/quick_install.py \
+  | python3 - --here --custom acid-properties
+
+# Friendly alias
+curl -fsSL .../src/quick_install.py | python3 - --here --alias "python backend"
+
+# Stack, tag, or rule names
+curl -fsSL .../src/quick_install.py | python3 - --here --stack backend-e2e-fastapi
+curl -fsSL .../src/quick_install.py | python3 - --here --tag python --custom base
+curl -fsSL .../src/quick_install.py | python3 - --here react fastapi</pre>
+
+          <h3>Option 3 — Python CLI (only from cloned repo or full path)</h3>
+          <pre>cd ~/your-backend-project
+uv run ~/path/to/awesome-cursor-rules-mdc/src/install_rules.py \
+  install --custom acid-properties --here --source github</pre>
+        </section>
+
+        <section id="download-rules">
+          <h2>Download .mdc rule files</h2>
+          <p>Download individual rules without installing into <code>.cursor/rules/</code>:</p>
+
+          <h3>From the web catalog</h3>
+          <p>On each rule card, click <strong>Download</strong> to save the <code>.mdc</code> file, or <strong>View</strong> to open the raw file on GitHub.</p>
+
+          <h3>Direct raw URL</h3>
+          <pre>https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/rules-mdc/react.mdc
+https://raw.githubusercontent.com/.../rules-custom/acid-properties.mdc</pre>
+
+          <h3>Using quick_install.py</h3>
+          <pre>curl -fsSL .../src/quick_install.py -o quick_install.py
+python3 quick_install.py --download react --output ./react.mdc
+python3 quick_install.py --download custom:acid-properties --output ./acid-properties.mdc</pre>
+
+          <h3>Download the installer script</h3>
+          <pre>curl -fsSL .../src/quick_install.py -o quick_install.py
+# Or from GitHub Pages after deploy:
+curl -fsSL .../quick_install.py -o quick_install.py</pre>
+        </section>
+
+        <section id="aliases">
+          <h2>Friendly aliases (auto-pick stacks)</h2>
+          <p>Use natural names instead of remembering exact stack IDs:</p>
+          <pre>curl -fsSL .../install.sh | bash -s -- --alias "python backend" --here
+curl -fsSL .../src/quick_install.py | python3 - --here --alias mern
+curl -fsSL .../src/quick_install.py | python3 - --here --alias "gen ai"</pre>
+
+          <table>
+            <thead><tr><th>Say this</th><th>Installs</th></tr></thead>
+            <tbody>
+              <tr><td><code>python backend</code></td><td>Stack <code>backend-e2e-fastapi</code></td></tr>
+              <tr><td><code>mern</code></td><td>Stack <code>mern-full</code></td></tr>
+              <tr><td><code>pern</code></td><td>Stack <code>pern-full</code></td></tr>
+              <tr><td><code>t3</code></td><td>Stack <code>t3-stack-full</code></td></tr>
+              <tr><td><code>gen ai</code></td><td>Stack <code>fullstack-genai-e2e</code></td></tr>
+              <tr><td><code>gen ai backend</code></td><td>Stack <code>genai-python-backend-e2e</code></td></tr>
+              <tr><td><code>data engineering</code></td><td>All rules tagged <code>data-engineering</code></td></tr>
+              <tr><td><code>personal</code></td><td>Stack <code>personal</code> workflow rules</td></tr>
+            </tbody>
+          </table>
+
+          <p>List all aliases:</p>
+          <pre>curl -fsSL .../src/quick_install.py | python3 - --list-aliases</pre>
         </section>
 
         <section id="mental-model">

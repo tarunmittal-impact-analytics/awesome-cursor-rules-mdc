@@ -16,6 +16,9 @@ except ModuleNotFoundError:
 RULES_JSON = REPO_ROOT / "rules.json"
 CUSTOM_RULES_JSON = REPO_ROOT / "custom-rules.json"
 STACKS_JSON = REPO_ROOT / "stacks.json"
+ALIASES_JSON = REPO_ROOT / "install_aliases.json"
+QUICK_INSTALL_SRC = REPO_ROOT / "src" / "quick_install.py"
+QUICK_INSTALL_DOCS = REPO_ROOT / "docs" / "quick_install.py"
 OUTPUT = REPO_ROOT / "docs" / "catalog.json"
 INSTALL_SH = REPO_ROOT / "install.sh"
 
@@ -49,6 +52,11 @@ def main() -> None:
             custom_data = json.load(handle)
         custom_rules = custom_data.get("rules", [])
 
+    aliases = {}
+    if ALIASES_JSON.is_file():
+        with ALIASES_JSON.open(encoding="utf-8") as handle:
+            aliases = json.load(handle).get("aliases", {})
+
     tag_counter: Counter[str] = Counter()
     rules = []
     for entry in rules_data["libraries"]:
@@ -63,11 +71,14 @@ def main() -> None:
         "githubUrl": config.github_url,
         "pagesUrl": config.pages_url,
         "installShUrl": config.install_sh_url,
+        "quickInstallUrl": f"{config.raw_base}/src/quick_install.py",
+        "quickInstallPagesUrl": f"{config.pages_url}/quick_install.py",
         "rulesMdcBase": config.rules_mdc_base,
         "customRulesBase": config.custom_rules_base,
         "rules": sorted(rules, key=lambda item: item["name"]),
         "customRules": sorted(custom_rules, key=lambda item: item["name"]),
         "stacks": stacks_data["stacks"],
+        "aliases": aliases,
         "tags": [
             {"name": tag, "count": count}
             for tag, count in tag_counter.most_common()
@@ -81,9 +92,14 @@ def main() -> None:
 
     sync_install_sh(config)
 
+    if QUICK_INSTALL_SRC.is_file():
+        QUICK_INSTALL_DOCS.write_text(QUICK_INSTALL_SRC.read_text(encoding="utf-8"), encoding="utf-8")
+
     print(f"Repo: {config.repo} ({config.branch})")
     print(f"Pages: {config.pages_url}")
-    print(f"Wrote {OUTPUT} ({len(rules)} rules, {len(custom_rules)} custom, {len(catalog['stacks'])} stacks)")
+    print(f"Wrote {OUTPUT} ({len(rules)} rules, {len(custom_rules)} custom, {len(catalog['stacks'])} stacks, {len(aliases)} aliases)")
+    if QUICK_INSTALL_SRC.is_file():
+        print(f"Copied {QUICK_INSTALL_DOCS}")
     print(f"Synced {INSTALL_SH}")
 
 

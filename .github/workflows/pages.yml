@@ -10,9 +10,11 @@ on:
       - "custom-rules.json"
       - "rules-custom/**"
       - "stacks.json"
+      - "install_aliases.json"
       - "repo.json"
       - "install.sh"
       - "src/generate_catalog.py"
+      - "src/quick_install.py"
       - "src/repo_config.py"
       - ".github/workflows/pages.yml"
   workflow_dispatch:

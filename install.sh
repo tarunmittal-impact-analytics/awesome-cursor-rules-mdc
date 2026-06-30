@@ -4,7 +4,8 @@
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh | bash -s -- react fastapi
 #   curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh | bash -s -- --stack python-backend
-#   curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh | bash -s -- --custom base frontend --here
+#   curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh | bash -s -- --alias "python backend" --here
+#   curl -fsSL .../install.sh | bash -s -- --custom base frontend --here
 #   curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh | bash -s -- --custom-all --here
 #
 # Options:
@@ -12,6 +13,7 @@
 #   --target PATH       Install into a specific directory
 #   --stack NAME        Install a preset stack (supports custom:rule refs)
 #   --tag TAG           Install all library rules matching tag (repeatable)
+#   --alias TEXT        Friendly name (e.g. "python backend", mern, gen ai)
 #   --custom NAME       Install custom/personal rule (repeatable)
 #   --custom-all        Install all custom/personal rules
 #   --force             Overwrite existing files
@@ -27,6 +29,7 @@ TARGET="./.cursor/rules"
 FORCE=0
 DRY_RUN=0
 STACK=""
+ALIAS=""
 declare -a RULES=()
 declare -a TAGS=()
 declare -a CUSTOM_RULES=()
@@ -95,6 +98,33 @@ print(' '.join(entry['name'] for entry in data.get('rules', [])))
 "
 }
 
+resolve_alias() {
+  local alias="$1"
+  fetch_json "install_aliases.json" | python3 -c "
+import json, sys
+alias = sys.argv[1].strip().lower()
+data = json.load(sys.stdin).get('aliases', {})
+if alias not in data:
+    alias_norm = alias.replace('_', ' ')
+    if alias_norm in data:
+        alias = alias_norm
+    else:
+        print(f'Unknown alias: {sys.argv[1]}', file=sys.stderr)
+        print('Available: ' + ', '.join(sorted(data)), file=sys.stderr)
+        sys.exit(1)
+spec = data[alias]
+if 'stack' in spec:
+    print('stack', spec['stack'])
+elif 'tag' in spec:
+    print('tag', spec['tag'])
+elif 'custom' in spec:
+    print('custom', spec['custom'])
+else:
+    print('Unknown alias spec', file=sys.stderr)
+    sys.exit(1)
+" "$alias"
+}
+
 install_rule() {
   local ref="$1"
   local kind="library"
@@ -148,6 +178,11 @@ while [[ $# -gt 0 ]]; do
       STACK="$2"
       shift 2
       ;;
+    --alias)
+      [[ $# -ge 2 ]] || error "--alias requires a value"
+      ALIAS="$2"
+      shift 2
+      ;;
     --tag)
       [[ $# -ge 2 ]] || error "--tag requires a value"
       TAGS+=("$2")
@@ -190,6 +225,17 @@ while [[ $# -gt 0 ]]; do
   RULES+=("$1")
   shift
 done
+
+if [[ -n "$ALIAS" ]]; then
+  require_python
+  read -r alias_kind alias_value <<< "$(resolve_alias "$ALIAS")"
+  case "$alias_kind" in
+    stack) STACK="$alias_value" ;;
+    tag) TAGS+=("$alias_value") ;;
+    custom) CUSTOM_RULES+=("$alias_value") ;;
+    *) error "Failed to resolve alias: $ALIAS" ;;
+  esac
+fi
 
 if [[ -n "$STACK" ]]; then
   require_python

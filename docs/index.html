@@ -370,8 +370,18 @@
     </section>
 
     <div class="command-box">
-      <label>Quick install (curl — no clone required)</label>
+      <label>Quick install from any project (no clone — run inside your app folder)</label>
       <pre id="quick-curl">Loading…</pre>
+    </div>
+
+    <div class="command-box">
+      <label>Auto-install by friendly name (stack / alias / tags)</label>
+      <pre id="quick-alias">Loading…</pre>
+    </div>
+
+    <div class="command-box">
+      <label>Download the standalone installer script</label>
+      <pre id="quick-script">Loading…</pre>
     </div>
 
     <footer>
@@ -401,6 +411,8 @@
       selectionBar: document.getElementById("selection-bar"),
       selectionCount: document.getElementById("selection-count"),
       quickCurl: document.getElementById("quick-curl"),
+      quickAlias: document.getElementById("quick-alias"),
+      quickScript: document.getElementById("quick-script"),
       toast: document.getElementById("toast"),
       statRules: document.getElementById("stat-rules"),
       statCustom: document.getElementById("stat-custom"),
@@ -419,13 +431,36 @@
       showToast("Copied to clipboard");
     }
 
+    async function downloadRule(name, kind = "library") {
+      const base = kind === "custom" ? state.catalog.customRulesBase : state.catalog.rulesMdcBase;
+      const url = `${base}/${name}.mdc`;
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `${name}.mdc`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast(`Downloaded ${name}.mdc`);
+      } catch (error) {
+        showToast(`Download failed: ${error.message}`);
+      }
+    }
+
+    function quickInstallCmd(extra) {
+      const url = state.catalog.quickInstallUrl || `${state.catalog.rulesMdcBase.replace("/rules-mdc", "")}/src/quick_install.py`;
+      return `curl -fsSL ${url} | python3 - ${extra} --here`;
+    }
+
     function curlInstallCustom(rules) {
       const base = state.catalog.installShUrl;
       return `curl -fsSL ${base} | bash -s -- --custom ${rules.join(" ")} --here`;
     }
 
     function uvInstallCustom(rules) {
-      return `uv run src/install_rules.py install --custom ${rules.join(" ")} --here --source github`;
+      return quickInstallCmd(`--custom ${rules.join(" ")}`);
     }
 
     function curlInstall(rules, stack) {
@@ -437,10 +472,8 @@
     }
 
     function uvInstall(rules, stack) {
-      if (stack) {
-        return `uv run src/install_rules.py install --stack ${stack} --here --source github`;
-      }
-      return `uv run src/install_rules.py install ${rules.join(" ")} --here --source github`;
+      if (stack) return quickInstallCmd(`--stack ${stack}`);
+      return quickInstallCmd(rules.join(" "));
     }
 
     function matchesQuery(text) {
@@ -516,9 +549,10 @@
             <p>${rule.description || ""}</p>
             <div class="card-tags">${tags}</div>
             <div class="card-actions">
+              <button class="ghost" data-download-custom="${rule.name}">Download</button>
               <button class="primary" data-custom-curl="${rule.name}">Copy curl</button>
-              <button class="ghost" data-custom-uv="${rule.name}">Copy uv</button>
-              <a href="${state.catalog.customRulesBase}/${rule.name}.mdc" target="_blank" rel="noreferrer">View rule</a>
+              <button class="ghost" data-custom-uv="${rule.name}">Copy install</button>
+              <a href="${state.catalog.customRulesBase}/${rule.name}.mdc" target="_blank" rel="noreferrer">View</a>
             </div>
           </article>
         `;
@@ -532,6 +566,9 @@
           updateSelectionBar();
           renderContent();
         };
+      });
+      els.content.querySelectorAll("[data-download-custom]").forEach((btn) => {
+        btn.onclick = () => downloadRule(btn.dataset.downloadCustom, "custom");
       });
       els.content.querySelectorAll("[data-custom-curl]").forEach((btn) => {
         btn.onclick = () => copyText(curlInstallCustom([btn.dataset.customCurl]));
@@ -563,9 +600,10 @@
             </div>
             <div class="card-tags">${tags}</div>
             <div class="card-actions">
+              <button class="ghost" data-download="${rule.name}">Download</button>
               <button class="primary" data-curl="${rule.name}">Copy curl</button>
-              <button class="ghost" data-uv="${rule.name}">Copy uv</button>
-              <a href="${state.catalog.rulesMdcBase}/${rule.name}.mdc" target="_blank" rel="noreferrer">View rule</a>
+              <button class="ghost" data-uv="${rule.name}">Copy install</button>
+              <a href="${state.catalog.rulesMdcBase}/${rule.name}.mdc" target="_blank" rel="noreferrer">View</a>
             </div>
           </article>
         `;
@@ -573,6 +611,9 @@
 
       els.content.querySelectorAll("[data-select]").forEach((btn) => {
         btn.onclick = () => toggleRule(btn.dataset.select);
+      });
+      els.content.querySelectorAll("[data-download]").forEach((btn) => {
+        btn.onclick = () => downloadRule(btn.dataset.download);
       });
       els.content.querySelectorAll("[data-curl]").forEach((btn) => {
         btn.onclick = () => copyText(curlInstall([btn.dataset.curl]));
@@ -641,6 +682,8 @@
       els.statStacks.textContent = Object.keys(state.catalog.stacks).length;
       els.statTags.textContent = state.catalog.tags.length;
       els.quickCurl.textContent = curlInstall([], "personal");
+      els.quickAlias.textContent = `curl -fsSL ${state.catalog.installShUrl} | bash -s -- --alias "python backend" --here`;
+      els.quickScript.textContent = `# Download installer script\ncurl -fsSL ${state.catalog.quickInstallUrl} -o quick_install.py\n\n# Install by alias, stack, tag, or rule names\npython3 quick_install.py --here --alias "python backend"\npython3 quick_install.py --here --stack backend-e2e-fastapi\npython3 quick_install.py --here --tag python --custom base\npython3 quick_install.py --here --custom acid-properties\npython3 quick_install.py --list-aliases\n\n# Download a single .mdc file\npython3 quick_install.py --download react --output ./react.mdc`;
 
       const repoLink = document.getElementById("repo-link");
       repoLink.href = state.catalog.githubUrl;
