@@ -12,12 +12,14 @@ This project generates Cursor MDC (Markdown Cursor) rule files from a structured
 
 ## Features
 
-- Generates comprehensive MDC rule files for libraries
-- Uses Exa for semantic web search to gather best practices
-- Leverages LLM to create detailed, structured content
-- Supports parallel processing for efficiency
-- Tracks progress to allow resuming interrupted runs
-- Smart retry system that focuses on failed libraries by default
+- **296 library rules** — frameworks, databases, data engineering, cloud, AI/ML, mobile, frontend
+- **24 custom rules** — architecture, RAG, security, distributed systems, auth patterns
+- **54 preset stacks** — curated bundles by use case (data eng, gen-ai, security, cloud)
+- **Install tooling** — curl script, Python CLI, and web catalog
+- Generates comprehensive MDC rule files via Exa + LLM (Gemini)
+- Template fallback generator when API keys unavailable
+- Supports parallel processing and progress tracking
+- GitHub Pages catalog with search, tags, and one-click install commands
 
 ## Prerequisites
 
@@ -133,23 +135,38 @@ uv run src/install_rules.py install --tag python --tag backend --here
 
 ```bash
 uv run src/install_rules.py install --stack python-backend --here
-uv run src/install_rules.py install --stack react-ts --here
-uv run src/install_rules.py install --stack ai-llm --here
+uv run src/install_rules.py install --stack gen-ai-graph-rag --here
+uv run src/install_rules.py install --stack data-stack-kafka --here
+uv run src/install_rules.py install --stack full-stack-fastapi-pro --here
 ```
 
 Available stacks: run `uv run src/install_rules.py stacks` (54 stacks including data engineering, gen-ai, security, cloud, mobile, frontend). Key stacks: `python-backend`, `personal-python-backend`, `gen-ai-rag`, `gen-ai-graph-rag`, `data-stack-kafka`, `data-stack-spark`, `full-stack-nextjs-pro`, `security-full`, `secrets-management`.
 
-### Personal / custom rules
+### Rule catalog overview
 
-Personal workflow rules live in `rules-custom/` (from `Desktop/Personal/cursor_rules`):
+| Category | Examples |
+|----------|----------|
+| **Backend / API** | fastapi, django, express, go, rust, actix-web |
+| **Frontend** | react, next-js, vue, angular, tailwind, shadcn, radix-ui |
+| **Databases** | postgresql, mysql, clickhouse, duckdb, cassandra, redis, neo4j |
+| **Data engineering** | apache-kafka, apache-spark, apache-flink, airflow, dbt, snowflake, bigquery |
+| **Cloud (AWS/GCP/Azure)** | aws-lambda, aws-glue, gcp, azure, google-secret-manager, terraform |
+| **Gen AI / RAG** | langchain, langgraph, openai, anthropic, pinecone, chromadb, haystack |
+| **Mobile** | flutter, react-native, swift, kotlin, ios-development, android-sdk |
+| **DevOps** | docker, kubernetes, datadog, github-actions, ansible |
+| **Custom / patterns** | graph-rag, authentication, rate-limiting, design-patterns, cap-theorem |
 
-| Rule | Purpose |
-|------|---------|
-| `base` | Always-on core behavior (concise, incremental edits) |
-| `simple` | Docs, tests, small files |
-| `complex` | Architecture and large refactors |
-| `frontend` | UI component conventions |
-| `backend` | API/DB/server conventions |
+Browse all rules: **https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/**
+
+### Personal / custom rules (24 total)
+
+**Workflow** (original 5): `base`, `simple`, `complex`, `frontend`, `backend`
+
+**Architecture & patterns:** `software-architecture`, `design-patterns`, `ai-design-patterns`, `concurrency-parallelism`, `acid-properties`, `cap-theorem`
+
+**Gen AI / RAG:** `gen-ai-development`, `rag-development`, `graph-rag`, `vectorless-rag`, `multi-agent-systems`, `token-optimization`
+
+**Security & infra:** `authentication`, `authorization`, `caching`, `rate-limiting`, `distributed-rate-limiting`, `distributed-locks`, `env-secrets-management`
 
 ```bash
 # Install all personal rules
@@ -253,16 +270,27 @@ Adding support for new libraries is simple:
    }
    ```
 
-2. **Generate the MDC files**:
-   - Run the generator script:
+2. **Generate the MDC files** (choose one):
    ```bash
+   # Rich rules via Exa + LLM (requires API keys in .env)
    uv run src/generate_mdc_files.py
-   ```
-   - The script automatically detects and processes new libraries
 
-3. **Contribute back**:
-   - Test your new rules with real projects
-   - Consider raising a PR to contribute your additions back to the community
+   # Template rules (no API keys needed)
+   uv run src/generate_template_mdc.py
+   ```
+   Or batch-add entries from `src/new_rules_batch.json`:
+   ```bash
+   uv run src/merge_rules.py
+   uv run src/generate_template_mdc.py
+   ```
+
+3. **Sync catalog and deploy**:
+   ```bash
+   uv run src/generate_catalog.py
+   git add rules-mdc/ rules.json docs/catalog.json stacks.json
+   git commit -m "Add new rules"
+   git push
+   ```
 
 ## Configuration
 
@@ -279,11 +307,15 @@ The script uses a `config.yaml` file for configuration. You can modify this file
 .
 ├── repo.json             # Fork repo coordinates (owner/repo, branch, upstream)
 ├── docs/                 # Static web catalog (GitHub Pages)
+│   ├── README.md         # Docs index
 │   ├── index.html
 │   └── catalog.json
 ├── install.sh            # Curl-based installer script
 ├── src/                  # Main source code directory
-│   ├── generate_mdc_files.py  # Main generator script
+│   ├── generate_mdc_files.py  # LLM + Exa rule generator
+│   ├── generate_template_mdc.py  # Template fallback (no API keys)
+│   ├── merge_rules.py        # Batch-add entries to rules.json
+│   ├── new_rules_batch.json  # Batch library definitions
 │   ├── install_rules.py  # CLI to browse and install rules
 │   ├── generate_catalog.py  # Build docs/catalog.json and sync fork URLs
 │   ├── repo_config.py    # Resolve repo slug from repo.json / git / env

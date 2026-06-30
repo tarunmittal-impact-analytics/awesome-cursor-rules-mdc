@@ -13,21 +13,22 @@ This document is the full reference for **awesome-cursor-rules-mdc** — what it
 1. [What is this repo?](#what-is-this-repo)
 2. [What are Cursor rules?](#what-are-cursor-rules)
 3. [What's inside this repo](#whats-inside-this-repo)
-4. [Quick start — set up a new project](#quick-start--set-up-a-new-project)
-5. [All ways to install rules](#all-ways-to-install-rules)
-6. [Install methods compared](#install-methods-compared)
-7. [CLI reference (`install_rules.py`)](#cli-reference-install_rulespy)
-8. [Curl installer reference (`install.sh`)](#curl-installer-reference-installsh)
-9. [Web catalog](#web-catalog)
-10. [Preset stacks](#preset-stacks)
-11. [Personal / custom rules](#personal--custom-rules)
-12. [Example workflows by project type](#example-workflows-by-project-type)
-13. [Generating library rules (maintainers)](#generating-library-rules-maintainers)
-14. [Adding your own custom rules](#adding-your-own-custom-rules)
-15. [Fork configuration](#fork-configuration)
-16. [GitHub Pages setup](#github-pages-setup)
-17. [After installing — using rules in Cursor](#after-installing--using-rules-in-cursor)
-18. [Troubleshooting](#troubleshooting)
+4. [Rule catalog overview](#rule-catalog-overview)
+5. [Quick start — set up a new project](#quick-start--set-up-a-new-project)
+6. [All ways to install rules](#all-ways-to-install-rules)
+7. [Install methods compared](#install-methods-compared)
+8. [CLI reference (`install_rules.py`)](#cli-reference-install_rulespy)
+9. [Curl installer reference (`install.sh`)](#curl-installer-reference-installsh)
+10. [Web catalog](#web-catalog)
+11. [Preset stacks](#preset-stacks)
+12. [Personal / custom rules](#personal--custom-rules)
+13. [Example workflows by project type](#example-workflows-by-project-type)
+14. [Generating library rules (maintainers)](#generating-library-rules-maintainers)
+15. [Adding your own custom rules](#adding-your-own-custom-rules)
+16. [Fork configuration](#fork-configuration)
+17. [GitHub Pages setup](#github-pages-setup)
+18. [After installing — using rules in Cursor](#after-installing--using-rules-in-cursor)
+19. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -97,8 +98,9 @@ alwaysApply: false
 │   └── catalog.json
 └── src/
     ├── install_rules.py      # CLI installer
+    ├── generate_mdc_files.py # LLM + Exa rule generator
+    ├── generate_template_mdc.py  # Template fallback (no API keys)
     ├── generate_catalog.py   # Build web catalog + sync URLs
-    ├── generate_mdc_files.py # Generate library rules (needs API keys)
     └── repo_config.py        # Resolve fork URLs
 ```
 
@@ -108,6 +110,37 @@ alwaysApply: false
 |------|-----------|-------|--------|----------------|
 | **Library** | `rules-mdc/` | 296 | Generated / template + LLM | `react`, `fastapi`, `clickhouse` |
 | **Personal** | `rules-custom/` | 24 | Hand-written | `custom:base` or `--custom base` |
+
+---
+
+## Rule catalog overview
+
+### Library rules by category (296 total)
+
+| Category | Key rules |
+|----------|-----------|
+| **Languages** | python, javascript, typescript, go, rust, swift, kotlin, java |
+| **Backend / API** | fastapi, django, flask, express, nestjs, fiber, actix-web |
+| **Frontend** | react, next-js, vue, angular, svelte, tailwind, shadcn, radix-ui, framer-motion |
+| **Databases (SQL)** | postgresql, mysql, clickhouse, duckdb, sqlite, sql |
+| **Databases (NoSQL)** | mongodb, cassandra, redis, memcached, elasticsearch, neo4j |
+| **Data engineering** | apache-kafka, apache-spark, apache-flink, apache-airflow, dbt, prefect, dagster, apache-beam, trino, delta-lake |
+| **Data warehouses** | snowflake, google-bigquery, databricks |
+| **Cloud AWS** | aws, aws-lambda, aws-glue, aws-emr, aws-kinesis, aws-sqs, aws-sns, aws-secrets-manager, boto3 |
+| **Cloud GCP** | gcp, google-bigquery, google-pubsub, google-dataflow, google-secret-manager, google-cloud-run |
+| **Cloud Azure** | azure, azure-data-factory, azure-key-vault, azure-service-bus |
+| **Gen AI / LLM** | langchain, langgraph, openai, anthropic, crewai, autogen, haystack, langsmith |
+| **Vector DBs** | pinecone, chromadb, weaviate, qdrant, milvus |
+| **Mobile** | flutter, react-native, expo, swift, swiftui, kotlin, ios-development, android-sdk, jetpack-compose |
+| **DevOps / infra** | docker, kubernetes, terraform, ansible, datadog, github-actions, nginx |
+| **Testing** | pytest, jest, vitest, playwright, cypress |
+
+Search the full catalog:
+```bash
+uv run src/install_rules.py search clickhouse
+uv run src/install_rules.py list --tag data-engineering
+uv run src/install_rules.py list --tag gen-ai
+```
 
 ---
 
@@ -226,8 +259,8 @@ uv run cursor-rules install --stack personal --here
 Open: **https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/**
 
 - **Rules** tab — browse 296 library rules, filter by tag, multi-select, copy curl/uv commands
-- **Personal** tab — browse 5 custom rules
-- **Stacks** tab — browse preset bundles, copy install command
+- **Personal** tab — browse 24 custom rules (RAG, security, architecture)
+- **Stacks** tab — browse 54 preset bundles, copy install command
 
 ### 4. Manual copy
 
@@ -564,12 +597,49 @@ curl -fsSL .../install.sh | bash -s -- --stack next-js-fullstack --here
 curl -fsSL .../install.sh | bash -s -- --custom base --here
 ```
 
-### LLM / AI project
+### LLM / Graph RAG project
 
 ```bash
 cd ~/my-llm-app
-curl -fsSL .../install.sh | bash -s -- --stack ai-llm --here
-curl -fsSL .../install.sh | bash -s -- --custom base complex --here
+curl -fsSL .../install.sh | bash -s -- --stack gen-ai-graph-rag --here
+```
+
+### Data engineering (Kafka)
+
+```bash
+cd ~/my-pipeline
+curl -fsSL .../install.sh | bash -s -- --stack data-stack-kafka --here
+```
+
+### Data engineering (Spark + Delta Lake)
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack data-stack-spark --here
+```
+
+### ClickHouse analytics
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack data-stack-clickhouse --here
+```
+
+### Security + secrets management
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack security-full --here
+curl -fsSL .../install.sh | bash -s -- --stack secrets-management --here
+```
+
+### AWS data engineering
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack aws-data-engineering --here
+```
+
+### iOS development
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack mobile-ios --here
 ```
 
 ### Existing project — add one rule
@@ -611,32 +681,41 @@ cp .env.example .env
 
 ### Generate rules
 
+**Option A — LLM + Exa (rich, detailed rules):**
 ```bash
-# Process failed libraries (default)
+# Process failed/new libraries (default)
 uv run src/generate_mdc_files.py
 
-# Regenerate all
+# Regenerate all with fresh Exa data
 uv run src/generate_mdc_files.py --regenerate-all
 
 # Single library
-uv run src/generate_mdc_files.py --library react
+uv run src/generate_mdc_files.py --library clickhouse
 
 # By tag
-uv run src/generate_mdc_files.py --tag python
+uv run src/generate_mdc_files.py --tag data-engineering
 ```
+
+Requires valid `EXA_API_KEY` and `GEMINI_API_KEY` in `.env`.
+
+**Option B — Template generator (no API keys):**
+```bash
+uv run src/generate_template_mdc.py
+```
+Creates structured MDC files for any library in `rules.json` missing from `rules-mdc/`.
 
 ### Add a new library to the catalog
 
-1. Add entry to `rules.json`:
+1. Add entry to `rules.json` (or batch via `src/new_rules_batch.json` + `src/merge_rules.py`):
    ```json
    {
      "name": "your-library",
      "tags": ["python", "backend"]
    }
    ```
-2. Run generator: `uv run src/generate_mdc_files.py`
+2. Generate MDC: `uv run src/generate_mdc_files.py` or `uv run src/generate_template_mdc.py`
 3. Regenerate web catalog: `uv run src/generate_catalog.py`
-4. Commit `rules-mdc/your-library.mdc` and updated JSON files
+4. Commit and push — GitHub Pages redeploys automatically
 
 ---
 
@@ -847,7 +926,17 @@ uv run src/install_rules.py stacks
 # ── New project (pick one) ──
 curl -fsSL .../install.sh | bash -s -- --custom-all --here
 curl -fsSL .../install.sh | bash -s -- --stack personal-python-backend --here
-curl -fsSL .../install.sh | bash -s -- --stack react-ts --here
+curl -fsSL .../install.sh | bash -s -- --stack gen-ai-graph-rag --here
+curl -fsSL .../install.sh | bash -s -- --stack data-stack-kafka --here
+curl -fsSL .../install.sh | bash -s -- --stack full-stack-nextjs-pro --here
+
+# ── Data engineering (individual tools) ──
+curl -fsSL .../install.sh | bash -s -- --stack data-stack-spark --here
+curl -fsSL .../install.sh | bash -s -- --stack data-stack-clickhouse --here
+curl -fsSL .../install.sh | bash -s -- --stack data-stack-airflow --here
+
+# ── Security ──
+curl -fsSL .../install.sh | bash -s -- --stack security-full --here
 
 # ── Add to existing project ──
 curl -fsSL .../install.sh | bash -s -- react --here
@@ -858,7 +947,9 @@ curl -fsSL .../install.sh | bash -s -- --stack personal --here --dry-run
 
 # ── Maintainer ──
 uv run src/generate_catalog.py
-uv run src/generate_mdc_files.py --library react
+uv run src/generate_mdc_files.py --library clickhouse
+uv run src/generate_template_mdc.py
+uv run src/merge_rules.py
 ```
 
 Replace `.../install.sh` with:
