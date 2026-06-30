@@ -1,22 +1,45 @@
 # Documentation
 
-| Document | Description |
-|----------|-------------|
-| [README.md](../README.md) | Project overview, quick install, features |
-| [GUIDE.md](../GUIDE.md) | Complete usage reference (296 rules, 24 custom, 54 stacks) |
+Unified docs live in three places — same content, different formats:
 
-## Web catalog
+| Format | URL / path | Best for |
+|--------|------------|----------|
+| **Web docs (GitHub Pages)** | [guide.html](https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/guide.html) | Browsing concepts, use cases, rules vs stacks |
+| **Web catalog** | [index.html](https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/) | Search rules/stacks, copy install commands |
+| **Full reference** | [GUIDE.md](../GUIDE.md) | Complete CLI reference, maintainer workflows |
+| **Overview** | [README.md](../README.md) | Quick start, features |
 
-**Live site:** https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/
+## GitHub Pages structure
 
-Built from this folder:
-- `index.html` — browse/search UI
-- `catalog.json` — generated from `rules.json`, `custom-rules.json`, `stacks.json`
+```
+docs/
+├── index.html      # Browse/search catalog (rules, personal, stacks tabs)
+├── guide.html      # Documentation — what is it, concepts, use cases
+├── styles.css      # Shared styles for both pages
+└── catalog.json    # Generated from rules.json + custom-rules.json + stacks.json
+```
 
-Regenerate after catalog changes:
+### Documentation sections (`guide.html`)
+
+1. **What is this?** — repo purpose, counts, no-clone install
+2. **Cursor rules** — what `.mdc` files are, frontmatter fields
+3. **Key concepts** — library rules, personal rules, stacks
+4. **Rules vs stacks** — detailed comparison with examples
+5. **File structure** — why so many files, JSON indexes explained
+6. **Use cases** — stacks by project type (backend, data eng, gen-ai, mobile)
+7. **How to install** — curl, CLI, web catalog
+8. **Mental model** — quick reference diagram
+9. **For maintainers** — add new library rules
+
+## Regenerate catalog
+
+After changing `rules.json`, `custom-rules.json`, or `stacks.json`:
+
 ```bash
 uv run src/generate_catalog.py
 ```
+
+GitHub Pages redeploys automatically on push to `main` when `docs/**` or catalog sources change.
 
 ## Quick install
 

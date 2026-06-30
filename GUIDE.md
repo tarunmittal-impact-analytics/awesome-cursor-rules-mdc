@@ -13,22 +13,26 @@ This document is the full reference for **awesome-cursor-rules-mdc** — what it
 1. [What is this repo?](#what-is-this-repo)
 2. [What are Cursor rules?](#what-are-cursor-rules)
 3. [What's inside this repo](#whats-inside-this-repo)
-4. [Rule catalog overview](#rule-catalog-overview)
-5. [Quick start — set up a new project](#quick-start--set-up-a-new-project)
-6. [All ways to install rules](#all-ways-to-install-rules)
-7. [Install methods compared](#install-methods-compared)
-8. [CLI reference (`install_rules.py`)](#cli-reference-install_rulespy)
-9. [Curl installer reference (`install.sh`)](#curl-installer-reference-installsh)
-10. [Web catalog](#web-catalog)
-11. [Preset stacks](#preset-stacks)
-12. [Personal / custom rules](#personal--custom-rules)
-13. [Example workflows by project type](#example-workflows-by-project-type)
-14. [Generating library rules (maintainers)](#generating-library-rules-maintainers)
-15. [Adding your own custom rules](#adding-your-own-custom-rules)
-16. [Fork configuration](#fork-configuration)
-17. [GitHub Pages setup](#github-pages-setup)
-18. [After installing — using rules in Cursor](#after-installing--using-rules-in-cursor)
-19. [Troubleshooting](#troubleshooting)
+4. [How this repo works end to end](#how-this-repo-works-end-to-end)
+5. [Rules vs stacks — what's the difference?](#rules-vs-stacks--whats-the-difference)
+6. [Why so many files?](#why-so-many-files)
+7. [Simple mental model](#simple-mental-model)
+8. [Rule catalog overview](#rule-catalog-overview)
+9. [Quick start — set up a new project](#quick-start--set-up-a-new-project)
+10. [All ways to install rules](#all-ways-to-install-rules)
+11. [Install methods compared](#install-methods-compared)
+12. [CLI reference (`install_rules.py`)](#cli-reference-install_rulespy)
+13. [Curl installer reference (`install.sh`)](#curl-installer-reference-installsh)
+14. [Web catalog](#web-catalog)
+15. [Preset stacks](#preset-stacks)
+16. [Personal / custom rules](#personal--custom-rules)
+17. [Example workflows by project type](#example-workflows-by-project-type)
+18. [Generating library rules (maintainers)](#generating-library-rules-maintainers)
+19. [Adding your own custom rules](#adding-your-own-custom-rules)
+20. [Fork configuration](#fork-configuration)
+21. [GitHub Pages setup](#github-pages-setup)
+22. [After installing — using rules in Cursor](#after-installing--using-rules-in-cursor)
+23. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -110,6 +114,381 @@ alwaysApply: false
 |------|-----------|-------|--------|----------------|
 | **Library** | `rules-mdc/` | 296 | Generated / template + LLM | `react`, `fastapi`, `clickhouse` |
 | **Personal** | `rules-custom/` | 24 | Hand-written | `custom:base` or `--custom base` |
+
+---
+
+## How this repo works end to end
+
+This repo is two things at once: a **library of Cursor AI rules** and a **toolkit to install and generate them**. The flow is: define what exists → generate content → install into your project → Cursor uses those rules when you code.
+
+### Repo architecture
+
+```mermaid
+flowchart TB
+    subgraph catalogs [Catalogs - metadata only]
+        RJ[rules.json]
+        CR[custom-rules.json]
+        ST[stacks.json]
+    end
+
+    subgraph content [Rule content - actual .mdc files]
+        RM[rules-mdc/ - 296 library rules]
+        RC[rules-custom/ - 24 personal rules]
+    end
+
+    subgraph generate [Maintainer pipeline]
+        EXA[Exa semantic search]
+        LLM[OpenAI / Gemini via LiteLLM]
+        GEN[generate_mdc_files.py]
+    end
+
+    subgraph consume [User consumption]
+        CLI[install_rules.py]
+        CURL[install.sh]
+        WEB[GitHub Pages catalog]
+    end
+
+    RJ --> GEN
+    GEN --> EXA --> LLM --> RM
+    RJ --> CLI
+    CR --> CLI
+    ST --> CLI
+    RM --> CLI
+    RC --> CLI
+    CLI --> PROJ[your-project/.cursor/rules/]
+    CURL --> PROJ
+    WEB --> PROJ
+```
+
+### The JSON files — what each one does
+
+These are **indexes/catalogs**. They don't contain rule content — they describe what exists and how to find it.
+
+#### `rules.json` — Library rule catalog (296 entries)
+
+The master list of **technology-specific rules** (frameworks, databases, cloud services, etc.).
+
+```json
+{
+  "libraries": [
+    {
+      "name": "clickhouse",
+      "tags": ["database", "analytics", "sql", "columnar", "data-engineering"]
+    }
+  ]
+}
+```
+
+| Role | Detail |
+|------|--------|
+| Source of truth | Which library rules exist |
+| Tags | Power search/filter (`--tag data-engineering`, web catalog filters) |
+| Generator input | Add an entry here, run `generate_mdc_files.py`, get `rules-mdc/clickhouse.mdc` |
+| Does not contain | The rule text itself |
+
+#### `custom-rules.json` — Personal/custom rule catalog (24 entries)
+
+Index for **hand-written workflow and architecture rules** — not tied to a single library.
+
+```json
+{
+  "rules": [
+    {"name": "base", "description": "Base behavior for all tasks", "tags": ["personal", "custom", "always-apply"]},
+    {"name": "graph-rag", "description": "Graph RAG with knowledge graphs", "tags": ["personal", "custom", "ai", "rag"]}
+  ]
+}
+```
+
+| Role | Detail |
+|------|--------|
+| Purpose | Your team's coding philosophy, not "how to use React" |
+| Topics | Architecture, RAG, security, distributed systems, token optimization, etc. |
+| Install prefix | `custom:base`, `custom:graph-rag`, or `--custom base` |
+
+#### `stacks.json` — Preset bundles (54 stacks)
+
+Curated **multi-rule bundles** for common project types. One command installs a whole setup.
+
+```json
+{
+  "stacks": {
+    "data-stack-kafka": {
+      "description": "Apache Kafka event streaming",
+      "rules": ["apache-kafka", "docker", "python"]
+    },
+    "personal": {
+      "description": "Personal workflow rules",
+      "rules": ["custom:base", "custom:simple", "custom:complex", "custom:frontend", "custom:backend"]
+    },
+    "gen-ai-graph-rag": {
+      "rules": ["custom:base", "custom:graph-rag", "custom:rag-development", "langchain", "pinecone"]
+    }
+  }
+}
+```
+
+| Role | Detail |
+|------|--------|
+| Purpose | Avoid picking 5–10 rules manually for every new project |
+| Mixing | Combines library rules (`react`) and personal rules (`custom:base`) |
+| Usage | `--stack data-stack-kafka` in CLI or curl installer |
+
+#### `repo.json` — Fork configuration
+
+```json
+{
+  "repo": "tarunmittal-impact-analytics/awesome-cursor-rules-mdc",
+  "branch": "main"
+}
+```
+
+Points install scripts and GitHub raw URLs at your fork so curl/CLI fetch from the right place.
+
+### The two rule directories
+
+| | `rules-mdc/` | `rules-custom/` |
+|---|---|---|
+| **Count** | 296 | 24 |
+| **Content** | Technology best practices | Workflow, architecture, patterns |
+| **How created** | Generated (Exa + LLM) or template fallback | Hand-written |
+| **Examples** | `react.mdc`, `clickhouse.mdc`, `apache-kafka.mdc` | `base.mdc`, `graph-rag.mdc`, `authentication.mdc` |
+| **Install as** | `react`, `clickhouse` | `custom:base`, `custom:graph-rag` |
+
+- **Library rules** answer: *"How should I write code for this technology?"*
+- **Personal rules** answer: *"How should the AI behave on my team?"*
+
+Example personal rule (`rules-custom/base.mdc`):
+
+```markdown
+---
+description: Base behavior for all tasks
+alwaysApply: true
+---
+
+# Core behavior
+- Be concise. Don't explain standard patterns unless asked.
+- Focus on what's unique about the change being made.
+- ...
+```
+
+### Generation pipeline (maintainers)
+
+When you add a new library to `rules.json`, you generate its `.mdc` file:
+
+```
+rules.json entry
+    ↓
+generate_mdc_files.py
+    ↓
+Exa search (best practices for library)  ← needs EXA_API_KEY
+    ↓
+OpenAI / Gemini (synthesize into .mdc)   ← needs OPENAI_API_KEY or GEMINI_API_KEY
+    ↓
+rules-mdc/{name}.mdc
+    ↓
+mdc_generation_progress.json (tracks completed/failed)
+```
+
+Key files:
+
+| File | Purpose |
+|------|---------|
+| `src/config.yaml` | LLM model, workers, rate limits |
+| `src/mdc-instructions.txt` | Prompt template for generation |
+| `src/generate_template_mdc.py` | Fallback when API keys fail (generic boilerplate) |
+| `src/exa_results/` | Cached Exa research per library |
+
+If generation fails (bad API key), you get thin template rules instead of rich Exa+LLM content.
+
+### Installation flow (users)
+
+You **do not need to clone the repo** to use rules. Three install paths:
+
+**CLI:**
+```bash
+uv run src/install_rules.py install react fastapi --here
+uv run src/install_rules.py install --stack data-stack-kafka --here
+uv run src/install_rules.py install --custom base graph-rag --here
+```
+
+**Curl (no Python):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh | bash -s -- --stack gen-ai-graph-rag --here
+```
+
+**Web catalog:** https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/
+
+What install does:
+
+1. Reads `rules.json` / `custom-rules.json` / `stacks.json` to resolve names
+2. Copies `.mdc` files from GitHub raw URLs (or local clone) into `your-project/.cursor/rules/`
+3. Cursor picks them up automatically
+
+### Deploy / catalog
+
+```
+Push to main (rules-mdc/** changes)
+    ↓
+.github/workflows/pages.yml
+    ↓
+generate_catalog.py → docs/catalog.json
+    ↓
+GitHub Pages → web catalog with search, tags, install commands
+```
+
+`docs/catalog.json` merges all three catalogs (library + custom + stacks) for the web UI.
+
+### Typical workflows
+
+**New Kafka + Python data project:**
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack data-stack-kafka --here
+# Installs: apache-kafka.mdc, docker.mdc, python.mdc
+```
+
+**Gen-AI RAG app with your team's conventions:**
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack gen-ai-graph-rag --here
+# Installs: custom:base, custom:graph-rag, langchain, pinecone, etc.
+```
+
+**Just your personal workflow rules:**
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack personal --here
+# Installs: custom:base, custom:simple, custom:complex, custom:frontend, custom:backend
+```
+
+**Add a new library to the repo (maintainer):**
+
+1. Add entry to `rules.json` (or `src/new_rules_batch.json` + merge script)
+2. `uv run src/generate_mdc_files.py --library new-lib`
+3. `uv run src/generate_catalog.py`
+4. Commit + push → auto-deploys to GitHub Pages
+
+### Summary table
+
+| Artifact | Role |
+|----------|------|
+| `rules.json` | Index of 296 library/tech rules + tags |
+| `custom-rules.json` | Index of 24 personal/workflow rules |
+| `stacks.json` | 54 preset bundles mixing library + custom rules |
+| `rules-mdc/` | Generated tech-specific rule **content** |
+| `rules-custom/` | Hand-written team/workflow rule **content** |
+| `repo.json` | Fork URL config for installers |
+| `install_rules.py` / `install.sh` | Copy rules into `.cursor/rules/` |
+| `generate_mdc_files.py` | Create library rules via Exa + LLM |
+| `docs/catalog.json` + Pages | Browse/search/install UI |
+
+**In one sentence:** JSON files describe *what* rules exist and how to bundle them; `.mdc` files are the actual AI instructions; install tooling copies the right ones into your project; Cursor reads them and codes accordingly.
+
+> **Web docs:** The same concepts are available on GitHub Pages — [Documentation](https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/guide.html) | [Browse catalog](https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/)
+
+---
+
+## Rules vs stacks — what's the difference?
+
+Think of it like a menu vs a combo meal.
+
+### Rule = one instruction file (the actual content)
+
+A **rule** is a single `.mdc` file with real AI instructions.
+
+```
+rules-mdc/react.mdc          ← library rule (how to write React)
+rules-custom/base.mdc        ← personal rule (how AI should behave)
+```
+
+When you install a rule, one file lands in your project:
+
+```
+my-app/.cursor/rules/react.mdc
+```
+
+### Stack = a shortcut list (no content of its own)
+
+A **stack** is just a **named bundle of rule names** in `stacks.json`. It has no `.mdc` file.
+
+```json
+"data-stack-kafka": {
+  "description": "Apache Kafka event streaming",
+  "rules": ["apache-kafka", "docker", "python"]
+}
+```
+
+When you run `--stack data-stack-kafka`, the installer:
+
+1. Looks up the list in `stacks.json`
+2. Copies **3 separate rule files** into your project
+
+```
+my-app/.cursor/rules/
+  apache-kafka.mdc   ← from rules-mdc/
+  docker.mdc         ← from rules-mdc/
+  python.mdc         ← from rules-mdc/
+```
+
+| | **Rule** | **Stack** |
+|---|---|---|
+| What it is | Content (instructions) | A shopping list |
+| File type | `.mdc` | Entry in `stacks.json` |
+| Install as | `react`, `custom:base` | `--stack react-ts` |
+| Can mix types? | One rule at a time | Yes — e.g. `custom:base` + `react` |
+
+**Analogy:** Rules are ingredients. Stacks are recipes that say which ingredients to grab.
+
+### Three things users need to know
+
+| Concept | Command | Installs |
+|---------|---------|----------|
+| Library rule | `install react` | One tech rule file |
+| Personal rule | `--custom base` | One workflow rule file |
+| Stack | `--stack react-ts` | Multiple rule files at once |
+
+---
+
+## Why so many files?
+
+Most of the volume is **the product itself**, not clutter.
+
+| What | Count | Why it exists |
+|------|-------|---------------|
+| `rules-mdc/*.mdc` | ~296 | One file per technology — this **is** the rule library |
+| `rules-custom/*.mdc` | 24 | Hand-written team/workflow rules |
+| `rules.json` | 1 | Index of library rules (names + tags) |
+| `custom-rules.json` | 1 | Index of personal rules |
+| `stacks.json` | 1 | Preset bundles (lists of rule names) |
+| `src/` | ~75 | Generator, installer, Exa cache — **maintainers only** |
+
+You can't collapse the ~320 `.mdc` files without losing granularity — each rule is meant to be installed individually.
+
+What can feel noisy (but has a purpose):
+
+- **3 JSON catalogs** — different indexes for library rules, personal rules, and stacks
+- **Generator artifacts** in `src/exa_results/`, `src/logs/` — maintainer-only, not needed for users
+- **Multiple markdown docs** — `GUIDE.md` (full reference), `README.md` (overview), web docs on GitHub Pages
+
+**As a user**, you only need three concepts: `install react` (rule), `--stack react-ts` (stack), `--custom base` (personal).
+
+---
+
+## Simple mental model
+
+```
+rules.json          → "what library rules exist"
+custom-rules.json   → "what personal rules exist"
+stacks.json         → "recommended combos for project types"
+
+rules-mdc/          → the actual library rule files
+rules-custom/       → the actual personal rule files
+
+install             → copies .mdc files into your project
+generate            → creates new .mdc files (maintainers only)
+```
+
+| Who | What you touch |
+|-----|----------------|
+| **User** | Install commands, web catalog, stacks |
+| **Maintainer** | `rules.json`, generator, `generate_catalog.py`, push to deploy |
 
 ---
 
@@ -399,15 +778,27 @@ Defaults to values in `repo.json` / `install.sh`.
 
 ## Web catalog
 
-**URL:** https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/
+**Catalog:** https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/  
+**Documentation:** https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/guide.html
 
-### Tabs
+The site has two pages:
+
+| Page | Path | Purpose |
+|------|------|---------|
+| **Browse catalog** | `index.html` | Search rules, personal rules, and stacks; copy install commands |
+| **Documentation** | `guide.html` | What this repo is, rules vs stacks, file structure, use cases, install guide |
+
+### Catalog tabs (`index.html`)
 
 | Tab | Content |
 |-----|---------|
 | **Rules** | 296 library rules with tag filters and multi-select |
 | **Personal** | 24 custom rules (RAG, security, architecture, patterns) |
 | **Stacks** | 54 preset bundles with one-click copy |
+
+### Documentation sections (`guide.html`)
+
+What is this · Cursor rules · Key concepts · Rules vs stacks · File structure · Use cases · How to install · Mental model · For maintainers
 
 ### Regenerate catalog (after editing rules)
 

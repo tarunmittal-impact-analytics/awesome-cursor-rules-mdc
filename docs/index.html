@@ -5,40 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cursor Rules Catalog</title>
   <meta name="description" content="Browse and install 296+ Cursor MDC rules for libraries, data engineering, cloud, and AI.">
+  <link rel="stylesheet" href="styles.css">
   <style>
-    :root {
-      --bg: #0b0d10;
-      --surface: #141820;
-      --surface-2: #1b2230;
-      --border: #2a3344;
-      --text: #e8edf5;
-      --muted: #8b98ad;
-      --accent: #6ea8fe;
-      --accent-2: #3dd68c;
-      --chip: #222b3a;
-      --chip-active: #2f4568;
-      --radius: 12px;
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: radial-gradient(circle at top, #121826 0%, var(--bg) 45%);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 32px 20px 64px;
-    }
-
     header {
       display: flex;
       flex-wrap: wrap;
@@ -341,7 +309,27 @@
   </style>
 </head>
 <body>
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-brand" href="index.html">Cursor Rules Catalog</a>
+      <div class="site-links">
+        <a href="index.html" class="active">Browse Catalog</a>
+        <a href="guide.html">Documentation</a>
+        <a id="nav-github-link" href="https://github.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
   <div class="container">
+    <div class="hero-banner">
+      <p><strong>New here?</strong> Read the docs to learn what rules and stacks are, how they differ, and which stack fits your project.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="guide.html#what-is-it">What is this?</a>
+        <a class="btn" href="guide.html#rules-vs-stacks">Rules vs stacks</a>
+        <a class="btn" href="guide.html#use-cases">Use cases</a>
+      </div>
+    </div>
+
     <header>
       <div>
         <h1>Cursor Rules Catalog</h1>
@@ -388,7 +376,9 @@
 
     <footer>
       Part of <a id="repo-link" href="#" target="_blank" rel="noreferrer">awesome-cursor-rules-mdc</a>.
-      Rules install into <code>.cursor/rules/</code> in your project.
+      Rules install into <code>.cursor/rules/</code>.
+      · <a href="guide.html">Documentation</a>
+      · <a id="footer-guide-link" href="guide.html">Rules vs stacks explained</a>
     </footer>
   </div>
 
@@ -655,6 +645,7 @@
       const repoLink = document.getElementById("repo-link");
       repoLink.href = state.catalog.githubUrl;
       repoLink.textContent = state.catalog.repo;
+      document.getElementById("nav-github-link").href = state.catalog.githubUrl;
 
       document.querySelectorAll(".tab").forEach((tab) => {
         tab.onclick = () => setView(tab.dataset.view);

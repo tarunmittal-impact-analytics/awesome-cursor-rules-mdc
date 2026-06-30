@@ -6,7 +6,8 @@
 
 This project generates Cursor MDC (Markdown Cursor) rule files from a structured JSON file containing library information. It uses Exa for semantic search and LLM (Gemini) for content generation.
 
-**📖 [Complete Usage Guide →](GUIDE.md)** — full reference for installing rules, preset stacks, personal rules, web catalog, curl/CLI, and new project setup.
+**📖 [Complete Usage Guide →](GUIDE.md)** — end-to-end architecture, rules vs stacks, use cases, install methods, preset stacks, personal rules.  
+**🌐 [Web documentation →](https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/guide.html)** — same concepts on GitHub Pages.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=tarunmittal-impact-analytics/awesome-cursor-rules-mdc&type=Date)](https://www.star-history.com/#tarunmittal-impact-analytics/awesome-cursor-rules-mdc&Date)
 
@@ -156,7 +157,8 @@ Available stacks: run `uv run src/install_rules.py stacks` (54 stacks including 
 | **DevOps** | docker, kubernetes, datadog, github-actions, ansible |
 | **Custom / patterns** | graph-rag, authentication, rate-limiting, design-patterns, cap-theorem |
 
-Browse all rules: **https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/**
+Browse all rules: **https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/**  
+Read the docs (rules vs stacks, use cases): **https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/guide.html**
 
 ### Personal / custom rules (24 total)
 
@@ -221,13 +223,16 @@ Options: `--here`, `--target PATH`, `--stack NAME`, `--tag TAG`, `--custom`, `--
 
 Override repo source with env vars: `CURSOR_RULES_REPO=owner/repo CURSOR_RULES_BRANCH=main`
 
-### Web catalog
+### Web catalog & documentation
 
-Browse all rules visually and copy install commands:
-
-**https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/**
+| Page | URL |
+|------|-----|
+| **Browse catalog** | https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/ |
+| **Documentation** | https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/guide.html |
 
 The catalog supports search, tag filters, multi-select, preset stacks, and one-click copy for curl/uv commands.
+
+The documentation page explains what rules and stacks are, how they differ, repo file structure, and use cases by project type.
 
 To regenerate `docs/catalog.json` after updating `rules.json` or `repo.json`:
 
@@ -306,9 +311,11 @@ The script uses a `config.yaml` file for configuration. You can modify this file
 ```
 .
 ├── repo.json             # Fork repo coordinates (owner/repo, branch, upstream)
-├── docs/                 # Static web catalog (GitHub Pages)
+├── docs/                 # Web catalog + docs (GitHub Pages)
 │   ├── README.md         # Docs index
-│   ├── index.html
+│   ├── index.html        # Browse/search catalog
+│   ├── guide.html        # Documentation (concepts, use cases)
+│   ├── styles.css        # Shared styles
 │   └── catalog.json
 ├── install.sh            # Curl-based installer script
 ├── src/                  # Main source code directory

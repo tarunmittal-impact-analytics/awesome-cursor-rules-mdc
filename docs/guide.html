@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation — Cursor Rules Catalog</title>
+  <meta name="description" content="What this repo is, how rules and stacks differ, use cases, and how to install Cursor MDC rules.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-brand" href="index.html">Cursor Rules Catalog</a>
+      <div class="site-links">
+        <a href="index.html">Browse Catalog</a>
+        <a href="guide.html" class="active">Documentation</a>
+        <a id="github-link" href="https://github.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <h2>On this page</h2>
+        <a href="#what-is-it">What is this?</a>
+        <a href="#cursor-rules">Cursor rules</a>
+        <a href="#key-concepts">Key concepts</a>
+        <a href="#rules-vs-stacks">Rules vs stacks</a>
+        <a href="#file-structure">File structure</a>
+        <a href="#use-cases">Use cases</a>
+        <a href="#install">How to install</a>
+        <a href="#mental-model">Mental model</a>
+        <a href="#maintainers">For maintainers</a>
+      </aside>
+
+      <main class="docs-content">
+        <section id="what-is-it">
+          <h1>Documentation</h1>
+          <p class="lead">
+            This repo is a <strong>Cursor rules library</strong> and <strong>install toolkit</strong>.
+            It ships 296 technology-specific rules, 24 personal workflow rules, and 54 preset stacks —
+            so you can give Cursor consistent, stack-aware AI guidance in any project.
+          </p>
+
+          <div class="card-grid">
+            <div class="info-card">
+              <h3>296 library rules</h3>
+              <p>Best practices for React, ClickHouse, Kafka, FastAPI, AWS, and more. Generated with Exa + LLM.</p>
+            </div>
+            <div class="info-card">
+              <h3>24 personal rules</h3>
+              <p>Hand-written team conventions: architecture, RAG, security, distributed systems.</p>
+            </div>
+            <div class="info-card">
+              <h3>54 preset stacks</h3>
+              <p>One-command bundles for common project types — data eng, gen-ai, mobile, backend.</p>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>You do not need to clone this repo.</strong> Install rules directly from GitHub with curl, the CLI, or the <a href="index.html">web catalog</a>.
+          </div>
+        </section>
+
+        <section id="cursor-rules">
+          <h2>What are Cursor rules?</h2>
+          <p>
+            Cursor rules are persistent instructions that tell the AI how to behave in your project.
+            They live in <code>your-project/.cursor/rules/</code> as <code>.mdc</code> files.
+          </p>
+          <pre>your-project/
+  .cursor/
+    rules/
+      base.mdc       ← always-on team behavior
+      react.mdc      ← applies when editing React files
+      clickhouse.mdc ← applies when editing SQL/analytics code</pre>
+
+          <p>Each file has YAML frontmatter + markdown content:</p>
+          <pre>---
+description: React best practices
+globs: **/*.{jsx,tsx}
+alwaysApply: false
+---
+
+# React rules
+- Prefer functional components
+- ...</pre>
+
+          <table>
+            <thead>
+              <tr><th>Field</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>description</code></td><td>What the rule covers — Cursor uses this to decide relevance</td></tr>
+              <tr><td><code>globs</code></td><td>File patterns — rule activates when editing matching files</td></tr>
+              <tr><td><code>alwaysApply: true</code></td><td>Always included in AI context (e.g. your base rule)</td></tr>
+            </tbody>
+          </table>
+
+          <p><strong>Without rules</strong>, the AI gives generic answers. <strong>With rules</strong>, it follows your stack's idioms, team conventions, and domain patterns.</p>
+        </section>
+
+        <section id="key-concepts">
+          <h2>Key concepts</h2>
+
+          <h3>1. Library rules (<code>rules-mdc/</code>)</h3>
+          <p>Technology-specific best practices — one <code>.mdc</code> file per library or framework.</p>
+          <ul>
+            <li><strong>Answers:</strong> "How should I write code for this technology?"</li>
+            <li><strong>Examples:</strong> <code>react.mdc</code>, <code>clickhouse.mdc</code>, <code>apache-kafka.mdc</code></li>
+            <li><strong>Install as:</strong> <code>react</code>, <code>clickhouse</code>, <code>fastapi</code></li>
+            <li><strong>Indexed in:</strong> <code>rules.json</code> (names + tags only, not content)</li>
+          </ul>
+
+          <h3>2. Personal / custom rules (<code>rules-custom/</code>)</h3>
+          <p>Hand-written workflow and architecture rules — not tied to a single library.</p>
+          <ul>
+            <li><strong>Answers:</strong> "How should the AI behave on my team?"</li>
+            <li><strong>Examples:</strong> <code>base.mdc</code>, <code>graph-rag.mdc</code>, <code>authentication.mdc</code></li>
+            <li><strong>Install as:</strong> <code>--custom base</code> or <code>custom:base</code> in stacks</li>
+            <li><strong>Indexed in:</strong> <code>custom-rules.json</code></li>
+          </ul>
+
+          <h3>3. Stacks (<code>stacks.json</code>)</h3>
+          <p>Named bundles — a shopping list of rule names, <strong>not</strong> rule content.</p>
+          <ul>
+            <li><strong>Answers:</strong> "What rules should I install for this project type?"</li>
+            <li><strong>Install as:</strong> <code>--stack data-stack-kafka</code></li>
+            <li>Can mix library rules and personal rules in one bundle</li>
+          </ul>
+        </section>
+
+        <section id="rules-vs-stacks">
+          <h2>Rules vs stacks — what's the difference?</h2>
+          <p>Think of it like a menu vs a combo meal.</p>
+
+          <table>
+            <thead>
+              <tr><th></th><th>Rule</th><th>Stack</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>What it is</strong></td><td>Content (AI instructions)</td><td>A shortcut list (no content)</td></tr>
+              <tr><td><strong>File type</strong></td><td><code>.mdc</code> file</td><td>Entry in <code>stacks.json</code></td></tr>
+              <tr><td><strong>Install as</strong></td><td><code>react</code>, <code>custom:base</code></td><td><code>--stack react-ts</code></td></tr>
+              <tr><td><strong>Can mix types?</strong></td><td>One at a time</td><td>Yes — e.g. <code>custom:base</code> + <code>react</code></td></tr>
+            </tbody>
+          </table>
+
+          <h3>Example: installing a stack</h3>
+          <p>This stack definition in <code>stacks.json</code>:</p>
+          <pre>{
+  "data-stack-kafka": {
+    "description": "Apache Kafka event streaming",
+    "rules": ["apache-kafka", "docker", "python"]
+  }
+}</pre>
+
+          <p>Running <code>--stack data-stack-kafka</code> copies <strong>three separate rule files</strong> into your project:</p>
+          <pre>my-app/.cursor/rules/
+  apache-kafka.mdc   ← from rules-mdc/
+  docker.mdc         ← from rules-mdc/
+  python.mdc         ← from rules-mdc/</pre>
+
+          <div class="callout">
+            <strong>Analogy:</strong> Rules are ingredients. Stacks are recipes that say which ingredients to grab.
+          </div>
+
+          <h3>Three things users need to know</h3>
+          <table>
+            <thead>
+              <tr><th>Concept</th><th>Command pattern</th><th>Installs</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Library rule</td><td><code>install react</code></td><td>One tech rule file</td></tr>
+              <tr><td>Personal rule</td><td><code>--custom base</code></td><td>One workflow rule file</td></tr>
+              <tr><td>Stack</td><td><code>--stack react-ts</code></td><td>Multiple rule files at once</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="file-structure">
+          <h2>Why so many files?</h2>
+          <p>Most of the volume is the <strong>rule library itself</strong>, not clutter.</p>
+
+          <table>
+            <thead>
+              <tr><th>What</th><th>Count</th><th>Why it exists</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>rules-mdc/*.mdc</code></td><td>~296</td><td>One file per technology — this <em>is</em> the library</td></tr>
+              <tr><td><code>rules-custom/*.mdc</code></td><td>24</td><td>Hand-written team/workflow rules</td></tr>
+              <tr><td><code>rules.json</code></td><td>1</td><td>Index of library rules (names + tags)</td></tr>
+              <tr><td><code>custom-rules.json</code></td><td>1</td><td>Index of personal rules</td></tr>
+              <tr><td><code>stacks.json</code></td><td>1</td><td>Preset bundles (lists of rule names)</td></tr>
+              <tr><td><code>src/</code></td><td>~75</td><td>Generator, installer, Exa cache (maintainers)</td></tr>
+            </tbody>
+          </table>
+
+          <h3>What each JSON file does</h3>
+          <p>JSON files are <strong>indexes only</strong> — they describe what exists, not the rule text.</p>
+
+          <table>
+            <thead>
+              <tr><th>File</th><th>Role</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>rules.json</code></td><td>Master list of library rules + tags for search/filter</td></tr>
+              <tr><td><code>custom-rules.json</code></td><td>Index of personal rules (base, graph-rag, security, …)</td></tr>
+              <tr><td><code>stacks.json</code></td><td>Named bundles mixing library + personal rules</td></tr>
+              <tr><td><code>repo.json</code></td><td>Fork URL config for curl/CLI installers</td></tr>
+            </tbody>
+          </table>
+
+          <h3>End-to-end flow</h3>
+          <div class="flow">rules.json entry
+    ↓
+generate_mdc_files.py (+ Exa + OpenAI)
+    ↓
+rules-mdc/{name}.mdc          ← actual rule content
+    ↓
+install_rules.py / install.sh
+    ↓
+your-project/.cursor/rules/   ← Cursor reads these
+    ↓
+AI follows your stack + team conventions</div>
+
+          <p>As a <strong>user</strong>, you only touch install commands. Generator files in <code>src/</code> are for maintainers.</p>
+        </section>
+
+        <section id="use-cases">
+          <h2>Use cases</h2>
+
+          <h3>New project — pick a stack</h3>
+          <table>
+            <thead>
+              <tr><th>Project type</th><th>Stack</th><th>What you get</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>FastAPI backend</td><td><code>python-backend</code></td><td>fastapi, sqlalchemy, pydantic, pytest, docker</td></tr>
+              <tr><td>React + TypeScript</td><td><code>react-ts</code></td><td>react, typescript, vite, vitest, eslint</td></tr>
+              <tr><td>Kafka streaming</td><td><code>data-stack-kafka</code></td><td>apache-kafka, docker, python</td></tr>
+              <tr><td>ClickHouse analytics</td><td><code>data-stack-clickhouse</code></td><td>clickhouse, sql, python, docker</td></tr>
+              <tr><td>Gen-AI RAG app</td><td><code>gen-ai-graph-rag</code></td><td>custom base + graph-rag + langchain + pinecone</td></tr>
+              <tr><td>Team workflow only</td><td><code>personal</code></td><td>custom base, simple, complex, frontend, backend</td></tr>
+              <tr><td>iOS app</td><td><code>mobile-ios</code></td><td>swift, swiftui, ios-development</td></tr>
+              <tr><td>AWS data pipeline</td><td><code>aws-data-engineering</code></td><td>aws-glue, aws-emr, aws-kinesis, aws-sqs</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Existing project — add one rule</h3>
+          <pre>cd ~/my-app
+curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh \
+  | bash -s -- react --here</pre>
+
+          <h3>Existing project — add team base rule only</h3>
+          <pre>curl -fsSL .../install.sh | bash -s -- --custom base --here</pre>
+
+          <h3>Browse and pick rules interactively</h3>
+          <p>Use the <a href="index.html">web catalog</a> to search by name or tag, select multiple rules, and copy a curl or uv install command.</p>
+        </section>
+
+        <section id="install">
+          <h2>How to install</h2>
+
+          <h3>Curl (no clone, no Python)</h3>
+          <pre># Single library rule
+curl -fsSL .../install.sh | bash -s -- react --here
+
+# Preset stack
+curl -fsSL .../install.sh | bash -s -- --stack data-stack-kafka --here
+
+# Personal rules
+curl -fsSL .../install.sh | bash -s -- --custom base graph-rag --here
+
+# All personal rules
+curl -fsSL .../install.sh | bash -s -- --custom-all --here</pre>
+
+          <h3>Python CLI (from clone or GitHub source)</h3>
+          <pre>uv run src/install_rules.py list
+uv run src/install_rules.py search clickhouse
+uv run src/install_rules.py stacks
+uv run src/install_rules.py install react fastapi --here
+uv run src/install_rules.py install --stack gen-ai-graph-rag --here
+uv run src/install_rules.py install --custom base --here --source github</pre>
+
+          <h3>Web catalog</h3>
+          <p>Open <a href="index.html">Browse Catalog</a>, search rules/stacks, click "Copy curl" or "Copy uv".</p>
+
+          <p>All methods copy <code>.mdc</code> files into <code>.cursor/rules/</code> in your project. Cursor picks them up automatically.</p>
+        </section>
+
+        <section id="mental-model">
+          <h2>Simple mental model</h2>
+
+          <div class="flow">rules.json          → "what library rules exist"
+custom-rules.json   → "what personal rules exist"
+stacks.json         → "recommended combos for project types"
+
+rules-mdc/          → the actual library rule files
+rules-custom/       → the actual personal rule files
+
+install             → copies .mdc files into your project
+generate            → creates new .mdc files (maintainers only)</div>
+
+          <div class="callout">
+            <strong>In one sentence:</strong> JSON files describe <em>what</em> rules exist and how to bundle them;
+            <code>.mdc</code> files are the actual AI instructions; install tooling copies the right ones into your project;
+            Cursor reads them when you code.
+          </div>
+
+          <div class="hero-actions">
+            <a class="btn primary" href="index.html">Browse the catalog</a>
+            <a class="btn" id="guide-repo-link" href="https://github.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/blob/main/GUIDE.md" target="_blank" rel="noreferrer">Full GUIDE.md on GitHub</a>
+          </div>
+        </section>
+
+        <section id="maintainers">
+          <h2>For maintainers</h2>
+          <p>To add a new library rule:</p>
+          <ol>
+            <li>Add entry to <code>rules.json</code></li>
+            <li><code>uv run src/generate_mdc_files.py --library new-lib</code> (needs EXA + OpenAI keys in <code>.env</code>)</li>
+            <li><code>uv run src/generate_catalog.py</code></li>
+            <li>Commit and push — GitHub Pages redeploys automatically</li>
+          </ol>
+          <p>See <a id="guide-md-link" href="https://github.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/blob/main/GUIDE.md">GUIDE.md</a> for full CLI reference, fork config, and troubleshooting.</p>
+        </section>
+
+        <footer>
+          Part of <a id="footer-repo-link" href="https://github.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc">awesome-cursor-rules-mdc</a>.
+          Rules install into <code>.cursor/rules/</code>.
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    fetch("catalog.json")
+      .then((r) => r.json())
+      .then((catalog) => {
+        const url = catalog.githubUrl || `https://github.com/${catalog.repo}`;
+        document.getElementById("github-link").href = url;
+        document.getElementById("footer-repo-link").href = url;
+        document.getElementById("footer-repo-link").textContent = catalog.repo;
+        document.getElementById("guide-repo-link").href = `${url}/blob/${catalog.branch || "main"}/GUIDE.md`;
+        document.getElementById("guide-md-link").href = `${url}/blob/${catalog.branch || "main"}/GUIDE.md`;
+      })
+      .catch(() => {});
+
+    const sections = document.querySelectorAll(".docs-content section[id]");
+    const navLinks = document.querySelectorAll(".docs-sidebar a");
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          navLinks.forEach((link) => {
+            link.classList.toggle("active", link.getAttribute("href") === `#${entry.target.id}`);
+          });
+        }
+      });
+    }, { rootMargin: "-30% 0px -60% 0px" });
+
+    sections.forEach((section) => observer.observe(section));
+  </script>
+</body>
+</html>
