@@ -1,38 +1,238 @@
 ---
-description: Best practices and coding standards for Swiftui.
-globs: **/*.{swift,kt,kts,dart}
+description: This guide provides actionable best practices for SwiftUI development, focusing on performance, structure, and modern patterns to enhance code quality and maintainability.
+globs: **/*
 ---
+# swiftui Best Practices
 
-# Swiftui Best Practices
+SwiftUI is a powerful framework for building user interfaces on Apple platforms. This guide outlines the best practices to follow, ensuring your applications are performant, maintainable, and scalable.
 
-Tags: mobile, ios, ui, swift, apple
+## Code Organization and Structure
 
-## Code organization
+### Use Separate Types for Views
+Define views as separate types instead of computed properties to create isolated invalidation boundaries. This improves performance by reducing unnecessary re-renders.
 
-- Follow idiomatic Swiftui project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```swift
+struct ContentView: View {
+    var body: some View {
+        VStack {
+            Text("Hello, World!")
+            // More complex views
+        }
+    }
+}
+```
 
-## Performance
+✅ GOOD
+```swift
+struct ContentView: View {
+    var body: some View {
+        MainVStack()
+    }
+}
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+struct MainVStack: View {
+    var body: some View {
+        VStack {
+            Text("Hello, World!")
+            // More complex views
+        }
+    }
+}
+```
 
-## Security
+### Use the Repository Pattern
+Isolate data logic from ViewModels by adopting the repository pattern. This enhances testability and separation of concerns.
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+✅ GOOD
+```swift
+protocol UserRepository {
+    func fetchUsers() -> [User]
+}
 
-## Testing
+class UserViewModel: ObservableObject {
+    private let repository: UserRepository
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+    @Published var users: [User] = []
 
-## Operations
+    init(repository: UserRepository) {
+        self.repository = repository
+        loadUsers()
+    }
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+    private func loadUsers() {
+        users = repository.fetchUsers()
+    }
+}
+```
+
+## Common Patterns and Anti-patterns
+
+### Use @Observable for Property-Level Re-rendering
+Utilize the `@Observable` macro to enable more granular updates, enhancing performance.
+
+❌ BAD
+```swift
+class UserModel: ObservableObject {
+    @Published var name: String = ""
+    @Published var age: Int = 0
+}
+```
+
+✅ GOOD
+```swift
+struct UserModel {
+    @Observable var name: String = ""
+    @Observable var age: Int = 0
+}
+```
+
+### Avoid Array Indices for Identifiers
+Preserve view identity by using `Identifiable` instead of relying on array indices.
+
+❌ BAD
+```swift
+struct UserListView: View {
+    var users: [User]
+
+    var body: some View {
+        List(users.indices, id: \.self) { index in
+            Text(users[index].name)
+        }
+    }
+}
+```
+
+✅ GOOD
+```swift
+struct UserListView: View {
+    var users: [User]
+
+    var body: some View {
+        List(users) { user in
+            Text(user.name)
+        }
+    }
+}
+```
+
+## Performance Considerations
+
+### Keep Body Logic Declarative
+Minimize complex operations within the `body` property to maintain clarity and performance.
+
+❌ BAD
+```swift
+var body: some View {
+    if isLoading {
+        ProgressView()
+    } else {
+        Text(data)
+    }
+}
+```
+
+✅ GOOD
+```swift
+var body: some View {
+    Group {
+        if isLoading {
+            ProgressView()
+        } else {
+            Text(data)
+        }
+    }
+}
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Using if/else for State Changes
+Use ternary operators for single-view state changes to prevent unnecessary structural identity shifts.
+
+❌ BAD
+```swift
+var body: some View {
+    if isActive {
+        Text("Active")
+    } else {
+        Text("Inactive")
+    }
+}
+```
+
+✅ GOOD
+```swift
+var body: some View {
+    Text(isActive ? "Active" : "Inactive")
+}
+```
+
+## Component Architecture
+
+### Use NavigationStack with Typed Navigation Paths
+For scalable and testable routing, prefer `NavigationStack` with typed paths.
+
+✅ GOOD
+```swift
+struct AppNavigation: View {
+    var body: some View {
+        NavigationStack {
+            MainView()
+        }
+    }
+}
+
+struct MainView: View {
+    var body: some View {
+        NavigationLink("Go to Detail", value: DetailPath())
+    }
+}
+```
+
+## Accessibility
+
+### Ensure Accessibility Features are Enabled
+Always use accessibility modifiers to enhance usability for all users.
+
+✅ GOOD
+```swift
+Text("Welcome")
+    .accessibilityLabel("Welcome message")
+    .accessibilityHint("Tap to continue")
+```
+
+## Theming
+
+### Use Environment for Dependency Injection
+Inject dependencies via `@Environment` instead of singletons to improve testability.
+
+✅ GOOD
+```swift
+struct ThemedView: View {
+    @Environment(\.theme) var theme
+
+    var body: some View {
+        Text("Themed Text")
+            .foregroundColor(theme.textColor)
+    }
+}
+```
+
+## Testing Approaches
+
+### Write Unit Tests for ViewModels
+Ensure that your ViewModels are thoroughly tested, especially when they contain business logic.
+
+✅ GOOD
+```swift
+func testUserViewModel() {
+    let mockRepository = MockUserRepository()
+    let viewModel = UserViewModel(repository: mockRepository)
+
+    viewModel.loadUsers()
+    XCTAssertEqual(viewModel.users.count, expectedCount)
+}
+```
+
+By following these best practices, you'll ensure that your SwiftUI applications are not only performant but also maintainable and scalable. Embrace these patterns to enhance your development experience and deliver high-quality applications.

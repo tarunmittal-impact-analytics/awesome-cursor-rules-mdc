@@ -1,44 +1,229 @@
 ---
-description: Best practices and coding standards for Spec Kit.
-globs: **/*.{py,ts,tsx}
+description: This guide provides actionable best practices for using spec-kit effectively, focusing on code organization, common patterns, performance considerations, and testing approaches.
+globs: **/*
 ---
+# spec-kit Best Practices
 
-# Spec Kit Best Practices
+Spec Kit is a powerful toolkit for Spec-Driven Development (SDD). By following these best practices, you can streamline your development process, enhance collaboration with AI coding agents, and maintain high code quality.
 
-Tags: development, specification, ai, workflow
+## Code Organization and Structure
 
-## Code organization
+### Use a Consistent Directory Structure
 
-- Follow idiomatic Spec Kit project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+Organizing your project files consistently is crucial for maintainability. Follow this structure:
 
-## AI-specific
+```
+/project-root
+  ├── /docs
+  ├── /src
+  │   ├── /components
+  │   ├── /hooks
+  │   ├── /pages
+  │   └── /utils
+  ├── /tests
+  ├── /speckit
+  │   ├── constitution.md
+  │   ├── specify.md
+  │   ├── clarify.md
+  │   ├── plan.md
+  │   └── tasks.md
+  └── package.json
+```
 
-- Version prompts, models, and retrieval indexes together.
-- Log token usage, latency, and model version per request.
-- Treat LLM output as untrusted until validated.
+**Why:** A clear directory structure helps team members find files quickly and understand the project's organization.
 
-## Performance
+### Keep Specifications Versioned
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+Always version your specification files. Use a naming convention like `specify-v1.md`, `specify-v2.md`, etc.
 
-## Security
+```markdown
+# specify-v1.md
+## Feature: User Authentication
+- **What:** Users can log in using email and password.
+- **Why:** To secure user data and provide personalized experiences.
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+**Why:** Versioning helps track changes over time and provides clarity on project evolution.
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Prefer Functional Components with Hooks
 
-## Operations
+In React, use functional components with hooks instead of class components for cleaner and more maintainable code.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD:
+```javascript
+class UserProfile extends React.Component {
+  state = { user: null };
+
+  componentDidMount() {
+    this.fetchUser();
+  }
+
+  fetchUser() {
+    // Fetch user logic
+  }
+
+  render() {
+    return <div>{this.state.user?.name}</div>;
+  }
+}
+```
+
+✅ GOOD:
+```javascript
+import { useEffect, useState } from 'react';
+
+const UserProfile = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      // Fetch user logic
+      setUser(fetchedUser);
+    };
+    fetchUser();
+  }, []);
+
+  return <div>{user?.name}</div>;
+};
+```
+
+**Why:** Functional components with hooks are easier to read, test, and reuse.
+
+### Use Clear and Descriptive Naming
+
+Always use descriptive names for your specifications and artifacts.
+
+❌ BAD:
+```markdown
+# specify.md
+## Feature: Something
+```
+
+✅ GOOD:
+```markdown
+# specify-user-authentication.md
+## Feature: User Authentication
+```
+
+**Why:** Descriptive names make it easier for team members to understand the purpose of each file at a glance.
+
+## Performance Considerations
+
+### Optimize Rendering with Memoization
+
+Use `React.memo` and `useMemo` to prevent unnecessary re-renders.
+
+❌ BAD:
+```javascript
+const UserProfile = ({ user }) => {
+  return <div>{user.name}</div>;
+};
+```
+
+✅ GOOD:
+```javascript
+import { memo } from 'react';
+
+const UserProfile = memo(({ user }) => {
+  return <div>{user.name}</div>;
+});
+```
+
+**Why:** Memoization improves performance by preventing re-renders of components that have not changed.
+
+### Lazy Load Components
+
+Use React's `React.lazy` and `Suspense` for lazy loading components.
+
+```javascript
+import React, { Suspense, lazy } from 'react';
+
+const LazyComponent = lazy(() => import('./LazyComponent'));
+
+const App = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <LazyComponent />
+  </Suspense>
+);
+```
+
+**Why:** Lazy loading reduces the initial load time, improving user experience.
+
+## Common Pitfalls and Gotchas
+
+### Avoid Over-Engineering
+
+Keep your specifications simple and focused. Avoid adding unnecessary complexity.
+
+❌ BAD:
+```markdown
+## Feature: Complex User Management
+- Users can be managed through a complex admin panel with multiple roles and permissions.
+```
+
+✅ GOOD:
+```markdown
+## Feature: User Management
+- Users can be created, updated, and deleted through a simple admin interface.
+```
+
+**Why:** Simplicity leads to better maintainability and easier understanding among team members.
+
+### Don’t Ignore Documentation
+
+Always document your specifications and decisions. Use the `/speckit` files to maintain clarity.
+
+❌ BAD:
+```markdown
+## Feature: User Profile
+- Implemented without documentation.
+```
+
+✅ GOOD:
+```markdown
+## Feature: User Profile
+- **What:** Users can view and edit their profiles.
+- **Why:** To enhance user engagement.
+- **Documentation:** Refer to /speckit/clarify-user-profile.md for detailed decisions.
+```
+
+**Why:** Documentation provides context and rationale for decisions, aiding future development.
+
+## Testing Approaches
+
+### Write Unit Tests for Specifications
+
+Always write unit tests for your specifications to ensure they meet the defined criteria.
+
+```javascript
+import { render, screen } from '@testing-library/react';
+import UserProfile from './UserProfile';
+
+test('renders user name', () => {
+  const user = { name: 'John Doe' };
+  render(<UserProfile user={user} />);
+  expect(screen.getByText('John Doe')).toBeInTheDocument();
+});
+```
+
+**Why:** Unit tests verify that your implementation aligns with the specifications, reducing bugs.
+
+### Use Integration Tests for Workflow
+
+Implement integration tests to ensure that all parts of your application work together as expected.
+
+```javascript
+import { render, screen } from '@testing-library/react';
+import App from './App';
+
+test('renders user profile with correct data', () => {
+  render(<App />);
+  expect(screen.getByText('User Profile')).toBeInTheDocument();
+});
+```
+
+**Why:** Integration tests validate the interactions between components, catching issues that unit tests might miss.
+
+By adhering to these best practices, you will ensure a smooth workflow with spec-kit, enabling your team to build high-quality software efficiently.

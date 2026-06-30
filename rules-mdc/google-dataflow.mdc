@@ -1,44 +1,187 @@
 ---
-description: Best practices and coding standards for Google Dataflow.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This guide provides actionable best practices for developing efficient Dataflow pipelines using the Google Dataflow service, focusing on code organization, performance optimization, testing, and common pitfalls.
+globs: **/*
 ---
+# google-dataflow Best Practices
 
-# Google Dataflow Best Practices
+## Code Organization and Structure
 
-Tags: gcp, data-engineering, streaming, batch
+### Use Pure Functions in ParDo Transforms
+Always structure your pipeline code using pure functions within `ParDo` transforms. This ensures that your state is thread-safe and makes your code easier to test.
 
-## Code organization
+❌ BAD
+```python
+def process_element(element):
+    global state_variable  # Using global state
+    state_variable += element.value
+    return state_variable
+```
 
-- Follow idiomatic Google Dataflow project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+✅ GOOD
+```python
+def process_element(element, state):
+    return state + element.value  # Pure function with no side effects
+```
 
-## Data quality
+### Reuse Common Transforms
+Create shared libraries or Maven submodules for common transforms. This enhances testability and reduces code duplication.
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+❌ BAD
+```python
+def transform_a(element):
+    # Transformation logic
+    pass
 
-## Performance
+def transform_b(element):
+    # Similar transformation logic
+    pass
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD
+```python
+# In a shared library
+def common_transform(element):
+    # Shared transformation logic
+    pass
 
-## Security
+# In your pipeline
+p | 'Transform A' >> beam.Map(common_transform)
+p | 'Transform B' >> beam.Map(common_transform)
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+## Common Patterns and Anti-patterns
 
-## Testing
+### Use Dataflow Templates
+Leverage Dataflow templates or Flex Templates to accelerate deployment. This allows for parameterization and reuse of pipeline configurations.
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+❌ BAD
+```bash
+gcloud dataflow jobs run my-job --gcs-location gs://my-bucket/my-pipeline
+```
 
-## Operations
+✅ GOOD
+```bash
+gcloud dataflow jobs run my-job \
+  --gcs-location gs://my-bucket/my-template \
+  --parameters inputFile=gs://my-bucket/input.txt,outputFile=gs://my-bucket/output.txt
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+### Avoid Hot Keys
+To prevent performance bottlenecks, add random salt to keys when grouping data.
+
+❌ BAD
+```python
+p | 'Group By Key' >> beam.GroupByKey()
+```
+
+✅ GOOD
+```python
+import random
+
+def add_salt(element):
+    key, value = element
+    return (f"{key}_{random.randint(0, 1000)}", value)
+
+p | 'Salt Keys' >> beam.Map(add_salt) | 'Group By Key' >> beam.GroupByKey()
+```
+
+## Performance Considerations
+
+### Enable Streaming Engine and Runner v2
+Always enable the Streaming Engine and use Runner v2 for streaming jobs to enhance performance and reduce latency.
+
+✅ GOOD
+```bash
+gcloud dataflow jobs run my-streaming-job \
+  --gcs-location gs://my-bucket/my-pipeline \
+  --streaming \
+  --worker-machine-type n1-standard-1 \
+  --max-workers 10 \
+  --enable-streaming-engine
+```
+
+### Use GroupIntoBatches
+To reduce I/O pressure, use `GroupIntoBatches` when processing large datasets.
+
+❌ BAD
+```python
+p | 'Group By Key' >> beam.GroupByKey()
+```
+
+✅ GOOD
+```python
+p | 'Group Into Batches' >> beam.GroupIntoBatches(1000)
+```
+
+## Common Pitfalls and Gotchas
+
+### Minimize Shuffle Operations
+Excessive shuffling can lead to performance degradation. Use `Reshuffle` or `GroupByKey` judiciously.
+
+❌ BAD
+```python
+p | 'Shuffle' >> beam.GroupByKey() | 'Another Shuffle' >> beam.GroupByKey()
+```
+
+✅ GOOD
+```python
+p | 'First Shuffle' >> beam.GroupByKey() | 'Reshuffle' >> beam.Reshuffle()
+```
+
+### Set Appropriate Worker Counts
+Define initial and maximum worker counts based on your expected load to balance cost against latency SLOs.
+
+✅ GOOD
+```bash
+gcloud dataflow jobs run my-job \
+  --gcs-location gs://my-bucket/my-pipeline \
+  --worker-machine-type n1-standard-1 \
+  --max-workers 20 \
+  --autoscaling-algorithm THROUGHPUT_BASED
+```
+
+## Testing Approaches
+
+### Implement CI/CD for Dataflow
+Set up a CI/CD pipeline using a preproduction environment that mirrors production settings. This ensures your pipeline is tested under conditions similar to production.
+
+✅ GOOD
+```yaml
+# Example GitHub Actions workflow
+name: Dataflow CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run tests
+        run: |
+          python -m unittest discover tests/
+```
+
+### Use Direct Runner for Unit Tests
+Utilize the Direct Runner for unit tests to provide rapid feedback during development.
+
+✅ GOOD
+```python
+import apache_beam as beam
+from apache_beam.testing.util import assert_that, equal_to
+
+def test_my_transform():
+    with beam.Pipeline(options=beam.options.pipeline_options.PipelineOptions()) as p:
+        result = (p 
+                  | 'Create Input' >> beam.Create([1, 2, 3]) 
+                  | 'My Transform' >> beam.Map(process_element, state=0))
+        assert_that(result, equal_to([1, 2, 3]))
+```
+
+## Conclusion
+By following these best practices, you can create efficient, maintainable, and scalable Dataflow pipelines. Focus on pure functions, reuse code, optimize performance, and ensure thorough testing to avoid common pitfalls. Always stay updated with the latest features and improvements in the Apache Beam SDK and Google Dataflow.

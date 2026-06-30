@@ -1,38 +1,161 @@
 ---
-description: Best practices and coding standards for Radix Ui.
-globs: **/*.{tsx,jsx,vue,svelte,css}
+description: This guide provides definitive best practices for using Radix UI in React applications, focusing on code organization, patterns, performance, accessibility, and state management.
+globs: **/*
 ---
+# radix-ui Best Practices
 
-# Radix Ui Best Practices
+Radix UI is a powerful library for building accessible, headless UI components in React. This guide outlines essential practices to ensure your components are robust, maintainable, and performant.
 
-Tags: frontend, react, ui, component-library
+## Code Organization and Structure
 
-## Code organization
+### Use the `asChild` Prop
+When integrating Radix components with your own or existing DOM elements, always use the `asChild` prop. This allows for proper forwarding of refs, event handlers, and ARIA attributes without unnecessary wrappers.
 
-- Follow idiomatic Radix Ui project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```jsx
+<Dialog>
+  <button>Open Dialog</button>
+</Dialog>
+```
 
-## Performance
+✅ GOOD
+```jsx
+<Dialog>
+  <button asChild>Open Dialog</button>
+</Dialog>
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Build Product-Specific Abstractions
+Avoid importing raw Radix primitives globally. Instead, create abstractions tailored to your product's needs. This approach minimizes the risk of breaking changes when updating dependencies.
 
-## Security
+✅ GOOD
+```jsx
+// Button.js
+import { Button as RadixButton } from '@radix-ui/react-button';
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+const Button = ({ children, ...props }) => {
+  return <RadixButton {...props}>{children}</RadixButton>;
+};
+```
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Controlled vs. Uncontrolled State
+Choose either controlled or uncontrolled state patterns, but never mix them. Use `defaultOpen` or `defaultValue` for internal management, and `open` and `onOpenChange` when your app manages the state.
 
-## Operations
+❌ BAD
+```jsx
+<Accordion defaultOpen={true} open={isOpen} onOpenChange={setIsOpen}>
+  ...
+</Accordion>
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD
+```jsx
+<Accordion open={isOpen} onOpenChange={setIsOpen}>
+  ...
+</Accordion>
+```
+
+## Performance Considerations
+
+### Optimize Rendering with Memoization
+Use `React.memo` to prevent unnecessary re-renders of components that do not change frequently. This is particularly useful for complex Radix components.
+
+✅ GOOD
+```jsx
+const MemoizedComponent = React.memo(({ data }) => {
+  return <SomeRadixComponent data={data} />;
+});
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Inline Styles
+Avoid using inline styles for Radix components as they can lead to performance issues and make styling harder to manage.
+
+❌ BAD
+```jsx
+<Dialog style={{ backgroundColor: 'white' }}>
+  ...
+</Dialog>
+```
+
+✅ GOOD
+```jsx
+<Dialog className="bg-white">
+  ...
+</Dialog>
+```
+
+## Component Architecture
+
+### Keep Layout Logic Outside Components
+Maintain a clear separation of layout logic from component logic. This ensures components remain focused on behavior and presentation.
+
+✅ GOOD
+```jsx
+const Layout = () => {
+  return (
+    <div className="flex">
+      <Sidebar />
+      <MainContent />
+    </div>
+  );
+};
+```
+
+## State Management
+
+### Use Context for Global State
+For managing global state across Radix components, leverage React's Context API. This avoids prop drilling and keeps your components clean.
+
+✅ GOOD
+```jsx
+const GlobalStateContext = React.createContext();
+
+const App = () => {
+  const [state, setState] = useState(initialState);
+
+  return (
+    <GlobalStateContext.Provider value={{ state, setState }}>
+      <YourComponent />
+    </GlobalStateContext.Provider>
+  );
+};
+```
+
+## Accessibility
+
+### Ensure ARIA Attributes are Present
+Always ensure that ARIA attributes are correctly set on Radix components to maintain accessibility standards. This is crucial for users relying on assistive technologies.
+
+✅ GOOD
+```jsx
+<Dialog aria-labelledby="dialog-title" aria-describedby="dialog-description">
+  <h2 id="dialog-title">Dialog Title</h2>
+  <p id="dialog-description">Description of the dialog</p>
+</Dialog>
+```
+
+## Hooks Best Practices
+
+### Use Custom Hooks for Reusable Logic
+Encapsulate reusable logic in custom hooks to keep components clean and focused. This is especially useful for managing state or side effects related to Radix components.
+
+✅ GOOD
+```jsx
+const useDialogState = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const toggle = () => setIsOpen((prev) => !prev);
+  return { isOpen, toggle };
+};
+
+// Usage
+const MyComponent = () => {
+  const { isOpen, toggle } = useDialogState();
+  return <Dialog open={isOpen} onOpenChange={toggle}>...</Dialog>;
+};
+```
+
+By following these best practices, you will ensure that your use of Radix UI is effective, maintainable, and accessible, leading to a better experience for both developers and users.

@@ -1,44 +1,261 @@
 ---
-description: Best practices and coding standards for Apache Airflow.
-globs: **/*.{py,sql,yml,yaml}
+description: This document provides comprehensive best practices for developing with Apache Airflow, focusing on performance, reliability, and maintainability.
+globs: **/*.py
 ---
+# apache-airflow Best Practices
 
-# Apache Airflow Best Practices
+This guide outlines essential best practices for developing with Apache Airflow. By following these guidelines, you can ensure your workflows are efficient, maintainable, and reliable.
 
-Tags: data-engineering, orchestration, workflow, python
+## Code Organization and Structure
 
-## Code organization
+### Keep DAG Definitions Clean
 
-- Follow idiomatic Apache Airflow project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+**Always separate your DAG definitions from helper scripts and plugins.** This creates a clear structure and improves maintainability.
 
-## Data quality
+```python
+# ❌ BAD: Mixing DAG definitions with helper functions
+from airflow import DAG
+from airflow.operators.dummy_operator import DummyOperator
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+def helper_function():
+    # some logic here
+    pass
 
-## Performance
+dag = DAG('example_dag', default_args={'start_date': '2023-01-01'})
+start = DummyOperator(task_id='start', dag=dag)
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+```python
+# ✅ GOOD: Separate DAG definitions and helper functions
+# In dag_example.py
+from airflow import DAG
+from airflow.operators.dummy_operator import DummyOperator
+from my_helpers import helper_function
 
-## Security
+dag = DAG('example_dag', default_args={'start_date': '2023-01-01'})
+start = DummyOperator(task_id='start', dag=dag)
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+# In my_helpers.py
+def helper_function():
+    # some logic here
+    pass
+```
 
-## Testing
+### Use Task Groups for Organization
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+**Utilize TaskGroups to visually organize tasks in the Airflow UI.** This makes complex DAGs easier to understand.
 
-## Operations
+```python
+from airflow import DAG
+from airflow.utils.task_group import TaskGroup
+from airflow.operators.dummy_operator import DummyOperator
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+with DAG('grouped_dag', default_args={'start_date': '2023-01-01'}) as dag:
+    with TaskGroup("group1") as group1:
+        task1 = DummyOperator(task_id='task1')
+        task2 = DummyOperator(task_id='task2')
+
+    with TaskGroup("group2") as group2:
+        task3 = DummyOperator(task_id='task3')
+        task4 = DummyOperator(task_id='task4')
+
+    group1 >> group2
+```
+
+## Common Patterns and Anti-patterns
+
+### Avoid Top-Level Code
+
+**Do not place heavy logic or database connections at the module level.** This can lead to performance issues since Airflow parses DAG files frequently.
+
+```python
+# ❌ BAD: Heavy logic at the module level
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+
+# This will run every 30 seconds
+result = heavy_logic_function()
+
+dag = DAG('example_dag', default_args={'start_date': '2023-01-01'})
+task = PythonOperator(task_id='task', python_callable=heavy_logic_function, dag=dag)
+```
+
+```python
+# ✅ GOOD: Move logic inside task callables
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+
+def heavy_logic_function():
+    # Perform heavy logic here
+    return "result"
+
+dag = DAG('example_dag', default_args={'start_date': '2023-01-01'})
+task = PythonOperator(task_id='task', python_callable=heavy_logic_function, dag=dag)
+```
+
+### Use the TaskFlow API
+
+**Prefer the TaskFlow API for defining tasks.** This modern approach simplifies the code and improves readability.
+
+```python
+from airflow.decorators import dag, task
+from datetime import datetime
+
+@dag(schedule_interval='@daily', start_date=datetime(2023, 1, 1))
+def my_dag():
+    @task
+    def my_task():
+        return "Hello, Airflow!"
+
+    my_task()
+
+dag_instance = my_dag()
+```
+
+## Performance Considerations
+
+### Prioritize Idempotency and Atomicity
+
+**Ensure tasks are idempotent and atomic.** Use operations like MERGE for database interactions to avoid side effects.
+
+```python
+# ✅ GOOD: Idempotent and atomic task
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+
+def merge_data():
+    # Use MERGE or similar operation to ensure idempotency
+    pass
+
+dag = DAG('merge_dag', default_args={'start_date': '2023-01-01'})
+task = PythonOperator(task_id='merge_task', python_callable=merge_data, dag=dag)
+```
+
+### Optimize Data Handling with XCom
+
+**Use XCom only for small metadata.** For larger datasets, write to external storage and pass the URI.
+
+```python
+# ✅ GOOD: Using claim-check pattern
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+import boto3
+
+def store_large_data():
+    # Store large data in S3 and return URI
+    s3_client = boto3.client('s3')
+    s3_client.put_object(Bucket='my-bucket', Key='data.json', Body='{"key": "value"}')
+    return 's3://my-bucket/data.json'
+
+dag = DAG('data_handling_dag', default_args={'start_date': '2023-01-01'})
+task = PythonOperator(task_id='store_data', python_callable=store_large_data, dag=dag)
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Hardcoded Credentials
+
+**Use secrets managers instead of hardcoded credentials.** This improves security and maintainability.
+
+```python
+# ❌ BAD: Hardcoded credentials
+from airflow import DAG
+from airflow.operators.http_operator import SimpleHttpOperator
+
+dag = DAG('http_dag', default_args={'start_date': '2023-01-01'})
+task = SimpleHttpOperator(
+    task_id='http_task',
+    http_conn_id='http_default',
+    endpoint='api/data',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'},  # Hardcoded token
+    dag=dag,
+)
+```
+
+```python
+# ✅ GOOD: Use Airflow's connection management
+from airflow import DAG
+from airflow.operators.http_operator import SimpleHttpOperator
+
+dag = DAG('http_dag', default_args={'start_date': '2023-01-01'})
+task = SimpleHttpOperator(
+    task_id='http_task',
+    http_conn_id='http_default',
+    endpoint='api/data',
+    headers={'Authorization': '{{ conn.http_default.password }}'},  # Use connection password
+    dag=dag,
+)
+```
+
+## Type Hints
+
+### Use Type Hints for Clarity
+
+**Always use type hints in your task callables.** This improves code clarity and helps with static analysis.
+
+```python
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+
+def process_data(data: str) -> str:
+    return data.upper()
+
+dag = DAG('type_hints_dag', default_args={'start_date': '2023-01-01'})
+task = PythonOperator(task_id='process_task', python_callable=process_data, op_kwargs={'data': 'example'}, dag=dag)
+```
+
+## Virtual Environments
+
+### Use Virtual Environments for Isolation
+
+**Always develop in a virtual environment.** This ensures dependencies do not conflict with system packages.
+
+```bash
+# Create and activate a virtual environment
+python3 -m venv airflow_env
+source airflow_env/bin/activate
+
+# Install Airflow
+pip install apache-airflow
+```
+
+## Packaging
+
+### Package Your DAGs Properly
+
+**Use a proper package structure for your Airflow project.** This aids in deployment and version control.
+
+```
+my_airflow_project/
+│
+├── dags/
+│   ├── __init__.py
+│   ├── my_dag.py
+│
+├── plugins/
+│   ├── __init__.py
+│   ├── my_plugin.py
+│
+└── requirements.txt
+```
+
+## Testing Approaches
+
+### Test Your DAGs
+
+**Always test your DAGs using unit tests.** This ensures that tasks behave as expected.
+
+```python
+import unittest
+from airflow.models import DagBag
+
+class TestDAGs(unittest.TestCase):
+    def test_dag_import(self):
+        dagbag = DagBag()
+        self.assertFalse(dagbag.import_errors)
+
+if __name__ == "__main__":
+    unittest.main()
+```
+
+By adhering to these best practices, your Apache Airflow workflows will be more efficient, maintainable, and reliable. Always prioritize performance and clarity in your code to ensure long-term success.

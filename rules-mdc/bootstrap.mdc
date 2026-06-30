@@ -1,38 +1,143 @@
 ---
-description: Best practices and coding standards for Bootstrap.
-globs: **/*.{tsx,jsx,vue,svelte,css}
+description: This guide provides clear, actionable best practices for using Bootstrap effectively, focusing on mobile-first development, utility classes, and component architecture.
+globs: **/*.{css,scss,sass,less}
 ---
-
 # Bootstrap Best Practices
 
-Tags: frontend, ui, css, framework
+This document outlines essential guidelines for writing maintainable and modern Bootstrap code. By following these practices, you will ensure that your code is efficient, clean, and ready for the future.
 
-## Code organization
+## Code Organization and Structure
 
-- Follow idiomatic Bootstrap project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+### Use the Grid System for Layouts
+Always utilize Bootstrap's grid system to manage layouts. This approach eliminates the need for manual media queries.
 
-## Performance
+❌ BAD:  
+```html
+<div style="width: 100%; max-width: 1200px; margin: auto;">
+  <div style="float: left; width: 50%;">Left</div>
+  <div style="float: right; width: 50%;">Right</div>
+</div>
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD:  
+```html
+<div class="container">
+  <div class="row">
+    <div class="col-6">Left</div>
+    <div class="col-6">Right</div>
+  </div>
+</div>
+```
 
-## Security
+### Mobile-First Approach
+Define base styles for the smallest screens first, then override with breakpoint-specific classes. This ensures optimal performance on mobile devices.
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+✅ GOOD:  
+```html
+<div class="container">
+  <div class="row">
+    <div class="col-12 col-md-6">Left</div>
+    <div class="col-12 col-md-6">Right</div>
+  </div>
+</div>
+```
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Favor Utility Classes
+Use Bootstrap's built-in utility classes for spacing and alignment instead of custom CSS. This keeps your HTML clean and your styles consistent.
 
-## Operations
+❌ BAD:  
+```html
+<div class="content" style="margin: 20px; padding: 10px;">
+  Content here
+</div>
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD:  
+```html
+<div class="content m-3 p-2">
+  Content here
+</div>
+```
+
+## Performance Considerations
+
+### Load Only Required Components
+Always load only the components you need to minimize your bundle size. This practice enhances page load times and performance.
+
+✅ GOOD:  
+```scss
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/grid"; // Only import grid system
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Overriding Default Styles
+Instead of overriding Bootstrap's default styles, customize your theme using Sass variables or CSS custom properties. This approach maintains consistency and reduces maintenance.
+
+❌ BAD:  
+```css
+.btn {
+  background-color: red !important; /* Avoid this */
+}
+```
+
+✅ GOOD:  
+```scss
+$primary: red; // Change primary color
+@import "~bootstrap/scss/bootstrap"; // Re-import Bootstrap
+```
+
+## Component Architecture
+
+### Create Reusable Components
+When advanced styling is required, create reusable components rather than applying global CSS overrides. This promotes modularity and reusability.
+
+✅ GOOD:  
+```html
+<div class="card my-custom-card">
+  <div class="card-body">
+    <h5 class="card-title">Card Title</h5>
+    <p class="card-text">Some quick example text.</p>
+  </div>
+</div>
+```
+
+## State Management
+
+### Use Data Attributes for State
+Leverage Bootstrap's data attributes (e.g., `data-bs-theme`) for managing state without additional JavaScript. This keeps your code clean and efficient.
+
+✅ GOOD:  
+```html
+<button type="button" class="btn btn-primary" data-bs-theme="dark">Toggle Theme</button>
+```
+
+## Accessibility
+
+### Ensure Focus Management
+Always ensure that focus is managed correctly, especially for interactive components. Use ARIA roles and properties where necessary to enhance accessibility.
+
+✅ GOOD:  
+```html
+<button type="button" class="btn btn-primary" aria-label="Close" data-bs-dismiss="modal">Close</button>
+```
+
+## Theming
+
+### Utilize Sass Variables for Theming
+Use Bootstrap's Sass variables to create a consistent theme across your application. This allows for easy updates and maintenance.
+
+✅ GOOD:  
+```scss
+$body-bg: #f8f9fa; // Set body background
+$primary: #007bff; // Set primary color
+@import "~bootstrap/scss/bootstrap"; // Import Bootstrap
+```
+
+## Conclusion
+
+By adhering to these best practices, you will create maintainable, efficient, and modern Bootstrap code. Always remember to test your layouts on real devices to ensure functionality and usability. Happy coding!

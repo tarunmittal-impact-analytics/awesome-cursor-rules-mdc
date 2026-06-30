@@ -1,44 +1,189 @@
 ---
-description: Best practices and coding standards for Pinecone.
-globs: **/*.{py,ts,tsx}
+description: This guide provides best practices for implementing Pinecone in a production RAG environment, focusing on code organization, performance, and common pitfalls.
+globs: **/*
 ---
-
 # Pinecone Best Practices
 
-Tags: ai, vector-database, rag, ml, gen-ai
+Implementing Pinecone effectively requires a solid understanding of its architecture and best practices. This guide will help you navigate common challenges and optimize your usage of Pinecone in a production setting.
 
-## Code organization
+## Code Organization and Structure
 
-- Follow idiomatic Pinecone project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+### Use Namespaces for Multitenancy
 
-## AI-specific
+❌ BAD:
+```python
+# Using separate indexes for different tenants
+index1 = pc.Index("tenant1-index")
+index2 = pc.Index("tenant2-index")
+```
 
-- Version prompts, models, and retrieval indexes together.
-- Log token usage, latency, and model version per request.
-- Treat LLM output as untrusted until validated.
+✅ GOOD:
+```python
+# Use namespaces for efficient multitenancy
+index = pc.Index("shared-index")
 
-## Performance
+def upsert_data(data, tenant_id):
+    index.upsert(vectors=data, namespace=tenant_id)
+```
+**Why:** Namespaces are more efficient and cost-effective than maintaining separate indexes, allowing you to manage tenant data within a single index.
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Batch Upserts for Performance
 
-## Security
+❌ BAD:
+```python
+# Upserting vectors one by one
+for vector in data:
+    index.upsert(vectors=[vector])
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+✅ GOOD:
+```python
+# Upserting vectors in batches
+def upsert_batch(batch, namespace):
+    index.upsert(vectors=batch, namespace=namespace)
 
-## Testing
+# Example usage
+upsert_batch(data, "tenant-id")
+```
+**Why:** Batching up to 100-200 vectors at a time optimizes throughput and avoids hitting rate limits.
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+## Common Patterns and Anti-patterns
 
-## Operations
+### Idempotency in Upserts
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD:
+```python
+# Not ensuring unique IDs can lead to duplicates
+index.upsert(vectors=[{"id": "vector1", "values": [0.1, 0.2]}])
+```
+
+✅ GOOD:
+```python
+# Ensuring idempotency with unique IDs
+import hashlib
+
+def generate_id(content):
+    return hashlib.sha256(content.encode()).hexdigest()
+
+def upsert_vector(content, values, namespace):
+    vector_id = generate_id(content)
+    index.upsert(vectors=[{"id": vector_id, "values": values}], namespace=namespace)
+```
+**Why:** Using unique, deterministic IDs prevents duplicate data and ensures data integrity.
+
+### Metadata Filtering in Queries
+
+❌ BAD:
+```python
+# Filtering results in application code
+results = index.query(vector=embedding_data, top_k=5)
+filtered_results = [r for r in results if r['metadata']['category'] == 'documentation']
+```
+
+✅ GOOD:
+```python
+# Filtering on the server side
+results = index.query(
+    vector=embedding_data,
+    top_k=5,
+    filter={"category": "documentation"},
+    include_metadata=True
+)
+```
+**Why:** Server-side filtering reduces the data transferred over the network and improves performance.
+
+## Performance Considerations
+
+### Monitor Key Metrics
+
+- **Retrieval Hit Rate**: Aim for a high hit rate to ensure efficient queries.
+- **p95 Query Latency**: Keep it under 200ms for optimal user experience.
+- **Index Freshness**: Regularly check for stale data.
+
+### Use Application Lifecycle Singleton
+
+❌ BAD:
+```python
+# Creating a new client for each operation
+def perform_query():
+    pc = Pinecone(api_key="YOUR_API_KEY")
+    index = pc.Index("your-index-name")
+    return index.query(...)
+```
+
+✅ GOOD:
+```python
+# Maintain a singleton for the client
+class PineconeClient:
+    _instance = None
+
+    @staticmethod
+    def get_instance(api_key):
+        if PineconeClient._instance is None:
+            PineconeClient._instance = Pinecone(api_key=api_key)
+        return PineconeClient._instance
+
+# Usage
+pc = PineconeClient.get_instance("YOUR_API_KEY")
+index = pc.Index("your-index-name")
+```
+**Why:** This approach minimizes connection overhead and improves performance.
+
+## Common Pitfalls and Gotchas
+
+### Dimension Mismatch
+
+❌ BAD:
+```python
+# Creating an index with incorrect dimensions
+pc.create_index("my-index", dimension=128)  # Wrong dimension
+```
+
+✅ GOOD:
+```python
+# Ensure correct dimension matching with your embedding model
+pc.create_index("my-index", dimension=1536)  # Correct dimension for text-embedding-3-small
+```
+**Why:** Mismatched dimensions lead to silent quality degradation and can cause queries to fail.
+
+### Metadata Size Limitations
+
+❌ BAD:
+```python
+# Including full document bodies in metadata
+index.upsert(vectors=[{"id": "doc1", "values": [0.1, 0.2], "metadata": {"body": "Full document text..."}}])
+```
+
+✅ GOOD:
+```python
+# Store only references or truncated text in metadata
+index.upsert(vectors=[{"id": "doc1", "values": [0.1, 0.2], "metadata": {"summary": "Truncated text..."}}])
+```
+**Why:** Keep metadata payloads under 40KB to avoid exceeding limits and ensure efficient queries.
+
+## Testing Approaches
+
+### Load Testing for Index Performance
+
+- Use tools like Locust or JMeter to simulate concurrent queries and upserts.
+- Monitor system performance and adjust your architecture accordingly.
+
+### Unit Testing for Upsert Logic
+
+❌ BAD:
+```python
+# Not testing upsert logic
+def test_upsert():
+    upsert_vector("sample content", [0.1, 0.2], "tenant-id")
+```
+
+✅ GOOD:
+```python
+# Test idempotency and correct vector storage
+def test_upsert():
+    upsert_vector("sample content", [0.1, 0.2], "tenant-id")
+    assert index.query(vector=embedding_data, top_k=1)['matches'][0]['id'] == generate_id("sample content")
+```
+**Why:** Unit tests ensure your upsert logic is robust and behaves as expected.
+
+By following these best practices, you will ensure that your implementation of Pinecone is efficient, reliable, and scalable. Always keep performance and data integrity at the forefront of your development process.

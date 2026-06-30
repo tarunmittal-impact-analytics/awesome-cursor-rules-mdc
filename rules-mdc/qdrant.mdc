@@ -1,44 +1,222 @@
 ---
-description: Best practices and coding standards for Qdrant.
-globs: **/*.{py,ts,tsx}
+description: This guide provides actionable best practices for using Qdrant in AI RAG development, focusing on performance, structure, and common pitfalls.
+globs: **/*
 ---
+# qdrant Best Practices
 
-# Qdrant Best Practices
+This document serves as a comprehensive guide to effectively using Qdrant for modern AI applications. It covers code organization, common patterns, performance considerations, and testing approaches, ensuring your implementation is high-performance and production-ready.
 
-Tags: ai, vector-database, rag, ml, gen-ai
+## Code Organization and Structure
 
-## Code organization
+### Use a Modular Approach
+Organize your Qdrant-related code into modules. This keeps your codebase clean and maintainable.
 
-- Follow idiomatic Qdrant project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```python
+# All code in a single file
+def ingest_data(data):
+    # Ingest data logic
+    pass
 
-## AI-specific
+def search_data(query):
+    # Search logic
+    pass
+```
 
-- Version prompts, models, and retrieval indexes together.
-- Log token usage, latency, and model version per request.
-- Treat LLM output as untrusted until validated.
+✅ GOOD
+```python
+# Separate files for ingestion and search
+# ingestion.py
+def ingest_data(data):
+    # Ingest data logic
+    pass
 
-## Performance
+# search.py
+def search_data(query):
+    # Search logic
+    pass
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Utilize Configuration Files
+Store your Qdrant configurations in a separate file to avoid hardcoding values.
 
-## Security
+❌ BAD
+```python
+# Hardcoded configurations
+QDRANT_URL = "http://localhost:6334"
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+✅ GOOD
+```python
+# config.py
+QDRANT_URL = "http://localhost:6334"
 
-## Testing
+# usage
+from config import QDRANT_URL
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+## Common Patterns and Anti-patterns
 
-## Operations
+### Use gRPC for Communication
+Always use gRPC for all ingestion and search traffic to minimize serialization overhead.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD
+```python
+# Using HTTP for communication
+import requests
+
+response = requests.post("http://localhost:6334/ingest", json=data)
+```
+
+✅ GOOD
+```python
+# Using gRPC for communication
+import grpc
+from qdrant import QdrantStub
+
+channel = grpc.insecure_channel('localhost:6334')
+stub = QdrantStub(channel)
+response = stub.Ingest(data)
+```
+
+### Implement Asynchronous Ingestion
+Decouple ingestion from your main application logic to prevent backpressure.
+
+❌ BAD
+```python
+# Synchronous ingestion
+def process_data(data):
+    ingest_data(data)
+```
+
+✅ GOOD
+```python
+# Asynchronous ingestion
+import asyncio
+
+async def process_data(data):
+    await asyncio.to_thread(ingest_data, data)
+```
+
+## Performance Considerations
+
+### Optimize HNSW Parameters
+Use HNSW with parameters `m=16` and `ef_construct=200` for optimal performance.
+
+❌ BAD
+```python
+# Default HNSW parameters
+hnsw_params = {
+    "m": 8,
+    "ef_construct": 100
+}
+```
+
+✅ GOOD
+```python
+# Optimized HNSW parameters
+hnsw_params = {
+    "m": 16,
+    "ef_construct": 200
+}
+```
+
+### Use Payload Indexing
+Index frequently filtered fields to avoid O(n) search complexity.
+
+❌ BAD
+```python
+# Not using payload indexing
+def search_with_filter(filter):
+    return qdrant.search(filter=filter)
+```
+
+✅ GOOD
+```python
+# Using payload indexing
+def search_with_filter(filter):
+    return qdrant.search(payload=filter)
+```
+
+## Common Pitfalls and Gotchas
+
+### Always Warm-Up Queries
+Perform a warm-up query batch before serving production traffic to ensure the index is loaded.
+
+❌ BAD
+```python
+# No warm-up queries
+def serve_requests():
+    while True:
+        query = get_next_query()
+        results = search_data(query)
+```
+
+✅ GOOD
+```python
+# Warm-up queries
+def warm_up():
+    for _ in range(10):
+        search_data("test query")
+
+def serve_requests():
+    warm_up()
+    while True:
+        query = get_next_query()
+        results = search_data(query)
+```
+
+### Monitor Segment Health
+Use Prometheus to monitor segment health and prevent out-of-memory errors.
+
+❌ BAD
+```python
+# No monitoring
+def check_memory():
+    # No health checks
+    pass
+```
+
+✅ GOOD
+```python
+# Monitoring segment health
+def check_memory():
+    # Implement Prometheus monitoring
+    pass
+```
+
+## Testing Approaches
+
+### Unit Tests for Ingestion and Search
+Write unit tests for your ingestion and search functions to ensure reliability.
+
+```python
+import unittest
+
+class TestQdrantFunctions(unittest.TestCase):
+    def test_ingest_data(self):
+        data = {"id": 1, "vector": [0.1, 0.2, 0.3]}
+        self.assertTrue(ingest_data(data))
+
+    def test_search_data(self):
+        query = {"vector": [0.1, 0.2, 0.3]}
+        results = search_data(query)
+        self.assertIsNotNone(results)
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+### Integration Tests for End-to-End Validation
+Ensure your entire pipeline works correctly with integration tests.
+
+```python
+def test_integration():
+    data = {"id": 1, "vector": [0.1, 0.2, 0.3]}
+    ingest_data(data)
+    query = {"vector": [0.1, 0.2, 0.3]}
+    results = search_data(query)
+    assert results[0]['id'] == 1
+```
+
+By following these guidelines, you will ensure a robust, performant, and maintainable implementation of Qdrant in your AI applications.

@@ -1,44 +1,211 @@
 ---
-description: Best practices and coding standards for Aws Kinesis.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This guide provides actionable best practices for using aws-kinesis, focusing on code organization, common patterns, performance considerations, and testing approaches to enhance your streaming data applications.
+globs: **/*
 ---
+# aws-kinesis Best Practices
 
-# Aws Kinesis Best Practices
+## Code Organization and Structure
 
-Tags: aws, streaming, data-engineering
+Organize your Kinesis-related code into clear modules to enhance maintainability and readability. Use a dedicated directory for Kinesis producers and consumers.
 
-## Code organization
+### Directory Structure
+```plaintext
+/my-app
+├── kinesis
+│   ├── producers
+│   │   └── kinesisProducer.js
+│   ├── consumers
+│   │   └── kinesisConsumer.js
+│   └── utils
+│       └── kinesisUtils.js
+└── ...
+```
 
-- Follow idiomatic Aws Kinesis project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+## Common Patterns and Anti-patterns
 
-## Data quality
+### Use Kinesis Producer Library (KPL) for High Throughput
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+When producing records, always use the Kinesis Producer Library (KPL) to optimize throughput and reduce latency.
 
-## Performance
+❌ BAD: Using `PutRecord` for individual records.
+```javascript
+const AWS = require('aws-sdk');
+const kinesis = new AWS.Kinesis();
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+async function sendSingleRecord(data) {
+    await kinesis.putRecord({
+        StreamName: 'my-stream',
+        Data: JSON.stringify(data),
+        PartitionKey: 'partitionKey'
+    }).promise();
+}
+```
 
-## Security
+✅ GOOD: Using KPL for batching records.
+```javascript
+const { KinesisProducer } = require('aws-kinesis-producer');
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+const producer = new KinesisProducer({ streamName: 'my-stream' });
 
-## Testing
+async function sendRecords(records) {
+    await producer.send(records.map(data => ({
+        Data: JSON.stringify(data),
+        PartitionKey: 'partitionKey'
+    })));
+}
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Implement Exponential Backoff for Retries
 
-## Operations
+Always implement retry logic with exponential backoff to handle `ProvisionedThroughputExceededException`.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD: Ignoring retry logic.
+```javascript
+async function sendRecord(data) {
+    await kinesis.putRecord({ /* ... */ }).promise();
+}
+```
+
+✅ GOOD: Implementing exponential backoff.
+```javascript
+async function sendRecordWithRetry(data, retries = 5) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            await kinesis.putRecord({ /* ... */ }).promise();
+            return; // Success
+        } catch (error) {
+            if (error.code === 'ProvisionedThroughputExceededException') {
+                const backoffTime = Math.pow(2, i) * 100; // Exponential backoff
+                await new Promise(resolve => setTimeout(resolve, backoffTime));
+            } else {
+                throw error; // Other errors
+            }
+        }
+    }
+}
+```
+
+## Performance Considerations
+
+### Use Enhanced Fan-Out for Lambda Consumers
+
+When using Lambda as a consumer, always utilize Enhanced Fan-Out (EFO) to achieve lower latencies.
+
+❌ BAD: Using standard polling for Lambda.
+```javascript
+exports.handler = async (event) => {
+    // Process records
+};
+```
+
+✅ GOOD: Using Enhanced Fan-Out.
+```javascript
+const AWS = require('aws-sdk');
+const kinesis = new AWS.Kinesis();
+
+exports.handler = async (event) => {
+    const records = event.Records.map(record => {
+        return Buffer.from(record.kinesis.data, 'base64').toString('utf-8');
+    });
+    // Process records
+};
+```
+
+### Monitor Iterator Age and Shard Metrics
+
+Regularly monitor `IteratorAgeMilliseconds` and shard-level metrics to detect processing delays.
+
+✅ GOOD: Setting up CloudWatch alarms.
+```javascript
+const cloudwatch = new AWS.CloudWatch();
+
+cloudwatch.putMetricAlarm({
+    AlarmName: 'HighIteratorAge',
+    MetricName: 'IteratorAgeMilliseconds',
+    Namespace: 'AWS/Kinesis',
+    Statistic: 'Average',
+    Period: 60,
+    EvaluationPeriods: 1,
+    Threshold: 10000, // 10 seconds
+    ComparisonOperator: 'GreaterThanThreshold',
+    AlarmActions: ['arn:aws:sns:region:account-id:alert'],
+    Dimensions: [{ Name: 'StreamName', Value: 'my-stream' }]
+}).promise();
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Hot Shards
+
+Select high-cardinality partition keys to distribute load evenly across shards and avoid hot shards.
+
+❌ BAD: Using a single partition key for all records.
+```javascript
+const partitionKey = 'commonKey'; // Hot shard
+```
+
+✅ GOOD: Using dynamic partition keys.
+```javascript
+const partitionKey = generateDynamicKey(data); // High-cardinality key
+```
+
+### Handle Partial Failures
+
+Always account for partial failures in non-atomic operations and enforce idempotency.
+
+❌ BAD: Processing records without idempotency.
+```javascript
+async function processRecord(data) {
+    // Process data
+}
+```
+
+✅ GOOD: Implementing idempotency.
+```javascript
+const processedIds = new Set();
+
+async function processRecord(data) {
+    if (!processedIds.has(data.id)) {
+        // Process data
+        processedIds.add(data.id);
+    }
+}
+```
+
+## Testing Approaches
+
+### Mock Kinesis for Unit Tests
+
+Use mocking libraries to simulate Kinesis interactions in unit tests, ensuring that tests are fast and reliable.
+
+✅ GOOD: Mocking Kinesis with Jest.
+```javascript
+const AWS = require('aws-sdk');
+jest.mock('aws-sdk');
+
+const kinesis = new AWS.Kinesis();
+
+test('should send record', async () => {
+    kinesis.putRecord.mockReturnValueOnce({ promise: jest.fn().mockResolvedValue({}) });
+    
+    await sendRecordWithRetry({ id: '1' });
+    
+    expect(kinesis.putRecord).toHaveBeenCalled();
+});
+```
+
+### Integration Testing with LocalStack
+
+For integration tests, use LocalStack to simulate AWS services locally.
+
+✅ GOOD: Running LocalStack for integration tests.
+```bash
+# Start LocalStack
+localstack start
+
+# Run your integration tests against LocalStack
+```
+
+## Conclusion
+
+Following these best practices will ensure that your aws-kinesis implementations are efficient, maintainable, and resilient. Always prioritize performance, monitoring, and proper error handling to create robust streaming applications.

@@ -1,38 +1,186 @@
 ---
-description: Best practices and coding standards for Preact.
-globs: **/*.{tsx,jsx,vue,svelte,css}
+description: This guide provides actionable best practices for developing with Preact, focusing on performance, code organization, and modern patterns.
+globs: **/*.{js,jsx}
 ---
-
 # Preact Best Practices
 
-Tags: frontend, framework, javascript, react
+This document serves as a comprehensive guide for developers using Preact, outlining essential practices for code organization, performance, and component architecture. Follow these guidelines to enhance your Preact development experience.
 
-## Code organization
+## Code Organization and Structure
 
-- Follow idiomatic Preact project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+### Use a Modular File Structure
+Organize your components in a modular way to improve maintainability and scalability. Each component should reside in its own directory.
 
-## Performance
+```plaintext
+src/
+├── components/
+│   ├── Button/
+│   │   ├── Button.jsx
+│   │   └── Button.css
+│   ├── Header/
+│   │   ├── Header.jsx
+│   │   └── Header.css
+│   └── Footer/
+│       ├── Footer.jsx
+│       └── Footer.css
+└── App.jsx
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Naming Conventions
+Use PascalCase for component names and camelCase for props. This enhances readability and consistency.
 
-## Security
+```javascript
+// ✅ GOOD
+const MyComponent = ({ myProp }) => {
+    return <div>{myProp}</div>;
+};
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+// ❌ BAD
+const mycomponent = ({ My_Prop }) => {
+    return <div>{My_Prop}</div>;
+};
+```
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Prefer Functional Components with Hooks
+Always use functional components with hooks for state and lifecycle management. This is the modern approach and leads to cleaner code.
 
-## Operations
+```javascript
+// ✅ GOOD
+import { useState } from 'preact/hooks';
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+const Counter = () => {
+    const [count, setCount] = useState(0);
+    return <button onClick={() => setCount(count + 1)}>{count}</button>;
+};
+
+// ❌ BAD
+class Counter extends Component {
+    state = { count: 0 };
+
+    render() {
+        return <button onClick={() => this.setState({ count: this.state.count + 1 })}>{this.state.count}</button>;
+    }
+}
+```
+
+## Performance Considerations
+
+### Use Signals for State Management
+Leverage Preact's Signals for high-performance state management. This avoids Virtual DOM overhead by updating specific nodes directly.
+
+```javascript
+import { signal } from '@preact/signals';
+
+const count = signal(0);
+
+const Counter = () => {
+    return <button onClick={() => count.value++}>{count.value}</button>;
+};
+```
+
+### Avoid Unnecessary Re-renders
+Use `memo` to prevent re-renders of components that don't depend on changing props.
+
+```javascript
+import { memo } from 'preact/compat';
+
+const ExpensiveComponent = memo(({ data }) => {
+    // expensive calculations
+    return <div>{data}</div>;
+});
+```
+
+## Common Pitfalls and Gotchas
+
+### Beware of Hydration Mismatches
+Ensure that the server and client outputs are consistent to prevent hydration issues. Always render the same content on both server and client.
+
+```javascript
+// ✅ GOOD
+const App = () => {
+    return <div>{process.env.NODE_ENV === 'production' ? 'Production' : 'Development'}</div>;
+};
+
+// ❌ BAD
+const App = () => {
+    return <div>{Math.random()}</div>; // This will differ between server and client
+};
+```
+
+## Component Architecture
+
+### Use Composition Over Inheritance
+Favor component composition to create flexible and reusable components.
+
+```javascript
+const Button = ({ children, onClick }) => (
+    <button onClick={onClick}>{children}</button>
+);
+
+const App = () => (
+    <Button onClick={() => alert('Clicked!')}>Click Me</Button>
+);
+```
+
+## State Management
+
+### Use Context for Global State
+When managing global state, use Preact's Context API for better performance and clarity.
+
+```javascript
+import { createContext, useContext, useState } from 'preact/hooks';
+
+const AppContext = createContext();
+
+const AppProvider = ({ children }) => {
+    const [state, setState] = useState({ user: null });
+    return (
+        <AppContext.Provider value={[state, setState]}>
+            {children}
+        </AppContext.Provider>
+    );
+};
+
+const useAppContext = () => useContext(AppContext);
+```
+
+## Accessibility
+
+### Ensure All Interactive Elements Are Keyboard Accessible
+Make sure all buttons and interactive elements are keyboard accessible and provide meaningful labels.
+
+```javascript
+// ✅ GOOD
+<button aria-label="Close" onClick={handleClose}>X</button>
+
+// ❌ BAD
+<button onClick={handleClose}>X</button> // No context for screen readers
+```
+
+## Hooks Best Practices
+
+### Use Custom Hooks for Reusable Logic
+Encapsulate reusable logic in custom hooks to keep components clean and focused.
+
+```javascript
+import { useEffect, useState } from 'preact/hooks';
+
+const useFetchData = (url) => {
+    const [data, setData] = useState(null);
+    useEffect(() => {
+        fetch(url)
+            .then(response => response.json())
+            .then(setData);
+    }, [url]);
+    return data;
+};
+
+const DataComponent = () => {
+    const data = useFetchData('/api/data');
+    return <div>{data ? JSON.stringify(data) : 'Loading...'}</div>;
+};
+```
+
+By following these best practices, you will ensure a robust, maintainable, and high-performance Preact application. Always prioritize modern patterns and keep your code organized for the best developer experience.

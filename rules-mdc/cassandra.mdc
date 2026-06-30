@@ -1,38 +1,163 @@
 ---
-description: Best practices and coding standards for Cassandra.
-globs: **/*.{py,ts,go,rs,java}
+description: This guide provides best practices for using Cassandra, focusing on data modeling, query optimization, and performance considerations to help developers build efficient and scalable applications.
+globs: **/*
 ---
-
 # Cassandra Best Practices
 
-Tags: database, nosql, distributed, backend
+Cassandra is a powerful NoSQL database designed for high availability and scalability. To leverage its full potential, adhere to the following best practices in your development process.
 
-## Code organization
+## Code Organization and Structure
 
-- Follow idiomatic Cassandra project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+Organize your codebase to enhance maintainability and clarity. Use a consistent structure for your Cassandra-related code.
 
-## Performance
+### Use a Dedicated Data Access Layer
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+❌ BAD
+```python
+def get_user(user_id):
+    # Directly querying in the business logic
+    query = "SELECT * FROM users WHERE user_id = %s"
+    return cassandra_session.execute(query, (user_id,))
+```
 
-## Security
+✅ GOOD
+```python
+class UserRepository:
+    def __init__(self, session):
+        self.session = session
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+    def get_user(self, user_id):
+        query = "SELECT * FROM users WHERE user_id = %s"
+        return self.session.execute(query, (user_id,))
+```
+**Why**: This separation of concerns allows for easier testing and modifications without affecting business logic.
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Use Prepared Statements
 
-## Operations
+❌ BAD
+```python
+query = "SELECT * FROM users WHERE user_id = %s"
+result = cassandra_session.execute(query, (user_id,))
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD
+```python
+prepared_statement = cassandra_session.prepare("SELECT * FROM users WHERE user_id = ?")
+result = cassandra_session.execute(prepared_statement, (user_id,))
+```
+**Why**: Prepared statements reduce overhead and improve performance by pre-compiling the query.
+
+## Performance Considerations
+
+### Keep Partitions Under 100 MB
+
+❌ BAD
+```sql
+CREATE TABLE large_partition (
+    id UUID PRIMARY KEY,
+    data TEXT
+) WITH CLUSTERING ORDER BY (id ASC);
+```
+
+✅ GOOD
+```sql
+CREATE TABLE user_data (
+    user_id UUID,
+    timestamp TIMESTAMP,
+    data TEXT,
+    PRIMARY KEY (user_id, timestamp)
+) WITH CLUSTERING ORDER BY (timestamp DESC);
+```
+**Why**: Keeping partitions small avoids latency issues and improves read performance.
+
+## Common Pitfalls and Gotchas
+
+### Avoid Cross-Partition Joins
+
+❌ BAD
+```sql
+SELECT * FROM users WHERE user_id IN (SELECT user_id FROM orders WHERE order_date > '2023-01-01');
+```
+
+✅ GOOD
+```sql
+SELECT * FROM orders_by_user WHERE order_date > '2023-01-01';
+```
+**Why**: Denormalize your data model to avoid expensive cross-partition queries.
+
+## Security Best Practices
+
+### Use Role-Based Access Control
+
+❌ BAD
+```sql
+GRANT ALL ON keyspace_name TO user_name;
+```
+
+✅ GOOD
+```sql
+GRANT SELECT ON keyspace_name.table_name TO user_name;
+```
+**Why**: Limit permissions to the minimum necessary to enhance security.
+
+## Query Optimization
+
+### Use Asynchronous Queries for Long-Running Operations
+
+❌ BAD
+```python
+result = cassandra_session.execute("SELECT * FROM large_table")
+```
+
+✅ GOOD
+```python
+future = cassandra_session.execute_async("SELECT * FROM large_table")
+result = future.result()  # Wait for the result
+```
+**Why**: Asynchronous queries prevent blocking the main thread, improving application responsiveness.
+
+## Data Modeling
+
+### Design Tables for Query Patterns
+
+❌ BAD
+```sql
+CREATE TABLE user_profiles (
+    user_id UUID PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    address TEXT
+);
+```
+
+✅ GOOD
+```sql
+CREATE TABLE user_profiles_by_email (
+    email TEXT PRIMARY KEY,
+    user_id UUID,
+    name TEXT,
+    address TEXT
+);
+```
+**Why**: Create tables specifically for your application's read patterns to optimize performance.
+
+## Error Handling
+
+### Explicitly Mark Idempotent Operations
+
+❌ BAD
+```python
+def create_user(user_id):
+    cassandra_session.execute("INSERT INTO users (user_id) VALUES (%s)", (user_id,))
+```
+
+✅ GOOD
+```python
+def create_user(user_id):
+    cassandra_session.execute("INSERT INTO users (user_id) VALUES (%s) IF NOT EXISTS", (user_id,))
+```
+**Why**: Marking operations as idempotent allows for safe retries in case of failures.
+
+By following these best practices, you can ensure that your use of Cassandra is efficient, secure, and scalable. Always keep performance and maintainability in mind when designing your data models and queries.

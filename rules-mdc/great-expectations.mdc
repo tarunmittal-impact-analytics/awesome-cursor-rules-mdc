@@ -1,44 +1,172 @@
 ---
-description: Best practices and coding standards for Great Expectations.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides actionable best practices for using Great Expectations in Python-based data validation, focusing on code organization, performance, and common pitfalls.
+globs: **/*.py
 ---
+# great-expectations Best Practices
 
-# Great Expectations Best Practices
+Great Expectations (GX) is a powerful framework for data validation. This guide outlines the best practices to ensure your data quality processes are efficient, maintainable, and effective.
 
-Tags: data-engineering, data-quality, testing, python
+## Code Organization and Structure
 
-## Code organization
+### Use Validation-as-Code Approach
 
-- Follow idiomatic Great Expectations project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+Store your Expectation Suites in version control alongside your pipeline code. This keeps your data validation logic close to your data processing logic, making it easier to maintain.
 
-## Data quality
+```python
+# ✅ GOOD: Store Expectation Suites in the same repo as your pipeline code
+from great_expectations.data_context import DataContext
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+context = DataContext("/path/to/your/great_expectations/directory")
+suite = context.create_expectation_suite("my_suite", overwrite_existing=True)
+```
 
-## Performance
+### Organize Expectations by Domain
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+Group Expectation Suites by domain to improve clarity and maintainability. This helps teams quickly find relevant expectations.
 
-## Security
+```python
+# ✅ GOOD: Organizing expectations
+context.create_expectation_suite("sales_data_suite")
+context.create_expectation_suite("customer_data_suite")
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+## Common Patterns and Anti-patterns
 
-## Testing
+### Use Checkpoints for Automated Validation
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+Automate Checkpoints using orchestrators like Airflow to ensure data is validated before reaching downstream consumers.
 
-## Operations
+```python
+# ✅ GOOD: Automate Checkpoints
+from great_expectations.checkpoint import Checkpoint
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+checkpoint = Checkpoint(
+    name="my_checkpoint",
+    data_context=context,
+    config={
+        "validations": [
+            {
+                "batch_request": {"datasource": "my_datasource", "data_asset_name": "my_data"},
+                "expectation_suite_name": "my_suite",
+            }
+        ],
+    },
+)
+checkpoint.run()
+```
+
+### Avoid Over-reliance on Auto-generated Profiles
+
+Auto-generated profiles are first drafts. Always refine constraints manually for accuracy.
+
+```python
+# ✅ GOOD: Refine auto-generated expectations
+expectation_suite = context.get_expectation_suite("my_suite")
+expectation_suite.expect_column_values_to_be_in_set("status", ["active", "inactive", "pending"])
+context.save_expectation_suite(expectation_suite)
+```
+
+## Performance Considerations
+
+### Optimize Batch Requests
+
+When validating large datasets, use the `BatchRequest` to limit the scope of validation to only necessary data.
+
+```python
+# ✅ GOOD: Optimize Batch Requests
+batch_request = {
+    "datasource": "my_datasource",
+    "data_asset_name": "my_large_dataset",
+    "limit": 1000,  # Limit the number of records processed
+}
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Hardcoding Values
+
+Hardcoding values in expectations can lead to maintenance headaches. Use variables or configuration files instead.
+
+```python
+# ❌ BAD: Hardcoding values
+expectation_suite.expect_column_values_to_be_in_set("country", ["USA", "Canada"])
+
+# ✅ GOOD: Use variables
+valid_countries = ["USA", "Canada"]
+expectation_suite.expect_column_values_to_be_in_set("country", valid_countries)
+```
+
+### Implement Custom BatchExpectations for Complex Rules
+
+For complex business rules, create custom `BatchExpectation` subclasses instead of relying on built-in expectations.
+
+```python
+# ✅ GOOD: Implement Custom BatchExpectation
+from great_expectations.expectations.core import Expectation
+
+class ExpectColumnValuesToBeValidEmail(Expectation):
+    # Custom logic for email validation
+    pass
+```
+
+## Test Organization
+
+### Structure Tests Around Expectations
+
+Organize your tests to reflect the structure of your expectations. This makes it easier to trace failures back to their source.
+
+```python
+# ✅ GOOD: Organize tests
+def test_sales_data_expectations():
+    # Validate sales data expectations
+    assert validate_expectations("sales_data_suite")
+
+def test_customer_data_expectations():
+    # Validate customer data expectations
+    assert validate_expectations("customer_data_suite")
+```
+
+## Mocking Strategies
+
+### Use Mocking for External Dependencies
+
+When testing, mock external dependencies to ensure your tests are isolated and reliable.
+
+```python
+# ✅ GOOD: Mocking external dependencies
+from unittest.mock import patch
+
+@patch('great_expectations.data_context.DataContext')
+def test_my_expectation(mock_data_context):
+    mock_data_context.return_value = ...  # Mock return value
+    # Proceed with your test
+```
+
+## Coverage Patterns
+
+### Aim for Comprehensive Coverage
+
+Ensure that your tests cover all critical paths, including both valid and invalid data scenarios.
+
+```python
+# ✅ GOOD: Comprehensive coverage
+def test_expectation_with_invalid_data():
+    # Test with invalid data
+    invalid_data = ...
+    assert not validate_expectations("sales_data_suite", invalid_data)
+```
+
+## Type Hints
+
+### Use Type Hints for Clarity
+
+Incorporate type hints in your functions and methods to improve code readability and maintainability.
+
+```python
+# ✅ GOOD: Use type hints
+def validate_expectations(suite_name: str, data: Any) -> bool:
+    # Validation logic here
+    return True
+```
+
+By adhering to these best practices, you can ensure that your implementation of Great Expectations is robust, maintainable, and efficient. This will ultimately lead to higher data quality and more reliable data pipelines.

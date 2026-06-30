@@ -1,38 +1,203 @@
 ---
-description: Best practices and coding standards for Javascript.
-globs: **/*.{tsx,jsx,vue,svelte,css}
+description: This document provides actionable JavaScript best practices to enhance code quality, maintainability, and performance in modern applications.
+globs: **/*.{js,jsx}
 ---
+# JavaScript Best Practices
 
-# Javascript Best Practices
+This guide outlines essential best practices for JavaScript development, focusing on modern standards and practical advice that developers can implement immediately.
 
-Tags: language, frontend, backend, web, javascript
+## Code Organization and Structure
 
-## Code organization
+### Use Modular Structure
+Organize your code into modules to improve readability and maintainability. Use ES modules (`import`/`export`) instead of CommonJS.
 
-- Follow idiomatic Javascript project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD:
+```javascript
+// commonjs.js
+const moduleA = require('./moduleA');
+const moduleB = require('./moduleB');
+```
 
-## Performance
+✅ GOOD:
+```javascript
+// moduleA.js
+export const functionA = () => { /* ... */ };
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+// moduleB.js
+import { functionA } from './moduleA';
+export const functionB = () => { /* ... */ };
+```
 
-## Security
+### File Naming Conventions
+Use consistent naming conventions for files. Use kebab-case for file names and keep them descriptive.
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+❌ BAD:
+```
+myfile.js
+```
 
-## Testing
+✅ GOOD:
+```
+user-service.js
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+## Common Patterns and Anti-patterns
 
-## Operations
+### Prefer Arrow Functions
+Use arrow functions for cleaner syntax and to avoid issues with `this` binding.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD:
+```javascript
+function add(a, b) {
+  return a + b;
+}
+```
+
+✅ GOOD:
+```javascript
+const add = (a, b) => a + b;
+```
+
+### Early Returns
+Avoid deep nesting by using early returns in functions.
+
+❌ BAD:
+```javascript
+function processData(data) {
+  if (data) {
+    // process data
+  } else {
+    return;
+  }
+}
+```
+
+✅ GOOD:
+```javascript
+function processData(data) {
+  if (!data) return;
+  // process data
+}
+```
+
+## Performance Considerations
+
+### Use `Array.fromAsync`
+Leverage ES2026 features like `Array.fromAsync` for better performance when working with asynchronous data.
+
+✅ GOOD:
+```javascript
+const asyncArray = await Array.fromAsync(fetchData());
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Using `var`
+Always use `const` or `let` instead of `var` to prevent hoisting issues.
+
+❌ BAD:
+```javascript
+var count = 0;
+```
+
+✅ GOOD:
+```javascript
+let count = 0; // or const if not reassigned
+```
+
+### Handle Async Errors Properly
+Always wrap async code in `try/catch` blocks to handle errors gracefully.
+
+❌ BAD:
+```javascript
+async function fetchData() {
+  const response = await fetch('api/data');
+  return response.json();
+}
+```
+
+✅ GOOD:
+```javascript
+async function fetchData() {
+  try {
+    const response = await fetch('api/data');
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch data:', error);
+  }
+}
+```
+
+## Component Architecture
+
+### Use Functional Components
+Adopt functional components with hooks in React, avoiding class components for new development.
+
+✅ GOOD:
+```javascript
+const MyComponent = () => {
+  const [state, setState] = useState(initialState);
+  return <div>{state}</div>;
+};
+```
+
+## State Management
+
+### Use Context API for Global State
+For global state management, prefer the Context API over external libraries unless necessary.
+
+✅ GOOD:
+```javascript
+const MyContext = createContext();
+
+const MyProvider = ({ children }) => {
+  const [state, setState] = useState(initialState);
+  return (
+    <MyContext.Provider value={[state, setState]}>
+      {children}
+    </MyContext.Provider>
+  );
+};
+```
+
+## Accessibility
+
+### Ensure ARIA Compliance
+Always use ARIA roles and properties to enhance accessibility.
+
+✅ GOOD:
+```javascript
+<button aria-label="Close" onClick={handleClose}>
+  X
+</button>
+```
+
+## Security Best Practices
+
+### Validate All Inputs
+Always validate user inputs to prevent security vulnerabilities.
+
+✅ GOOD:
+```javascript
+import { z } from 'zod';
+
+const schema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(8),
+});
+
+const validateInput = (input) => {
+  schema.parse(input);
+};
+```
+
+### Use Environment Variables
+Store sensitive information in environment variables rather than hardcoding them.
+
+✅ GOOD:
+```javascript
+const apiKey = process.env.API_KEY;
+```
+
+## Conclusion
+By following these JavaScript best practices, you can create cleaner, more maintainable, and secure applications. Always stay updated with the latest standards and continuously improve your coding habits.

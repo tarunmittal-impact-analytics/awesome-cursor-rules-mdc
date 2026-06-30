@@ -1,44 +1,158 @@
 ---
-description: Best practices and coding standards for Aws Emr.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This guide provides actionable best practices for using aws-emr, focusing on code organization, performance optimization, and common pitfalls.
+globs: **/*
 ---
+# aws-emr Best Practices
 
-# Aws Emr Best Practices
+This document outlines essential best practices for developing with AWS EMR, particularly for Spark applications. Follow these guidelines to ensure efficient, maintainable, and performant data processing.
 
-Tags: aws, data-engineering, spark, big-data
+## Code Organization and Structure
 
-## Code organization
+### Use a Modular Approach
+Organize your code into modules to enhance readability and maintainability. Each module should encapsulate a specific functionality.
 
-- Follow idiomatic Aws Emr project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```python
+def main():
+    # All code in one function
+    pass
+```
 
-## Data quality
+✅ GOOD
+```python
+def load_data():
+    # Load data logic
+    pass
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+def process_data(data):
+    # Data processing logic
+    pass
 
-## Performance
+def main():
+    data = load_data()
+    process_data(data)
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Maintain a Consistent File Structure
+Follow a clear directory structure for your project. This helps in navigating the codebase and understanding its components quickly.
 
-## Security
+```plaintext
+project/
+├── src/
+│   ├── __init__.py
+│   ├── data_loading.py
+│   ├── data_processing.py
+│   └── utils.py
+├── tests/
+│   ├── test_data_loading.py
+│   └── test_data_processing.py
+└── requirements.txt
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+## Common Patterns and Anti-patterns
 
-## Testing
+### Use EMR Serverless for Reduced Overhead
+Whenever possible, use EMR Serverless to minimize operational overhead. This allows you to focus on your code rather than managing infrastructure.
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+✅ GOOD
+```bash
+aws emr-serverless start-job-run --application-id <app_id> --execution-role-arn <role_arn> --job-driver file://job-driver.json
+```
 
-## Operations
+### Avoid Hardcoding Configuration Values
+Use environment variables or configuration files to manage settings. Hardcoding values can lead to maintenance headaches.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD
+```python
+spark = SparkSession.builder \
+    .appName("MyApp") \
+    .config("spark.executor.memory", "4g") \
+    .getOrCreate()
+```
+
+✅ GOOD
+```python
+import os
+
+spark = SparkSession.builder \
+    .appName("MyApp") \
+    .config("spark.executor.memory", os.getenv("SPARK_EXECUTOR_MEMORY", "4g")) \
+    .getOrCreate()
+```
+
+## Performance Considerations
+
+### Right-size Executors
+Identify your workload's vCPU:memory ratio and configure your executors accordingly. A common ratio is 1:4 for general-purpose workloads.
+
+✅ GOOD
+```bash
+aws emr create-cluster --instance-type m5.xlarge --instance-count 3 --configurations '[{"Classification":"spark","Properties":{"spark.executor.memory":"4g","spark.executor.cores":"1"}}]'
+```
+
+### Enable Adaptive Query Execution (AQE)
+Enable AQE to optimize shuffle partitions automatically, improving performance for complex queries.
+
+✅ GOOD
+```python
+spark.conf.set("spark.sql.adaptive.enabled", "true")
+```
+
+### Use Parquet with Snappy Compression
+For efficient storage and performance, always use Parquet files with Snappy compression. Aim for file sizes between 128-512 MB.
+
+✅ GOOD
+```python
+df.write.parquet("s3://my-bucket/data", mode="overwrite", compression="snappy")
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Implicit Defaults
+Always explicitly set executor memory and cores to avoid relying on implicit defaults, which can lead to suboptimal performance.
+
+❌ BAD
+```bash
+aws emr create-cluster --instance-type m5.xlarge --instance-count 3
+```
+
+✅ GOOD
+```bash
+aws emr create-cluster --instance-type m5.xlarge --instance-count 3 --configurations '[{"Classification":"spark","Properties":{"spark.executor.memory":"4g","spark.executor.cores":"2"}}]'
+```
+
+### Never Rely on Local Paths for Python Dependencies
+Use `--py-files` or `.pex` files for Python dependencies to ensure that your code runs consistently across different environments.
+
+✅ GOOD
+```bash
+aws emr add-steps --cluster-id <cluster_id> --steps Type=CUSTOM_JAR,Name="Spark Submit",ActionOnFailure=CONTINUE,Jar="command-runner.jar",Args=["spark-submit", "--py-files", "s3://my-bucket/dependencies.zip", "s3://my-bucket/my_script.py"]
+```
+
+## Testing Approaches
+
+### Implement Unit Tests
+Always write unit tests for your functions. Use a framework like `pytest` to ensure your code behaves as expected.
+
+✅ GOOD
+```python
+def test_load_data():
+    data = load_data()
+    assert data is not None
+```
+
+### Use Local Spark for Testing
+Utilize local Spark for testing to speed up development cycles. This allows for interactive debugging without the need for deployment.
+
+✅ GOOD
+```python
+from pyspark.sql import SparkSession
+
+def test_process_data():
+    spark = SparkSession.builder.master("local").appName("Test").getOrCreate()
+    data = spark.createDataFrame([(1, "a"), (2, "b")], ["id", "value"])
+    result = process_data(data)
+    assert result.count() == 2
+```
+
+By adhering to these best practices, you will enhance the quality, performance, and maintainability of your AWS EMR applications. Always prioritize using modern features and configurations to stay ahead in the rapidly evolving data engineering landscape.

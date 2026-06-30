@@ -1,44 +1,221 @@
 ---
-description: Best practices and coding standards for Azure Data Factory.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This document provides comprehensive best practices for developing with Azure Data Factory, focusing on modular design, performance optimization, and common pitfalls.
+globs: **/*
 ---
+# azure-data-factory Best Practices
 
-# Azure Data Factory Best Practices
+This guide outlines essential practices for developing Azure Data Factory (ADF) solutions, emphasizing modular design, performance, and maintainability. Follow these actionable guidelines to enhance your ADF projects.
 
-Tags: azure, data-engineering, etl, cloud
+## Code Organization and Structure
 
-## Code organization
+### Use Parameterization for Flexibility
+Always parameterize your pipelines, datasets, and linked services to avoid hardcoding values. This approach promotes reusability and simplifies maintenance.
 
-- Follow idiomatic Azure Data Factory project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD:
+```json
+{
+  "name": "CopyData",
+  "properties": {
+    "activities": [
+      {
+        "name": "CopyFromBlobToSql",
+        "type": "Copy",
+        "inputs": [
+          {
+            "referenceName": "InputBlob",
+            "type": "DatasetReference"
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "OutputSql",
+            "type": "DatasetReference"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
-## Data quality
+✅ GOOD:
+```json
+{
+  "name": "CopyData",
+  "properties": {
+    "parameters": {
+      "inputDataset": {
+        "type": "String"
+      },
+      "outputDataset": {
+        "type": "String"
+      }
+    },
+    "activities": [
+      {
+        "name": "CopyFromBlobToSql",
+        "type": "Copy",
+        "inputs": [
+          {
+            "referenceName": "@{pipeline().parameters.inputDataset}",
+            "type": "DatasetReference"
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "@{pipeline().parameters.outputDataset}",
+            "type": "DatasetReference"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+### Adopt a Metadata-Driven Ingestion Pattern
+Utilize control tables to drive your ingestion logic dynamically. This prevents the need for multiple pipelines for each data source.
 
-## Performance
+✅ GOOD:
+- Create a metadata table that contains source information (e.g., table names, connection strings).
+- Use a single pipeline to read from this table and orchestrate the ingestion based on the metadata.
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+## Common Patterns and Anti-patterns
 
-## Security
+### Prefer Incremental Loads
+Always opt for incremental data loads instead of full extracts to reduce resource consumption and improve performance.
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+❌ BAD:
+```json
+{
+  "name": "FullLoad",
+  "properties": {
+    "activities": [
+      {
+        "name": "CopyAllData",
+        "type": "Copy",
+        "source": {
+          "type": "BlobSource"
+        },
+        "sink": {
+          "type": "SqlSink"
+        }
+      }
+    ]
+  }
+}
+```
 
-## Testing
+✅ GOOD:
+```json
+{
+  "name": "IncrementalLoad",
+  "properties": {
+    "activities": [
+      {
+        "name": "CopyIncrementalData",
+        "type": "Copy",
+        "source": {
+          "type": "BlobSource",
+          "query": "SELECT * FROM source WHERE last_modified > @{pipeline().parameters.lastRunTime}"
+        },
+        "sink": {
+          "type": "SqlSink"
+        }
+      }
+    ]
+  }
+}
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Implement Retry Policies
+Design your activities with retry policies to handle transient failures gracefully.
 
-## Operations
+✅ GOOD:
+```json
+{
+  "name": "CopyDataWithRetry",
+  "type": "Copy",
+  "retry": 3,
+  "retryIntervalInSeconds": 30,
+  "source": {
+    "type": "BlobSource"
+  },
+  "sink": {
+    "type": "SqlSink"
+  }
+}
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+## Performance Considerations
+
+### Use Parallel Execution for Independent Activities
+Maximize throughput by running independent activities in parallel.
+
+✅ GOOD:
+```json
+{
+  "name": "ParallelActivities",
+  "properties": {
+    "activities": [
+      {
+        "name": "Activity1",
+        "type": "Copy"
+      },
+      {
+        "name": "Activity2",
+        "type": "Copy"
+      },
+      {
+        "name": "Activity3",
+        "type": "Copy"
+      }
+    ],
+    "parallelism": 3
+  }
+}
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Hardcoding Secrets
+Always use Azure Key Vault for managing secrets and connection strings. Ensure that secret names are consistent across environments.
+
+✅ GOOD:
+```json
+{
+  "name": "LinkedServiceToSql",
+  "properties": {
+    "type": "AzureSqlDatabase",
+    "typeProperties": {
+      "connectionString": "Server=tcp:yourserver.database.windows.net;Database=yourdb;Authentication=Active Directory Managed Identity;",
+      "password": {
+        "type": "AzureKeyVaultSecret",
+        "store": {
+          "referenceName": "YourKeyVault",
+          "type": "LinkedServiceReference"
+        },
+        "secretName": "YourSecretName"
+      }
+    }
+  }
+}
+```
+
+## Testing Approaches
+
+### Use Git for Source Control
+Implement Git-based source control in your development environment. Ensure that all changes are tracked and versioned.
+
+✅ GOOD:
+- Use branches for feature development.
+- Merge changes through pull requests to maintain code quality.
+
+### CI/CD for Deployment
+Automate deployments to higher environments using CI/CD pipelines. This ensures consistency and prevents manual errors.
+
+✅ GOOD:
+- Set up Azure DevOps pipelines to deploy ADF resources from your Git repository to Test and Production environments.
+
+## Conclusion
+By following these best practices, you will create more maintainable, efficient, and robust Azure Data Factory solutions. Always prioritize modular design, parameterization, and performance optimization to ensure your ADF projects are scalable and resilient.

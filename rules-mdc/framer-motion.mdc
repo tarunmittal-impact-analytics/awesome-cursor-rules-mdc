@@ -1,38 +1,249 @@
 ---
-description: Best practices and coding standards for Framer Motion.
-globs: **/*.{tsx,jsx,vue,svelte,css}
+description: This guide provides best practices for using framer-motion in React applications, focusing on performance, accessibility, and effective animation patterns.
+globs: **/*
 ---
+# framer-motion Best Practices
 
-# Framer Motion Best Practices
+This document outlines essential best practices for using framer-motion in React applications. By following these guidelines, you'll ensure that your animations are performant, accessible, and maintainable.
 
-Tags: frontend, react, animation, ui
+## Code Organization and Structure
 
-## Code organization
+### Use Consistent Imports
 
-- Follow idiomatic Framer Motion project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+Always import from `motion/react` to ensure you're using the latest version of the library.
 
-## Performance
+```javascript
+❌ BAD
+import { motion } from "framer-motion";
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD
+import { motion, AnimatePresence } from "motion/react";
+```
 
-## Security
+### Component Structure
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+Organize your components to separate animation logic from business logic. This keeps your code clean and easier to maintain.
 
-## Testing
+```javascript
+// AnimationComponent.js
+import { motion } from "motion/react";
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+const AnimationComponent = ({ isVisible }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+  />
+);
 
-## Operations
+// ParentComponent.js
+import AnimationComponent from './AnimationComponent';
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+const ParentComponent = ({ isVisible }) => (
+  <AnimationComponent isVisible={isVisible} />
+);
+```
+
+## Common Patterns and Anti-patterns
+
+### Use AnimatePresence for Conditional Rendering
+
+Always wrap components that should animate on mount/unmount with `AnimatePresence`.
+
+```javascript
+❌ BAD
+const Item = ({ isVisible }) => (
+  {isVisible && <motion.div>Content</motion.div>}
+);
+
+✅ GOOD
+const Item = ({ isVisible }) => (
+  <AnimatePresence>
+    {isVisible && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      />
+    )}
+  </AnimatePresence>
+);
+```
+
+### Layout Changes with LayoutGroup
+
+When animating layout changes, use the `layout` prop and wrap with `LayoutGroup` to prevent performance issues.
+
+```javascript
+import { motion, LayoutGroup } from "motion/react";
+
+const List = ({ items }) => (
+  <LayoutGroup>
+    {items.map(item => (
+      <motion.div key={item.id} layout>
+        {item.content}
+      </motion.div>
+    ))}
+  </LayoutGroup>
+);
+```
+
+## Performance Considerations
+
+### Animate Only Transform and Opacity
+
+Limit your animations to `transform` and `opacity` properties to keep animations on the GPU.
+
+```javascript
+❌ BAD
+<motion.div animate={{ width: '100%' }} />
+
+✅ GOOD
+<motion.div animate={{ scale: 1 }} />
+```
+
+### Avoid Inline Styles
+
+Avoid using inline styles as they can lead to unnecessary re-renders. Use CSS classes or styled-components instead.
+
+```javascript
+❌ BAD
+<motion.div style={{ margin: '20px' }} />
+
+✅ GOOD
+<motion.div className="my-class" />
+```
+
+## Common Pitfalls and Gotchas
+
+### Respect User Preferences
+
+Use the `useReducedMotion` hook to respect users' accessibility settings.
+
+```javascript
+import { useReducedMotion } from "motion/react";
+
+const MyComponent = () => {
+  const shouldReduceMotion = useReducedMotion();
+  
+  return (
+    <motion.div
+      animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
+    />
+  );
+};
+```
+
+### Ensure Stable Keys
+
+When using `AnimatePresence`, make sure the direct children have stable keys to avoid unexpected behavior.
+
+```javascript
+const ItemList = ({ items }) => (
+  <AnimatePresence>
+    {items.map(item => (
+      <motion.div key={item.id} exit={{ opacity: 0 }}>
+        {item.content}
+      </motion.div>
+    ))}
+  </AnimatePresence>
+);
+```
+
+## Component Architecture
+
+### Use Functional Components
+
+Always prefer functional components with hooks over class components for better performance and cleaner code.
+
+```javascript
+❌ BAD
+class MyComponent extends React.Component {
+  render() {
+    return <motion.div>Content</motion.div>;
+  }
+}
+
+✅ GOOD
+const MyComponent = () => <motion.div>Content</motion.div>;
+```
+
+## State Management
+
+### Local State with useState
+
+Use the `useState` hook for local component state management when controlling animations.
+
+```javascript
+import { useState } from "react";
+
+const ToggleItem = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setIsVisible(!isVisible)}>Toggle</button>
+      <Item isVisible={isVisible} />
+    </>
+  );
+};
+```
+
+## Accessibility
+
+### Ensure Focus Management
+
+When animating elements that affect focus, ensure that focus is managed properly to enhance accessibility.
+
+```javascript
+const FocusableItem = () => {
+  const ref = useRef(null);
+
+  const handleClick = () => {
+    ref.current.focus();
+  };
+
+  return (
+    <motion.div onClick={handleClick} ref={ref} tabIndex={0}>
+      Click Me
+    </motion.div>
+  );
+};
+```
+
+## Hooks Best Practices
+
+### Custom Hooks for Animation Logic
+
+Encapsulate complex animation logic in custom hooks to keep your components clean and focused.
+
+```javascript
+import { useAnimation } from "motion/react";
+
+const useFadeIn = (duration = 0.5) => {
+  const controls = useAnimation();
+
+  const fadeIn = () => {
+    controls.start({ opacity: 1, transition: { duration } });
+  };
+
+  const fadeOut = () => {
+    controls.start({ opacity: 0, transition: { duration } });
+  };
+
+  return { controls, fadeIn, fadeOut };
+};
+
+// Usage
+const MyComponent = () => {
+  const { controls, fadeIn } = useFadeIn();
+
+  useEffect(() => {
+    fadeIn();
+  }, []);
+
+  return <motion.div animate={controls}>Content</motion.div>;
+};
+```
+
+By adhering to these guidelines, you'll create animations that are not only visually appealing but also performant and accessible. Happy coding!

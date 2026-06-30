@@ -1,44 +1,183 @@
 ---
-description: Best practices and coding standards for Chromadb.
-globs: **/*.{py,ts,tsx}
+description: This guide provides definitive best practices for using ChromaDB effectively in your projects, ensuring optimal performance and maintainability.
+globs: **/*
 ---
+# chromadb Best Practices
 
-# Chromadb Best Practices
+ChromaDB is a powerful embedded vector database tailored for early-stage Retrieval-Augmented Generation (RAG) workloads. This guide outlines critical best practices to ensure efficient usage, robust performance, and maintainable code structures.
 
-Tags: ai, vector-database, rag, ml, gen-ai
+## Code Organization and Structure
 
-## Code organization
+### Use a Consistent Project Structure
+Organize your project to separate concerns clearly. Use the following structure:
 
-- Follow idiomatic Chromadb project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+```
+/project-root
+    /data
+    /src
+        /db
+            __init__.py
+            client.py
+            collections.py
+        /models
+            __init__.py
+            embeddings.py
+        /utils
+            __init__.py
+            helpers.py
+```
 
-## AI-specific
+This structure enhances maintainability and clarity.
 
-- Version prompts, models, and retrieval indexes together.
-- Log token usage, latency, and model version per request.
-- Treat LLM output as untrusted until validated.
+### Example: Client Initialization
+Place your client initialization in `client.py` for reusability.
 
-## Performance
+```python
+# src/db/client.py
+import chromadb
+from chromadb.config import Settings
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+def create_client():
+    return chromadb.PersistentClient(
+        path="/data/chroma",
+        settings=Settings(
+            chroma_db_impl="duckdb+parquet",
+            allow_duplicates=False,
+            batch_size=100
+        )
+    )
+```
 
-## Security
+## Common Patterns and Anti-patterns
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+### Always Use `get_or_create_collection`
+Using `get_or_create_collection` ensures you don’t accidentally create duplicate collections.
 
-## Testing
+❌ BAD: 
+```python
+collection = client.create_collection(name="production_knowledge_base")
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+✅ GOOD:
+```python
+collection = client.get_or_create_collection(
+    name="production_knowledge_base",
+    metadata={"hnsw:space": "cosine"}
+)
+```
 
-## Operations
+### Precompute Embeddings Externally
+Always compute embeddings before adding them to the database to enhance performance and control.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD:
+```python
+collection.add(
+    ids=["doc_1"],
+    embeddings=[some_model.embed("This is a document.")],
+    metadatas=[{"tenant_id": "org_abc", "version": "v1"}]
+)
+```
+
+✅ GOOD:
+```python
+# Assume embeddings are precomputed and stored in a variable `precomputed_embeddings`
+collection.add(
+    ids=["doc_1"],
+    embeddings=precomputed_embeddings,
+    metadatas=[{"tenant_id": "org_abc", "version": "v1"}]
+)
+```
+
+## Performance Considerations
+
+### Optimize Retrieval with `where` Filters
+Always apply `where` filters during retrieval to minimize unnecessary scans and improve performance.
+
+❌ BAD:
+```python
+results = collection.query()
+```
+
+✅ GOOD:
+```python
+results = collection.query(
+    where={"tenant_id": "org_abc"}
+)
+```
+
+### Tune `hnsw_search_ef`
+Adjust the `hnsw_search_ef` parameter between 50 and 100 based on your recall and latency needs.
+
+```python
+collection.query(
+    where={"tenant_id": "org_abc"},
+    hnsw_search_ef=75  # Balanced setting
+)
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Sharing Persistent Storage Paths
+Never share the persistent storage path between processes. Use Server mode for multi-worker environments to prevent data corruption.
+
+❌ BAD:
+```python
+client1 = chromadb.PersistentClient(path="/data/chroma")
+client2 = chromadb.PersistentClient(path="/data/chroma")  # Risk of corruption
+```
+
+✅ GOOD:
+```python
+# Use separate paths or server mode
+client = chromadb.ServerClient(path="/data/chroma_server")
+```
+
+### Maintain Schema Integrity
+Define a flat metadata structure before ingestion. Always store the model name and dimensions in metadata, and never change a key's data type.
+
+```python
+# Define your metadata structure clearly
+metadata = {
+    "model_name": "my_model",
+    "dimensions": 768,
+    "tenant_id": "org_abc"
+}
+```
+
+## Testing Approaches
+
+### Unit Tests for Database Interactions
+Implement unit tests to verify your database interactions. Use mocks to simulate the database.
+
+```python
+import unittest
+from unittest.mock import patch
+from src.db.client import create_client
+
+class TestDatabaseClient(unittest.TestCase):
+    @patch('chromadb.PersistentClient')
+    def test_create_client(self, mock_client):
+        client = create_client()
+        self.assertIsNotNone(client)
+        mock_client.assert_called_once_with(path="/data/chroma", settings=mock.ANY)
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+### Integration Tests for End-to-End Scenarios
+Create integration tests to validate the entire flow, from embedding generation to retrieval.
+
+```python
+def test_full_integration():
+    client = create_client()
+    collection = client.get_or_create_collection(name="test_collection")
+    
+    # Add and retrieve data
+    collection.add(ids=["doc_1"], embeddings=[[0.1, 0.2, 0.3]], metadatas=[{"tenant_id": "org_abc"}])
+    results = collection.query(where={"tenant_id": "org_abc"})
+    
+    assert len(results) == 1
+```
+
+By following these best practices, you will ensure that your use of ChromaDB is efficient, maintainable, and robust against common pitfalls. Always stay updated with the latest ChromaDB documentation and community practices for continuous improvement.

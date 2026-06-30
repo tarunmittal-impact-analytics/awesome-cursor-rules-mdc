@@ -1,38 +1,135 @@
 ---
-description: Best practices and coding standards for Azure Key Vault.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This guide provides best practices for using Azure Key Vault effectively, focusing on security, performance, and code organization.
+globs: **/*
 ---
+# azure-key-vault Best Practices
 
-# Azure Key Vault Best Practices
+Azure Key Vault is a critical component in managing secrets and sensitive information securely. This guide outlines best practices to ensure your implementation is secure, efficient, and maintainable.
 
-Tags: azure, cloud, security, secrets
+## Code Organization and Structure
 
-## Code organization
+### Use Managed Identities for Authentication
+Always use managed identities to authenticate with Azure Key Vault. This avoids the pitfalls of hard-coded credentials.
 
-- Follow idiomatic Azure Key Vault project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+```csharp
+// ✅ GOOD: Using DefaultAzureCredential for managed identity authentication
+var credential = new DefaultAzureCredential();
+var keyVaultUri = new Uri("https://<your-key-vault-name>.vault.azure.net/");
+var client = new SecretClient(keyVaultUri, credential);
+```
 
-## Performance
+### Structure Configuration Loading
+Load Key Vault configuration early in your application startup to ensure all settings are available throughout the application lifecycle.
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+```csharp
+// ✅ GOOD: Load Key Vault during application startup
+var builder = WebApplication.CreateBuilder(args);
+var keyVaultUri = builder.Configuration["KeyVault:Uri"];
+if (!string.IsNullOrEmpty(keyVaultUri)) {
+    var credential = new DefaultAzureCredential();
+    builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri), credential);
+}
+```
 
-## Security
+## Common Patterns and Anti-patterns
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+### Avoid Legacy Access Policies
+Use Azure RBAC (Role-Based Access Control) instead of legacy access policies. This provides more granular control over permissions.
 
-## Testing
+```csharp
+// ✅ GOOD: Assign roles through Azure RBAC
+// Use Azure portal or CLI to assign 'Key Vault Secrets User' role to your application.
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Do Not Store Non-Cryptographic Secrets
+Only store cryptographic secrets in Azure Key Vault. Use Azure App Configuration for application settings.
 
-## Operations
+```csharp
+// ❌ BAD: Storing application settings in Key Vault
+// var setting = client.GetSecret("AppSetting");
+// ✅ GOOD: Use Azure App Configuration for non-sensitive settings
+var appConfig = new ConfigurationBuilder()
+    .AddAzureAppConfiguration("ConnectionString")
+    .Build();
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+## Performance Considerations
+
+### Minimize Network Latency
+Use private endpoints to reduce latency and enhance security. This limits exposure to public internet.
+
+```csharp
+// ✅ GOOD: Configure private endpoint for Key Vault in Azure Portal
+// Ensure your application is within the same virtual network.
+```
+
+### Cache Secrets Locally
+Consider caching secrets locally to avoid frequent calls to Key Vault, especially for high-traffic applications.
+
+```csharp
+// ✅ GOOD: Implement caching for secrets
+var secretValue = await client.GetSecretAsync("MySecret");
+MemoryCache.Default.Set("MySecret", secretValue.Value, DateTimeOffset.UtcNow.AddMinutes(5));
+```
+
+## Common Pitfalls and Gotchas
+
+### Misconfiguring Access Policies
+Ensure that your application has the correct permissions set in Azure RBAC. Misconfigurations can lead to access issues.
+
+```csharp
+// ❌ BAD: Not assigning necessary roles
+// ✅ GOOD: Always verify roles in Azure Portal
+// Check that your application identity has the 'Key Vault Secrets User' role.
+```
+
+### Ignoring Secret Rotation
+Implement automated secret rotation to enhance security. Azure Key Vault can manage this for you.
+
+```csharp
+// ✅ GOOD: Set up automated secret rotation in Azure Key Vault
+// Use Azure Functions or Logic Apps to trigger rotation.
+```
+
+## Security Best Practices
+
+### Use Firewalls and Virtual Networks
+Restrict access to your Key Vault using firewalls and virtual networks. This minimizes exposure to unauthorized access.
+
+```csharp
+// ✅ GOOD: Configure firewall settings in Azure Portal
+// Allow only specific IP addresses or VNETs to access your Key Vault.
+```
+
+### Monitor Access and Activity
+Utilize Azure Monitor and Event Grid to track access and changes to your Key Vault.
+
+```csharp
+// ✅ GOOD: Set up monitoring for Key Vault
+// Use Azure Monitor to create alerts for unauthorized access attempts.
+```
+
+## Vulnerability Prevention
+
+### Validate Input
+Always validate input when retrieving secrets to prevent injection attacks.
+
+```csharp
+// ✅ GOOD: Validate input before using it to access secrets
+string secretName = SanitizeInput(userInput);
+var secret = await client.GetSecretAsync(secretName);
+```
+
+## Testing Approaches
+
+### Mocking Key Vault in Tests
+Use mocking frameworks to simulate Key Vault in unit tests, ensuring tests are isolated and do not depend on external services.
+
+```csharp
+// ✅ GOOD: Mock Key Vault client in unit tests
+var mockClient = new Mock<ISecretClient>();
+mockClient.Setup(client => client.GetSecretAsync("MySecret"))
+          .ReturnsAsync(new KeyVaultSecret("MySecret", "SecretValue"));
+```
+
+By following these best practices, you can ensure that your use of Azure Key Vault is secure, efficient, and maintainable. Always stay updated with the latest Azure features and practices to enhance your implementation further.

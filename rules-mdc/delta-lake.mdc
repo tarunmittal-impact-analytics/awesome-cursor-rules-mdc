@@ -1,44 +1,152 @@
 ---
-description: Best practices and coding standards for Delta Lake.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides actionable best practices for using Delta Lake, focusing on code organization, common patterns, performance, and testing approaches.
+globs: **/*
 ---
+# delta-lake Best Practices
 
-# Delta Lake Best Practices
+Delta Lake is a powerful tool for data engineering, particularly in lakehouse architectures. This guide outlines the best practices for using Delta Lake effectively, ensuring your data pipelines are efficient, maintainable, and performant.
 
-Tags: data-engineering, lakehouse, spark, analytics
+## Code Organization and Structure
 
-## Code organization
+### Use Declarative Pipelines
+Adopt Lakeflow Declarative Pipelines for all ETL processes. This approach simplifies the management of transformations and reduces the complexity associated with hand-managed Spark jobs.
 
-- Follow idiomatic Delta Lake project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```python
+# Manual Spark job with complex transformations
+df = spark.read.format("delta").load("/path/to/delta/table")
+df_transformed = df.filter("column > value").groupBy("column").agg({"other_column": "sum"})
+df_transformed.write.format("delta").mode("overwrite").save("/path/to/delta/table")
+```
 
-## Data quality
+✅ GOOD
+```python
+# Declarative pipeline using Lakeflow
+from lakeflow import pipeline
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+@pipeline
+def etl_pipeline():
+    df = read_delta("/path/to/delta/table")
+    df_transformed = df.filter("column > value").groupBy("column").agg({"other_column": "sum"})
+    write_delta(df_transformed, "/path/to/delta/table", mode="overwrite")
+```
 
-## Performance
+### Organize Code by Functionality
+Structure your code into modules based on functionality, such as data ingestion, transformation, and loading. This improves readability and maintainability.
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+```plaintext
+project/
+│
+├── ingestion/
+│   ├── __init__.py
+│   └── data_ingestion.py
+│
+├── transformation/
+│   ├── __init__.py
+│   └── data_transformation.py
+│
+└── loading/
+    ├── __init__.py
+    └── data_loading.py
+```
 
-## Security
+## Common Patterns and Anti-patterns
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+### Use Liquid Clustering for New Tables
+Instead of manual partitioning and Z-Ordering, use liquid clustering. This automatically adapts to your query patterns, improving performance without manual intervention.
 
-## Testing
+❌ BAD
+```python
+# Manual partitioning
+df.write.format("delta").partitionBy("date").save("/path/to/delta/table")
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+✅ GOOD
+```python
+# Using liquid clustering
+df.write.format("delta").option("liquidClustering", "true").save("/path/to/delta/table")
+```
 
-## Operations
+### Implement Auto CDC for Change Data Capture
+Utilize Auto CDC to automatically track changes in your data. This simplifies your data pipelines and ensures data consistency.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+```python
+# Enable Auto CDC
+df.write.format("delta").option("mergeSchema", "true").mode("append").save("/path/to/delta/table")
+```
+
+## Performance Considerations
+
+### Enable Predictive Optimization
+Always enable predictive optimization on managed tables to handle file compaction and statistics automatically. This significantly enhances query performance.
+
+```python
+# Enable predictive optimization
+spark.sql("ALTER TABLE delta.`/path/to/delta/table` SET TBLPROPERTIES (delta.optimizeWrite = true)")
+```
+
+### Avoid Manual Spark Caching
+Do not use manual caching as it can bypass data skipping, leading to degraded performance. Let Delta Lake manage caching automatically.
+
+❌ BAD
+```python
+# Manual caching
+df.cache()
+```
+
+✅ GOOD
+```python
+# Rely on Delta Lake's automatic caching
+df = spark.read.format("delta").load("/path/to/delta/table")
+```
+
+## Common Pitfalls and Gotchas
+
+### Never Modify Data Files Directly
+Always use Delta Lake APIs to modify your data. Directly modifying data files can lead to inconsistencies and corruption.
+
+❌ BAD
+```python
+# Direct file modification
+import shutil
+shutil.copy("new_data.parquet", "/path/to/delta/table/")
+```
+
+✅ GOOD
+```python
+# Use Delta Lake API
+new_data_df = spark.read.parquet("new_data.parquet")
+new_data_df.write.format("delta").mode("append").save("/path/to/delta/table")
+```
+
+### Design Idempotent Pipelines
+Ensure your pipelines are idempotent to simplify retries and backfills. This means running the same pipeline multiple times should not change the outcome.
+
+```python
+# Idempotent write
+df.write.format("delta").mode("append").save("/path/to/delta/table")
+```
+
+## Testing Approaches
+
+### Use Unit Tests for Transformations
+Implement unit tests for your transformation functions to ensure they behave as expected. Use a testing framework like `pytest`.
+
+```python
+def test_data_transformation():
+    input_df = spark.createDataFrame([(1, 2), (3, 4)], ["col1", "col2"])
+    result_df = transform_function(input_df)
+    expected_df = spark.createDataFrame([(1, 6)], ["col1", "col2"])
+    assert result_df.collect() == expected_df.collect()
+```
+
+### Validate Data After Load
+After loading data into Delta Lake, validate the data to ensure it meets your quality standards.
+
+```python
+# Validate data
+loaded_df = spark.read.format("delta").load("/path/to/delta/table")
+assert loaded_df.count() > 0  # Ensure data is loaded
+```
+
+By following these best practices, you will enhance the efficiency, maintainability, and performance of your Delta Lake implementations. Always keep your pipelines declarative, automated, and idempotent for the best results.

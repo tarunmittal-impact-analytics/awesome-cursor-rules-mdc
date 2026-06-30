@@ -1,44 +1,269 @@
 ---
-description: Best practices and coding standards for Haystack.
-globs: **/*.{py,ts,tsx}
+description: This guide provides actionable best practices for developing with the Haystack library, focusing on code organization, performance, testing, and more.
+globs: **/*.py
 ---
+# haystack Best Practices
 
-# Haystack Best Practices
+This document outlines the essential best practices for using the Haystack library effectively. It covers code organization, common patterns, performance considerations, testing approaches, and more, ensuring your projects are maintainable and production-ready.
 
-Tags: ai, rag, nlp, python, gen-ai
+## Code Organization and Structure
 
-## Code organization
+### Use the `src/` Layout
+Organize your code using the `src/` layout to improve modularity and clarity. This structure helps separate the implementation from tests.
 
-- Follow idiomatic Haystack project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```
+project_root/
+    haystack_component.py
+    test_haystack_component.py
+```
 
-## AI-specific
+✅ GOOD
+```
+project_root/
+    src/
+        haystack_component.py
+    tests/
+        test_haystack_component.py
+```
 
-- Version prompts, models, and retrieval indexes together.
-- Log token usage, latency, and model version per request.
-- Treat LLM output as untrusted until validated.
+### Decompose Pipelines into DAGs
+When building pipelines, structure them as directed acyclic graphs (DAGs) with explicitly typed sockets. This allows for better validation and debugging.
 
-## Performance
+❌ BAD
+```python
+class Pipeline:
+    def run(self, input_data):
+        # Complex logic without clear structure
+        pass
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD
+```python
+from haystack.pipelines import Pipeline
 
-## Security
+class MyPipeline(Pipeline):
+    def run(self, input_data: str) -> str:
+        # Clear input/output types
+        return self.process(input_data)
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+    def process(self, input_data: str) -> str:
+        # Processing logic
+        return f"Processed: {input_data}"
+```
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Use Async Components
+To maintain throughput in high-traffic scenarios, always use async components in your pipelines.
 
-## Operations
+❌ BAD
+```python
+def process_data(data):
+    # Blocking call
+    time.sleep(1)
+    return data
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD
+```python
+import asyncio
+
+async def process_data(data):
+    await asyncio.sleep(1)  # Non-blocking call
+    return data
+```
+
+### Avoid Black Box Pipelines
+Always implement evaluation metrics for individual components rather than treating the entire pipeline as a black box.
+
+❌ BAD
+```python
+class BlackBoxPipeline:
+    def evaluate(self):
+        # Only aggregate metrics
+        return self.get_aggregate_metrics()
+```
+
+✅ GOOD
+```python
+class EvaluatablePipeline:
+    def evaluate(self):
+        return {
+            "retriever_recall": self.evaluate_retriever(),
+            "generator_groundedness": self.evaluate_generator(),
+        }
+```
+
+## Performance Considerations
+
+### Pin Component and Model Versions
+To prevent silent regressions, always pin your dependencies in a `requirements.txt` file or `pyproject.toml`.
+
+❌ BAD
+```plaintext
+haystack
+```
+
+✅ GOOD
+```plaintext
+haystack==1.2.3
+```
+
+### Use Queues for Asynchronous Boundaries
+For scalable deployments, utilize Kafka or similar message queues at asynchronous boundaries.
+
+❌ BAD
+```python
+async def handle_request(request):
+    # Directly processing request
+    process_request(request)
+```
+
+✅ GOOD
+```python
+from kafka import KafkaProducer
+
+producer = KafkaProducer()
+
+async def handle_request(request):
+    # Send request to Kafka
+    producer.send('request_topic', value=request)
+```
+
+## Common Pitfalls and Gotchas
+
+### Mock External Dependencies in Tests
+To keep your tests fast and deterministic, always mock external dependencies.
+
+❌ BAD
+```python
+def test_pipeline():
+    result = pipeline.run(real_external_call())
+    assert result is not None
+```
+
+✅ GOOD
+```python
+from unittest.mock import patch
+
+@patch('module.external_call')
+def test_pipeline(mock_external_call):
+    mock_external_call.return_value = "mocked response"
+    result = pipeline.run("input")
+    assert result == "expected_output"
+```
+
+### Ensure Idempotent Lifecycle Methods
+Make sure lifecycle methods (like `warm_up`) are idempotent to avoid unexpected behavior during repeated calls.
+
+❌ BAD
+```python
+def warm_up():
+    global state
+    state += 1  # Mutates state
+```
+
+✅ GOOD
+```python
+def warm_up():
+    # Ensure no state is mutated
+    return "warmed up"
+```
+
+## Type Hints
+
+### Use Type Hints for Clarity
+Always use type hints for function signatures to improve code readability and maintainability.
+
+❌ BAD
+```python
+def process(data):
+    # No type hints
+    return data
+```
+
+✅ GOOD
+```python
+def process(data: str) -> str:
+    return data
+```
+
+## Virtual Environments
+
+### Always Use Virtual Environments
+Utilize virtual environments to manage dependencies and avoid conflicts.
+
+❌ BAD
+```bash
+pip install haystack
+```
+
+✅ GOOD
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install haystack
+```
+
+## Packaging
+
+### Create a `setup.py` for Packaging
+If you plan to distribute your code, create a `setup.py` file for proper packaging.
+
+✅ GOOD
+```python
+from setuptools import setup, find_packages
+
+setup(
+    name='my_haystack_project',
+    version='0.1',
+    packages=find_packages(where='src'),
+    package_dir={'': 'src'},
+    install_requires=[
+        'haystack==1.2.3',
+    ],
+)
+```
+
+## Testing Approaches
+
+### Use Unit Tests for Components
+Always write unit tests for individual components to ensure reliability.
+
+✅ GOOD
+```python
+def test_my_component():
+    result = my_component("input")
+    assert result == "expected_output"
+```
+
+### Implement Continuous Integration
+Integrate continuous integration (CI) tools to automate testing and ensure code quality.
+
+✅ GOOD
+```yaml
+# .github/workflows/python-app.yml
+name: Python application
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run tests
+      run: |
+        pytest
+```
+
+By following these best practices, your team will ensure that projects using Haystack are maintainable, scalable, and production-ready.

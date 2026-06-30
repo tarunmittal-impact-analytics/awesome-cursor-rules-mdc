@@ -1,38 +1,168 @@
 ---
-description: Best practices and coding standards for Google Pubsub.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: A comprehensive guide to best practices for using Google Cloud Pub/Sub, focusing on reliable message handling, performance optimization, and practical coding patterns.
+globs: **/*
 ---
+# google-pubsub Best Practices
 
-# Google Pubsub Best Practices
+Google Cloud Pub/Sub is a powerful messaging service that enables reliable communication between applications. To maximize its effectiveness, follow these best practices.
 
-Tags: gcp, messaging, streaming, cloud
+## Code Organization and Structure
 
-## Code organization
+### Use a Modular Approach
+Organize your code into modules based on functionality. This enhances maintainability and readability.
 
-- Follow idiomatic Google Pubsub project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```python
+def publish_message(project_id, topic_id, message):
+    # All logic in one function
+    from google.cloud import pubsub_v1
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(project_id, topic_id)
+    future = publisher.publish(topic_path, message.encode("utf-8"))
+    print(f"Published message ID: {future.result()}")
+```
 
-## Performance
+✅ GOOD
+```python
+from google.cloud import pubsub_v1
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+def get_publisher(project_id):
+    return pubsub_v1.PublisherClient()
 
-## Security
+def publish_message(publisher, topic_id, message):
+    topic_path = publisher.topic_path(project_id, topic_id)
+    future = publisher.publish(topic_path, message.encode("utf-8"))
+    return future.result()
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+# Usage
+publisher = get_publisher('your-project-id')
+message_id = publish_message(publisher, 'your-topic-id', 'Hello, World!')
+print(f"Published message ID: {message_id}")
+```
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Idempotent Message Processing
+Design your consumers to be idempotent. This means that processing the same message multiple times does not change the outcome.
 
-## Operations
+❌ BAD
+```python
+def process_message(message):
+    # Non-idempotent operation
+    database.insert(message.data)
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD
+```python
+def process_message(message):
+    unique_id = message.attributes.get('message_id')
+    if not database.exists(unique_id):
+        database.insert(unique_id, message.data)
+```
+
+### Asynchronous Publishing
+Always publish messages asynchronously to avoid blocking your application.
+
+❌ BAD
+```python
+def publish_message_sync(publisher, topic_id, message):
+    topic_path = publisher.topic_path('your-project-id', topic_id)
+    future = publisher.publish(topic_path, message.encode('utf-8'))
+    future.result()  # Blocking call
+```
+
+✅ GOOD
+```python
+def publish_message_async(publisher, topic_id, message):
+    topic_path = publisher.topic_path('your-project-id', topic_id)
+    future = publisher.publish(topic_path, message.encode('utf-8'))
+    # Optionally handle the future later
+    future.add_done_callback(lambda f: print(f"Published message ID: {f.result()}"))
+```
+
+## Performance Considerations
+
+### Optimize Batching
+Use batching to improve throughput. Adjust the batch size based on your application's needs.
+
+✅ GOOD
+```python
+from google.cloud import pubsub_v1
+
+publisher = pubsub_v1.PublisherClient()
+batch_settings = pubsub_v1.types.BatchSettings(
+    max_bytes=10 * 1024 * 1024,  # 10 MB
+    max_messages=1000,
+    max_latency=1,  # seconds
+)
+topic_path = publisher.topic_path('your-project-id', 'your-topic-id')
+future = publisher.publish(topic_path, b'My message', batch_settings=batch_settings)
+```
+
+### Flow Control for Subscribers
+Implement flow control to prevent memory exhaustion.
+
+✅ GOOD
+```python
+from google.cloud import pubsub_v1
+
+flow_control = pubsub_v1.types.FlowControl(
+    max_messages=100,
+    max_bytes=10 * 1024 * 1024  # 10 MB
+)
+subscriber = pubsub_v1.SubscriberClient()
+subscription_path = subscriber.subscription_path('your-project-id', 'your-subscription-id')
+
+streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback, flow_control=flow_control)
+```
+
+## Common Pitfalls and Gotchas
+
+### Logging Message IDs
+Always log message IDs for traceability. This helps in debugging and monitoring.
+
+✅ GOOD
+```python
+def callback(message):
+    print(f"Received message ID: {message.message_id}")
+    # Process the message
+    message.ack()
+```
+
+### Dead Letter Topics
+Use Dead Letter Topics for messages that cannot be processed after a certain number of attempts.
+
+✅ GOOD
+```python
+from google.cloud import pubsub_v1
+
+dead_letter_topic = 'projects/your-project-id/topics/dead-letter-topic'
+subscriber = pubsub_v1.SubscriberClient()
+subscription = subscriber.create_subscription(
+    name='projects/your-project-id/subscriptions/your-subscription-id',
+    topic='projects/your-project-id/topics/your-topic-id',
+    dead_letter_policy=pubsub_v1.types.DeadLetterPolicy(
+        dead_letter_topic=dead_letter_topic,
+        max_delivery_attempts=5,
+    )
+)
+```
+
+## Testing Approaches
+
+### Mocking Pub/Sub
+Use mocking libraries to test your Pub/Sub interactions without sending real messages.
+
+✅ GOOD
+```python
+from unittest.mock import Mock
+from google.cloud import pubsub_v1
+
+def test_publish_message():
+    mock_publisher = Mock()
+    mock_publisher.publish.return_value.result.return_value = 'mock-message-id'
+    message_id = publish_message(mock_publisher, 'test-topic', 'Test message')
+    assert message_id == 'mock-message-id'
+```
+
+By adhering to these best practices, you can ensure that your Google Cloud Pub/Sub implementation is robust, efficient, and maintainable. Always remember to review and refine your code as your application evolves.

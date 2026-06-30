@@ -1,38 +1,179 @@
 ---
-description: Best practices and coding standards for Memcached.
-globs: **/*.{py,ts,go,rs,java}
+description: This guide provides actionable best practices for using memcached effectively in modern applications, emphasizing performance, structure, and error handling.
+globs: **/*
 ---
+# memcached Best Practices
 
-# Memcached Best Practices
+Memcached is a powerful tool for caching in high-throughput applications. This guide outlines essential best practices to maximize its effectiveness.
 
-Tags: caching, backend, distributed, performance
+## Code Organization and Structure
 
-## Code organization
+### Use a Singleton Pattern for Memcached Client
 
-- Follow idiomatic Memcached project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+To avoid creating multiple instances of the Memcached client, use a singleton pattern. This ensures efficient resource management and connection pooling.
 
-## Performance
+❌ BAD
+```python
+# Creating a new client instance every time
+client1 = MemcachedClient('localhost:11211')
+client2 = MemcachedClient('localhost:11211')
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD
+```python
+# Singleton pattern for Memcached client
+class MemcachedClientSingleton:
+    _instance = None
 
-## Security
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = MemcachedClient('localhost:11211')
+        return cls._instance
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+client = MemcachedClientSingleton.get_instance()
+```
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Cache-Aside Pattern
 
-## Operations
+Use the cache-aside pattern for data access. This means checking the cache first, and if the data is not found, fetching it from the database and caching it.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD
+```python
+# Fetching data without checking the cache
+data = fetch_from_database(key)
+```
+
+✅ GOOD
+```python
+# Cache-aside pattern
+data = memcached_client.get(key)
+if data is None:
+    data = fetch_from_database(key)
+    memcached_client.set(key, data)
+```
+
+### Deleting on Writes
+
+Always delete the cache entry before writing new data to ensure consistency.
+
+❌ BAD
+```python
+# Writing data without deleting the cache
+memcached_client.set(key, new_data)
+```
+
+✅ GOOD
+```python
+# Delete before writing new data
+memcached_client.delete(key)
+memcached_client.set(key, new_data)
+```
+
+## Performance Considerations
+
+### Use Binary Protocol and Connection Pooling
+
+Select a client library that supports the binary protocol for better performance and use connection pooling to minimize TCP overhead.
+
+✅ GOOD
+```python
+# Using a client that supports binary protocol
+client = MemcachedClient('localhost:11211', protocol='binary', pool_size=10)
+```
+
+### Monitor Slab Memory Distribution
+
+Regularly monitor slab memory distribution and hit/miss ratios to optimize performance.
+
+✅ GOOD
+```python
+# Monitoring stats
+stats = memcached_client.stats()
+print(stats['slab_memory_distribution'])
+print(stats['hit_ratio'], stats['miss_ratio'])
+```
+
+## Common Pitfalls and Gotchas
+
+### Handle Cache Stampedes
+
+Implement protective measures against cache stampedes by using lease semantics or Compare-And-Swap (CAS) tokens.
+
+❌ BAD
+```python
+# Multiple processes fetching the same data
+data = memcached_client.get(key)
+if data is None:
+    data = fetch_from_database(key)
+    memcached_client.set(key, data)
+```
+
+✅ GOOD
+```python
+# Using CAS to prevent stampedes
+def fetch_with_lease(key):
+    data = memcached_client.get(key)
+    if data is None:
+        data = fetch_from_database(key)
+        memcached_client.cas(key, data)  # Use CAS to prevent race conditions
+    return data
+```
+
+## Security Best Practices
+
+### Use Secure Connections
+
+Always use secure connections (SSL/TLS) when connecting to Memcached to prevent data interception.
+
+✅ GOOD
+```python
+# Secure connection
+client = MemcachedClient('localhost:11211', use_ssl=True)
+```
+
+## Error Handling
+
+### Graceful Handling of Cache Misses
+
+Treat cache misses as expected operational events. Implement fallback mechanisms to handle them gracefully.
+
+✅ GOOD
+```python
+# Gracefully handling cache misses
+data = memcached_client.get(key)
+if data is None:
+    data = fetch_from_database(key)  # Fallback to database
+```
+
+## API Design
+
+### Consistent Key Naming Conventions
+
+Establish consistent key naming conventions to avoid collisions and ensure clarity.
+
+✅ GOOD
+```python
+# Consistent key naming
+user_key = f"user:{user_id}"
+data = memcached_client.get(user_key)
+```
+
+## Testing Approaches
+
+### Mocking Memcached in Tests
+
+Use mocking to simulate Memcached behavior in unit tests to ensure isolation and reliability.
+
+✅ GOOD
+```python
+# Mocking Memcached in tests
+from unittest.mock import MagicMock
+
+memcached_client = MagicMock()
+memcached_client.get.return_value = None  # Simulate cache miss
+```
+
+By following these best practices, you can effectively leverage memcached to improve the performance and reliability of your applications. Always monitor and adapt your caching strategy based on real-world usage patterns.

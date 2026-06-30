@@ -1,38 +1,222 @@
 ---
-description: Best practices and coding standards for Kotlin.
-globs: **/*.{swift,kt,kts,dart}
+description: This guide provides Kotlin developers with essential best practices for code organization, common patterns, performance considerations, and testing approaches, ensuring idiomatic and efficient code.
+globs: **/*
 ---
+# kotlin Best Practices
 
-# Kotlin Best Practices
+This document outlines essential best practices for Kotlin development, focusing on idiomatic usage, performance, and testing strategies. Follow these guidelines to ensure clean, maintainable, and efficient code.
 
-Tags: language, mobile, android, jvm
+## Code Organization and Structure
 
-## Code organization
+### Use `val` over `var`
 
-- Follow idiomatic Kotlin project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+Always prefer immutable variables. This enhances code safety and predictability.
 
-## Performance
+❌ BAD:
+```kotlin
+var count = 0
+count += 1
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD:
+```kotlin
+val count = 1
+```
 
-## Security
+### Leverage Sealed Classes for State Management
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+Use sealed classes to represent restricted class hierarchies, making your code more robust and type-safe.
 
-## Testing
+❌ BAD:
+```kotlin
+sealed class Result
+class Success(val data: String) : Result()
+class Failure(val error: Exception) : Result()
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+✅ GOOD:
+```kotlin
+sealed class Result {
+    data class Success(val data: String) : Result()
+    data class Failure(val error: Exception) : Result()
+}
+```
 
-## Operations
+### Use Data Classes for DTOs
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+Data classes are ideal for data transfer objects (DTOs), providing a concise way to create classes that hold data.
+
+❌ BAD:
+```kotlin
+class User(val name: String, val age: Int)
+```
+
+✅ GOOD:
+```kotlin
+data class User(val name: String, val age: Int)
+```
+
+### Organize Code into Modules
+
+For large projects, use modules to separate concerns and improve build times. Use version catalogs for dependency management.
+
+```kotlin
+// libs.versions.toml
+[versions]
+kotlin = "2.x"
+hilt = "2.x"
+
+[libraries]
+hilt = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+```
+
+## Common Patterns and Anti-patterns
+
+### Use Scope Functions Wisely
+
+Utilize scope functions (`let`, `apply`, `run`, `with`) to improve readability and reduce boilerplate.
+
+❌ BAD:
+```kotlin
+val user = User("Alice", 30)
+user.name = "Bob"
+user.age = 31
+```
+
+✅ GOOD:
+```kotlin
+val user = User("Alice", 30).apply {
+    name = "Bob"
+    age = 31
+}
+```
+
+### Avoid GlobalScope for Coroutines
+
+Always use structured concurrency with `coroutineScope` or `supervisorScope` to manage coroutines effectively.
+
+❌ BAD:
+```kotlin
+GlobalScope.launch {
+    // Do something
+}
+```
+
+✅ GOOD:
+```kotlin
+suspend fun fetchData() = coroutineScope {
+    launch {
+        // Do something
+    }
+}
+```
+
+## Performance Considerations
+
+### Use KSP over KAPT
+
+Kotlin Symbol Processing (KSP) is faster and more efficient than Kotlin Annotation Processing Tool (KAPT). Always prefer KSP for annotation processing.
+
+```kotlin
+// build.gradle.kts
+ksp {
+    arg("key", "value")
+}
+```
+
+### Minimize Object Creation in Loops
+
+Avoid unnecessary object creation inside loops to improve performance.
+
+❌ BAD:
+```kotlin
+for (i in 1..1000) {
+    val user = User("User $i", i)
+    // Process user
+}
+```
+
+✅ GOOD:
+```kotlin
+val users = List(1000) { User("User $it", it) }
+// Process users
+```
+
+## Common Pitfalls and Gotchas
+
+### Null Safety in APIs
+
+Design your APIs to minimize nullability. Use Kotlin's null safety features to avoid `NullPointerException`.
+
+❌ BAD:
+```kotlin
+fun getUser(id: String): User? {
+    // Retrieve user or return null
+}
+```
+
+✅ GOOD:
+```kotlin
+fun getUser(id: String): User {
+    return users[id] ?: throw IllegalArgumentException("User not found")
+}
+```
+
+### Avoid Using `!!` Operator
+
+Using the `!!` operator can lead to runtime exceptions. Instead, handle nulls gracefully.
+
+❌ BAD:
+```kotlin
+val name: String? = null
+println(name!!) // Throws NullPointerException
+```
+
+✅ GOOD:
+```kotlin
+val name: String? = null
+println(name ?: "Default Name") // Safely handles null
+```
+
+## Testing Approaches
+
+### Use MockK for Mocking
+
+For mocking dependencies in tests, use MockK. It provides a concise and powerful API for creating mocks.
+
+```kotlin
+val mockService = mockk<MyService>()
+every { mockService.getData() } returns "Mock Data"
+```
+
+### Write Tests for Coroutines
+
+Use `runBlockingTest` from the kotlinx.coroutines library to test coroutines effectively.
+
+```kotlin
+@Test
+fun testFetchData() = runBlockingTest {
+    val result = fetchData()
+    assertEquals(expected, result)
+}
+```
+
+### Follow the Arrange-Act-Assert Pattern
+
+Structure your tests using the Arrange-Act-Assert pattern for clarity.
+
+```kotlin
+@Test
+fun testUserCreation() {
+    // Arrange
+    val user = User("Alice", 30)
+    
+    // Act
+    val result = user.name
+    
+    // Assert
+    assertEquals("Alice", result)
+}
+```
+
+By following these best practices, you will write cleaner, more efficient, and maintainable Kotlin code. Always strive for idiomatic Kotlin and leverage the language's powerful features to enhance your development experience.

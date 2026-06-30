@@ -1,44 +1,172 @@
 ---
-description: Best practices and coding standards for Weaviate.
-globs: **/*.{py,ts,tsx}
+description: This guide provides actionable best practices for using Weaviate, focusing on code organization, performance, and testing to build robust RAG applications.
+globs: **/*
 ---
-
 # Weaviate Best Practices
 
-Tags: ai, vector-database, rag, ml, gen-ai
+This document outlines the essential best practices for developing production-ready Retrieval-Augmented Generation (RAG) applications with Weaviate. Follow these guidelines to ensure optimal performance, maintainability, and reliability.
 
-## Code organization
+## Code Organization and Structure
 
-- Follow idiomatic Weaviate project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+### Use a Modular Approach
+Organize your code into modules based on functionality. This enhances readability and maintainability.
 
-## AI-specific
+❌ BAD
+```python
+# all functions in one file
+def ingest_data():
+    # ingestion logic
 
-- Version prompts, models, and retrieval indexes together.
-- Log token usage, latency, and model version per request.
-- Treat LLM output as untrusted until validated.
+def query_data():
+    # query logic
 
-## Performance
+def process_results():
+    # processing logic
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD
+```python
+# structure your code in modules
+# ingestion.py
+def ingest_data():
+    # ingestion logic
 
-## Security
+# queries.py
+def query_data():
+    # query logic
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+# processing.py
+def process_results():
+    # processing logic
+```
 
-## Testing
+### Define Clear Schemas
+Define your collection schema with precise types. Use UUIDs for foreign keys and `text` with appropriate tokenization for keyword matching.
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+✅ GOOD
+```python
+from weaviate import Client
 
-## Operations
+client = Client("http://localhost:8080")
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+schema = {
+    "classes": [
+        {
+            "class": "Article",
+            "properties": [
+                {"name": "title", "dataType": ["text"]},
+                {"name": "content", "dataType": ["text"]},
+                {"name": "author", "dataType": ["uuid"]},
+            ],
+        }
+    ]
+}
+
+client.schema.create(schema)
+```
+
+## Common Patterns and Anti-patterns
+
+### Use Hybrid Search
+Always use Hybrid Search as your primary retrieval method. This combines BM25 for keyword identifiers and vector search for semantic intent.
+
+✅ GOOD
+```python
+results = client.query.get("Article", ["title", "content"]).with_hybrid_search(
+    query="Your search term here",
+    vector_search={"vector": [0.1, 0.2, 0.3]}  # Example vector
+).do()
+```
+
+❌ BAD
+```python
+# Only using vector search without BM25
+results = client.query.get("Article", ["title", "content"]).with_vector_search(
+    query="Your search term here"
+).do()
+```
+
+## Performance Considerations
+
+### Enable Vector Quantization
+For large datasets, enable vector quantization to improve resource efficiency.
+
+✅ GOOD
+```python
+client.schema.update_class("Article", {
+    "vectorizer": "text2vec-contextionary",
+    "vector_quantization": "rotational"
+})
+```
+
+### Use Dynamic Batching
+Leverage server-side dynamic batching (`collection.batch.dynamic`) to handle backpressure and retries automatically during ingestion.
+
+✅ GOOD
+```python
+client.batch.create_objects([
+    {"class": "Article", "properties": {"title": "Sample Title", "content": "Sample Content"}},
+    # Add more objects here
+], batch_size=100)  # Adjust batch size as needed
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Using `:latest` for Docker Images
+Pin your Weaviate Docker image versions to avoid unexpected breaking changes.
+
+✅ GOOD
+```bash
+docker pull semitechnologies/weaviate:1.16.0  # Specify a version
+```
+
+❌ BAD
+```bash
+docker pull semitechnologies/weaviate:latest  # Avoid this
+```
+
+### Configure HA Clusters Properly
+When setting up high availability (HA) clusters, use odd-numbered replication factors for reliability.
+
+✅ GOOD
+```yaml
+replication:
+  factor: 3  # Use an odd number
+```
+
+## Testing Approaches
+
+### Write Unit Tests for Each Module
+Ensure that each module has corresponding unit tests to verify functionality.
+
+✅ GOOD
+```python
+import unittest
+from ingestion import ingest_data
+
+class TestIngestion(unittest.TestCase):
+    def test_ingest_data(self):
+        result = ingest_data()
+        self.assertIsNotNone(result)
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+### Use Mocks for External Dependencies
+When testing, use mocks for external dependencies like the Weaviate client to isolate tests.
+
+✅ GOOD
+```python
+from unittest.mock import MagicMock
+from queries import query_data
+
+def test_query_data():
+    client_mock = MagicMock()
+    client_mock.query.get.return_value = ["mocked result"]
+    results = query_data(client_mock, "test")
+    assert results == ["mocked result"]
+```
+
+## Conclusion
+By following these best practices, you will build robust, efficient, and maintainable applications using Weaviate. Always stay updated with the latest changes in the Weaviate ecosystem to adapt your practices accordingly.

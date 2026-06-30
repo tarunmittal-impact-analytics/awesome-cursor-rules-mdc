@@ -1,38 +1,272 @@
 ---
-description: Best practices and coding standards for Ios Development.
-globs: **/*.{swift,kt,kts,dart}
+description: This guide provides actionable best practices for modern iOS development using Swift 6, focusing on code organization, patterns, performance, testing, and common pitfalls.
+globs: **/*
+---
+# ios-development Best Practices
+
+## Code Organization and Structure
+
+### Use MVVM with Coordinators
+**Why:** This architecture promotes a clear separation of concerns, making your codebase easier to maintain and test.
+
+**✅ GOOD:**
+```swift
+// ViewModel
+class MyViewModel: ObservableObject {
+    @Published var data: [String] = []
+    
+    func fetchData() {
+        // Fetch data logic
+    }
+}
+
+// Coordinator
+class MyCoordinator {
+    func start() -> some View {
+        MyView(viewModel: MyViewModel())
+    }
+}
+```
+
+**❌ BAD:**
+```swift
+// Mixing UI and business logic
+class MyView: View {
+    var body: some View {
+        Text("Hello, World!")
+        // Fetch data directly here
+    }
+}
+```
+
+### Favor Value Types
+**Why:** Value types (structs and enums) are safer and more predictable due to their copy semantics.
+
+**✅ GOOD:**
+```swift
+struct User {
+    var id: Int
+    var name: String
+}
+```
+
+**❌ BAD:**
+```swift
+class User {
+    var id: Int
+    var name: String
+}
+```
+
+## Common Patterns and Anti-patterns
+
+### Use Actors for State Isolation
+**Why:** Actors help manage state in a concurrent environment, preventing data races.
+
+**✅ GOOD:**
+```swift
+actor UserManager {
+    var user: User?
+    
+    func updateUser(name: String) {
+        user?.name = name
+    }
+}
+```
+
+**❌ BAD:**
+```swift
+class UserManager {
+    var user: User?
+    
+    func updateUser(name: String) {
+        user?.name = name // Potential data race
+    }
+}
+```
+
+### Implement Dependency Injection
+**Why:** This pattern enhances testability and flexibility in your code.
+
+**✅ GOOD:**
+```swift
+class MyService {
+    func fetchData() { /*...*/ }
+}
+
+class MyViewModel: ObservableObject {
+    private var service: MyService
+    
+    init(service: MyService) {
+        self.service = service
+    }
+}
+```
+
+**❌ BAD:**
+```swift
+class MyViewModel: ObservableObject {
+    private var service = MyService() // Hardcoded dependency
+}
+```
+
+## Performance Considerations
+
+### Use SwiftUI for UI Development
+**Why:** SwiftUI is optimized for performance and provides a declarative syntax that reduces boilerplate code.
+
+**✅ GOOD:**
+```swift
+struct ContentView: View {
+    var body: some View {
+        NavigationStack {
+            Text("Hello, SwiftUI!")
+        }
+    }
+}
+```
+
+**❌ BAD:**
+```swift
+class ContentViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // UIKit implementation
+    }
+}
+```
+
+### Optimize for Dynamic Resizing
+**Why:** Supporting different device sizes ensures a better user experience.
+
+**✅ GOOD:**
+```swift
+struct ResponsiveView: View {
+    var body: some View {
+        VStack {
+            Text("Responsive Layout")
+                .padding()
+                .frame(maxWidth: .infinity)
+        }
+    }
+}
+```
+
+**❌ BAD:**
+```swift
+struct FixedWidthView: View {
+    var body: some View {
+        VStack {
+            Text("Fixed Width Layout")
+                .frame(width: 300) // Not adaptive
+        }
+    }
+}
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Using UIKit for Simple UIs
+**Why:** SwiftUI is designed for simplicity and performance in most cases.
+
+**✅ GOOD:**
+```swift
+struct SimpleView: View {
+    var body: some View {
+        Text("Welcome to SwiftUI!")
+    }
+}
+```
+
+**❌ BAD:**
+```swift
+class SimpleViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let label = UILabel()
+        label.text = "Welcome to UIKit!"
+        view.addSubview(label)
+    }
+}
+```
+
+### Be Mindful of State Management
+**Why:** Incorrect state management can lead to bugs and unpredictable UI behavior.
+
+**✅ GOOD:**
+```swift
+@MainActor
+class MyViewModel: ObservableObject {
+    @Published var count: Int = 0
+    
+    func increment() {
+        count += 1
+    }
+}
+```
+
+**❌ BAD:**
+```swift
+class MyViewModel: ObservableObject {
+    @Published var count: Int = 0
+    
+    func increment() {
+        DispatchQueue.global().async {
+            self.count += 1 // Not safe
+        }
+    }
+}
+```
+
+## Testing Approaches
+
+### Use Swift Testing for New Suites
+**Why:** Swift Testing provides modern features that enhance test readability and maintainability.
+
+**✅ GOOD:**
+```swift
+@testable import MyApp
+import XCTest
+
+final class MyViewModelTests: XCTestCase {
+    func testIncrement() {
+        let viewModel = MyViewModel()
+        viewModel.increment()
+        XCTAssertEqual(viewModel.count, 1)
+    }
+}
+```
+
+**❌ BAD:**
+```swift
+import XCTest
+
+class MyOldTests: XCTestCase {
+    func testIncrement() {
+        // Using outdated testing patterns
+    }
+}
+```
+
+### Retain XCTest for Legacy Code
+**Why:** Transitioning codebases can be complex; maintain existing tests until fully migrated.
+
+**✅ GOOD:**
+```swift
+import XCTest
+
+class LegacyTests: XCTestCase {
+    func testLegacyFeature() {
+        // Legacy code tests
+    }
+}
+```
+
+**❌ BAD:**
+```swift
+// Mixing new and old testing frameworks inappropriately
+```
+
 ---
 
-# Ios Development Best Practices
-
-Tags: mobile, ios, apple, swift
-
-## Code organization
-
-- Follow idiomatic Ios Development project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
-
-## Performance
-
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
-
-## Security
-
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
-
-## Testing
-
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
-
-## Operations
-
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+**IMPORTANT: Use modern best practices as of July 2026. Focus on current, recommended approaches and avoid deprecated patterns.**

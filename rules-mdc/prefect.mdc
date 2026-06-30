@@ -1,44 +1,233 @@
 ---
-description: Best practices and coding standards for Prefect.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides best practices for using Prefect in data orchestration, focusing on code organization, performance, and common pitfalls.
+globs: **/*.py
 ---
+# prefect Best Practices
 
-# Prefect Best Practices
+This document outlines essential best practices for using Prefect effectively in data orchestration. Following these guidelines will help you build efficient, maintainable, and scalable workflows.
 
-Tags: data-engineering, orchestration, workflow, python
+## Code Organization and Structure
 
-## Code organization
+### Use the `from` Syntax for Imports
+Always import specific objects rather than entire modules. This practice improves readability and reduces memory overhead.
 
-- Follow idiomatic Prefect project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```python
+import prefect
+from prefect import task
+```
 
-## Data quality
+✅ GOOD
+```python
+from prefect import flow, task
+```
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+### Avoid Importing Submodules in `__init__.py`
+Keep your `__init__.py` files clean. Only import necessary components directly.
 
-## Performance
+❌ BAD
+```python
+# __init__.py
+from prefect.tasks import task1, task2
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD
+```python
+# __init__.py
+from prefect import flow, task
+```
 
-## Security
+### Lazy Imports for Slow Modules
+For modules that take time to load, use lazy imports within function bodies to speed up initial load times.
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+✅ GOOD
+```python
+@task
+def my_task():
+    import pandas as pd  # Lazy import
+    df = pd.read_csv('data.csv')
+    return df
+```
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Use Decorators for Task Definitions
+Utilize the `@flow` and `@task` decorators to define workflows and tasks clearly.
 
-## Operations
+✅ GOOD
+```python
+@task
+def extract():
+    return "data"
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+@flow
+def main_flow():
+    data = extract()
+    print(data)
+```
+
+### Avoid Complex Control Flow in Flows
+Leverage Python's native control flow instead of complex external DSLs. This keeps your code simple and understandable.
+
+✅ GOOD
+```python
+@task
+def process_data(data):
+    if data:
+        return data.upper()
+    return None
+
+@flow
+def main_flow():
+    data = extract()
+    processed = process_data(data)
+```
+
+## Performance Considerations
+
+### Offload CPU-bound Tasks
+Use libraries like Polars or DuckDB for CPU-intensive operations to bypass Python's GIL limitations.
+
+✅ GOOD
+```python
+import polars as pl
+
+@task
+def analyze_data():
+    df = pl.read_csv('data.csv')
+    return df.describe()
+```
+
+### Use Generators for Memory Efficiency
+When processing large datasets, prefer generators to avoid loading everything into memory at once.
+
+✅ GOOD
+```python
+def read_large_file(file_path):
+    with open(file_path) as f:
+        for line in f:
+            yield line.strip()
+
+@task
+def process_large_file():
+    for line in read_large_file('large_file.txt'):
+        print(line)
+```
+
+### Implement Result Caching
+Use `@task(cache_key_fn=...)` for expensive operations to save computation time in subsequent runs.
+
+✅ GOOD
+```python
+@task(cache_key_fn=lambda x: x)
+def expensive_operation(param):
+    # Simulate a heavy computation
+    return param * 2
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Long-Running Tasks Without Timeouts
+Always set timeouts for tasks to prevent them from running indefinitely.
+
+✅ GOOD
+```python
+@task(timeout=300)  # Timeout after 5 minutes
+def long_running_task():
+    # Simulate a long-running task
+    import time
+    time.sleep(600)  # This will raise a timeout error
+```
+
+### Use Structured Logging
+Implement structured logging to facilitate debugging and monitoring.
+
+✅ GOOD
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
+@task
+def my_task():
+    logging.info("Starting my_task")
+    # Task logic here
+    logging.info("Finished my_task")
+```
+
+## Type Hints
+
+### Use Type Hints for Clarity
+Always annotate your functions with type hints to improve readability and maintainability.
+
+✅ GOOD
+```python
+from typing import List
+
+@task
+def process_items(items: List[str]) -> List[str]:
+    return [item.upper() for item in items]
+```
+
+## Virtual Environments
+
+### Use Virtual Environments for Isolation
+Always use virtual environments to manage dependencies and avoid conflicts.
+
+✅ GOOD
+```bash
+# Create a virtual environment
+python -m venv venv
+
+# Activate the virtual environment
+source venv/bin/activate  # On macOS/Linux
+venv\Scripts\activate  # On Windows
+```
+
+## Packaging
+
+### Package Your Prefect Flows
+When distributing your flows, package them properly using `setuptools` to ensure easy installation.
+
+✅ GOOD
+```python
+# setup.py
+from setuptools import setup, find_packages
+
+setup(
+    name='my_prefect_flows',
+    version='0.1',
+    packages=find_packages(),
+    install_requires=[
+        'prefect',
+        'polars',
+    ],
+)
+```
+
+## Testing Approaches
+
+### Use `pytest` for Testing
+Utilize `pytest` to write tests for your flows and tasks. This will help ensure reliability.
+
+✅ GOOD
+```python
+def test_process_items():
+    assert process_items(['a', 'b', 'c']) == ['A', 'B', 'C']
+```
+
+### Mock External Dependencies
+When testing, mock external dependencies to isolate your tests.
+
+✅ GOOD
+```python
+from unittest.mock import patch
+
+@patch('module_containing_function.external_api_call')
+def test_my_task(mock_api):
+    mock_api.return_value = "mocked data"
+    result = my_task()
+    assert result == "expected result"
+```
+
+By following these best practices, you'll ensure that your Prefect workflows are efficient, maintainable, and scalable. Happy orchestrating!

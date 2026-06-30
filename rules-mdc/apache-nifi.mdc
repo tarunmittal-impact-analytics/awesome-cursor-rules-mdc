@@ -1,44 +1,166 @@
 ---
-description: Best practices and coding standards for Apache Nifi.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides essential best practices for developing with Apache NiFi, focusing on code organization, common patterns, performance considerations, and testing approaches.
+globs: **/*
 ---
+# apache-nifi Best Practices
 
-# Apache Nifi Best Practices
+This document serves as a comprehensive guide for developers working with Apache NiFi. It emphasizes practical, actionable advice, backed by concrete examples to enhance your development process.
 
-Tags: data-engineering, etl, integration, streaming
+## Code Organization and Structure
 
-## Code organization
+### Use Modular Process Groups
+Design your NiFi flows using modular process groups. This enhances reusability and maintainability.
 
-- Follow idiomatic Apache Nifi project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD:
+```plaintext
+Single process group with all components mixed together.
+```
 
-## Data quality
+✅ GOOD:
+```plaintext
+- Main Process Group
+  - Ingest Process Group
+  - Transform Process Group
+  - Load Process Group
+```
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+### Standardize Naming Conventions
+Adopt a consistent naming convention for your components. This improves readability and collaboration.
 
-## Performance
+❌ BAD:
+```plaintext
+Processor1, Processor2, MyProcessor
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD:
+```plaintext
+- IngestCSVProcessor
+- TransformDataProcessor
+- LoadToDatabaseProcessor
+```
 
-## Security
+## Common Patterns and Anti-patterns
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+### Use Parameter Contexts for Configuration
+Always utilize Parameter Contexts for managing environment-specific variables and secrets.
 
-## Testing
+❌ BAD:
+```plaintext
+- Hardcoded database credentials in the processor configuration.
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+✅ GOOD:
+```plaintext
+- Use Parameter Contexts to define:
+  - db.username
+  - db.password
+```
 
-## Operations
+### Ensure Thread Safety in Custom Extensions
+When developing custom processors, ensure they are thread-safe due to NiFi's concurrent nature.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD:
+```java
+public class MyProcessor extends AbstractProcessor {
+    private List<String> state = new ArrayList<>();
+    
+    @Override
+    public void onTrigger(ProcessContext context, ProcessSession session) {
+        state.add("new state"); // Not thread-safe
+    }
+}
+```
+
+✅ GOOD:
+```java
+public class MyProcessor extends AbstractProcessor {
+    private final List<String> state = Collections.synchronizedList(new ArrayList<>());
+
+    @Override
+    public void onTrigger(ProcessContext context, ProcessSession session) {
+        state.add("new state"); // Thread-safe
+    }
+}
+```
+
+## Performance Considerations
+
+### Optimize Processor Scheduling
+Set appropriate scheduling strategies for processors to enhance performance based on the flow's requirements.
+
+❌ BAD:
+```plaintext
+All processors set to run at the same time without consideration of resource usage.
+```
+
+✅ GOOD:
+```plaintext
+- Ingest Processor: Run on a schedule of 5 seconds.
+- Transform Processor: Run on a schedule of 10 seconds.
+- Load Processor: Run on a schedule of 30 seconds.
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Direct Edits in Production
+Never make direct edits to the NiFi flow in production. Use version control through Apache NiFi Registry.
+
+❌ BAD:
+```plaintext
+Editing the flow directly in the production environment.
+```
+
+✅ GOOD:
+```plaintext
+- Clone the flow to a staging environment.
+- Test changes thoroughly.
+- Commit to NiFi Registry and deploy to production.
+```
+
+### Use Git-Based Workflows
+Implement Git-based workflows for managing changes to your NiFi flows. This ensures auditability and prevents configuration drift.
+
+❌ BAD:
+```plaintext
+Changes made directly in the NiFi UI without tracking.
+```
+
+✅ GOOD:
+```plaintext
+- Use Git to track changes:
+  - Commit changes to a feature branch.
+  - Merge to main after review.
+```
+
+## Testing Approaches
+
+### Use Maven for Testing
+When testing your NiFi custom processors, always use `mvn clean install` to ensure no stale artifacts.
+
+❌ BAD:
+```plaintext
+Running tests without cleaning the build first.
+```
+
+✅ GOOD:
+```bash
+mvn clean install
+```
+
+### Document Your Processors
+Utilize the `additionalDetails.html` file within your processor bundle to document functionality and usage.
+
+❌ BAD:
+```plaintext
+No documentation for custom processors.
+```
+
+✅ GOOD:
+```html
+<!-- additionalDetails.html -->
+<h1>IngestCSVProcessor</h1>
+<p>This processor ingests CSV files from a specified directory.</p>
+```
+
+## Conclusion
+By adhering to these best practices, you will enhance the maintainability, performance, and reliability of your Apache NiFi flows. Always prioritize modularity, standardization, and thorough documentation in your development process.

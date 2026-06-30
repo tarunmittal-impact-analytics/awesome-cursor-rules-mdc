@@ -1,44 +1,260 @@
 ---
-description: Best practices and coding standards for Clickhouse.
-globs: **/*.{sql,py}
+description: This document provides comprehensive best practices for using ClickHouse effectively, focusing on performance, data modeling, and query optimization.
+globs: **/*
 ---
+# ClickHouse Best Practices
 
-# Clickhouse Best Practices
+This guide outlines essential best practices for ClickHouse, ensuring optimal performance and efficient data management. Follow these actionable guidelines to enhance your ClickHouse experience.
 
-Tags: database, analytics, sql, columnar, data-engineering
+## Code Organization and Structure
 
-## Code organization
+### Use Consistent Naming Conventions
+Establish a clear naming convention for your tables, columns, and databases. This improves readability and maintainability.
 
-- Follow idiomatic Clickhouse project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```sql
+CREATE TABLE my_table (
+    a INT,
+    b STRING,
+    c FLOAT
+);
+```
 
-## Data quality
+✅ GOOD
+```sql
+CREATE TABLE sales_data (
+    transaction_id UInt64,
+    customer_id UInt64,
+    purchase_amount Float64,
+    purchase_date DateTime
+);
+```
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+### Organize Queries Logically
+Group related queries into files or sections. Use comments to describe the purpose of each query.
 
-## Performance
+```sql
+-- Sales Data Queries
+SELECT customer_id, SUM(purchase_amount) as total_spent
+FROM sales_data
+GROUP BY customer_id;
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+## Common Patterns and Anti-patterns
 
-## Security
+### Use Materialized Views for Aggregations
+When you frequently run the same aggregations, leverage Materialized Views to pre-compute results.
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+❌ BAD
+```sql
+SELECT customer_id, COUNT(*) 
+FROM sales_data 
+GROUP BY customer_id;
+```
 
-## Testing
+✅ GOOD
+```sql
+CREATE MATERIALIZED VIEW mv_customer_spending
+ENGINE = SummingMergeTree()
+AS SELECT customer_id, COUNT(*) AS total_purchases
+FROM sales_data
+GROUP BY customer_id;
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Avoid Over-Partitioning
+Only partition tables when necessary. Excessive partitions can lead to degraded performance.
 
-## Operations
+❌ BAD
+```sql
+CREATE TABLE user_logs (
+    user_id UInt64,
+    log_date Date,
+    action String
+) ENGINE = MergeTree()
+PARTITION BY toYYYYMM(log_date);
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD
+```sql
+CREATE TABLE user_logs (
+    user_id UInt64,
+    log_date Date,
+    action String
+) ENGINE = MergeTree()
+PARTITION BY toYYYY(log_date);
+```
+
+## Performance Considerations
+
+### Prioritize the ORDER BY Clause
+The ORDER BY clause is crucial for performance. Place highly selective filters first and limit to 4-6 columns.
+
+❌ BAD
+```sql
+CREATE TABLE events (
+    event_id UInt64,
+    event_type String,
+    user_id UInt64,
+    event_time DateTime
+) ENGINE = MergeTree()
+ORDER BY (event_type, user_id, event_time);
+```
+
+✅ GOOD
+```sql
+CREATE TABLE events (
+    event_id UInt64,
+    event_type String,
+    user_id UInt64,
+    event_time DateTime
+) ENGINE = MergeTree()
+ORDER BY (user_id, event_time);
+```
+
+### Use LowCardinality for Frequent Values
+For columns with fewer than 10,000 unique values, use LowCardinality to save space and improve performance.
+
+❌ BAD
+```sql
+CREATE TABLE products (
+    product_id UInt64,
+    category String
+) ENGINE = MergeTree()
+ORDER BY product_id;
+```
+
+✅ GOOD
+```sql
+CREATE TABLE products (
+    product_id UInt64,
+    category LowCardinality(String)
+) ENGINE = MergeTree()
+ORDER BY product_id;
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Nullable Columns
+Nullable columns can lead to performance issues. Use them sparingly and only when necessary.
+
+❌ BAD
+```sql
+CREATE TABLE orders (
+    order_id UInt64,
+    customer_id UInt64,
+    discount Nullable(Float64)
+) ENGINE = MergeTree()
+ORDER BY order_id;
+```
+
+✅ GOOD
+```sql
+CREATE TABLE orders (
+    order_id UInt64,
+    customer_id UInt64,
+    discount Float64 DEFAULT 0.0
+) ENGINE = MergeTree()
+ORDER BY order_id;
+```
+
+### Filter Early in Queries
+Always filter data as early as possible in your queries to reduce the amount of data processed.
+
+❌ BAD
+```sql
+SELECT *
+FROM sales_data
+WHERE purchase_date > '2023-01-01';
+```
+
+✅ GOOD
+```sql
+SELECT customer_id, SUM(purchase_amount)
+FROM sales_data
+WHERE purchase_date > '2023-01-01'
+GROUP BY customer_id;
+```
+
+## Security Best Practices
+
+### Use Role-Based Access Control
+Implement role-based access control to manage permissions effectively.
+
+```sql
+CREATE ROLE analyst;
+GRANT SELECT ON sales_data TO analyst;
+```
+
+### Encrypt Sensitive Data
+Always encrypt sensitive data at rest and in transit to protect it from unauthorized access.
+
+```sql
+ALTER TABLE sensitive_data
+ADD COLUMN encrypted_data String ENCRYPTED WITH 'AES-256';
+```
+
+## Query Optimization
+
+### Analyze Slow Queries
+Utilize `system.query_log` to investigate slow queries and optimize them based on insights gained.
+
+```sql
+SELECT *
+FROM system.query_log
+WHERE type = 'Query' AND event_date = today()
+ORDER BY query_duration_ms DESC
+LIMIT 10;
+```
+
+### Choose the Right Join Type
+When joining tables, filter them before the join and select the appropriate join algorithm.
+
+❌ BAD
+```sql
+SELECT *
+FROM orders
+JOIN customers ON orders.customer_id = customers.customer_id;
+```
+
+✅ GOOD
+```sql
+SELECT *
+FROM (SELECT * FROM orders WHERE order_date > '2023-01-01') AS filtered_orders
+JOIN (SELECT * FROM customers WHERE active = 1) AS filtered_customers
+ON filtered_orders.customer_id = filtered_customers.customer_id;
+```
+
+## Data Modeling
+
+### Design for Query Patterns
+Model your data based on the queries you will run most frequently. This reduces the need for complex joins.
+
+```sql
+CREATE TABLE user_activity (
+    user_id UInt64,
+    activity_type String,
+    activity_timestamp DateTime,
+    activity_details String
+) ENGINE = MergeTree()
+ORDER BY (user_id, activity_timestamp);
+```
+
+## Testing Approaches
+
+### Use Test Data for Performance Benchmarking
+Create a separate test environment with realistic data volumes to benchmark query performance.
+
+```sql
+CREATE TABLE test_sales_data AS sales_data ENGINE = MergeTree()
+ORDER BY (customer_id, purchase_date);
+```
+
+### Validate Query Results
+Always validate query results against known values to ensure accuracy.
+
+```sql
+SELECT COUNT(*) FROM sales_data WHERE purchase_date > '2023-01-01';
+-- Compare with expected count
+```
+
+By following these best practices, you will ensure that your ClickHouse implementation is efficient, maintainable, and scalable.

@@ -1,44 +1,177 @@
 ---
-description: Best practices and coding standards for Aws Glue.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This guide provides best practices for developing with AWS Glue, focusing on code organization, performance optimization, and common pitfalls to enhance ETL processes.
+globs: **/*
 ---
+# aws-glue Best Practices
 
-# Aws Glue Best Practices
+AWS Glue is a powerful serverless ETL service that enables data engineers to prepare and transform data efficiently. This guide outlines critical best practices for structuring your AWS Glue jobs, optimizing performance, and avoiding common pitfalls.
 
-Tags: aws, data-engineering, etl, serverless
+## Code Organization and Structure
 
-## Code organization
+### Use a Modular Approach
+Organize your Glue jobs into reusable modules. This promotes code reuse and simplifies maintenance.
 
-- Follow idiomatic Aws Glue project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```python
+# All logic in one script
+def main():
+    # Load data
+    # Transform data
+    # Write data
+```
 
-## Data quality
+✅ GOOD
+```python
+# Separate functions for each task
+def load_data():
+    # Load data logic
+    pass
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+def transform_data(data):
+    # Transformation logic
+    return transformed_data
 
-## Performance
+def write_data(transformed_data):
+    # Write data logic
+    pass
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+def main():
+    data = load_data()
+    transformed_data = transform_data(data)
+    write_data(transformed_data)
+```
 
-## Security
+### Use Glue Workflows for Dependency Management
+Leverage Glue Workflows to manage job dependencies and pass state between jobs, ensuring a clear execution flow.
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+✅ GOOD
+```python
+import boto3
 
-## Testing
+glue = boto3.client('glue')
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+response = glue.start_workflow_run(Name='my_workflow')
+```
 
-## Operations
+## Common Patterns and Anti-patterns
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+### Prefer DynamicFrames Over DataFrames
+DynamicFrames provide built-in capabilities for schema evolution and data quality checks.
+
+❌ BAD
+```python
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("BadExample").getOrCreate()
+df = spark.read.csv("s3://bucket/path")
+```
+
+✅ GOOD
+```python
+from awsglue.context import GlueContext
+
+glueContext = GlueContext(spark)
+dynamic_frame = glueContext.create_dynamic_frame.from_catalog(database="my_db", table_name="my_table")
+```
+
+### Avoid Python UDFs for Performance
+Use native Spark SQL functions instead of Python UDFs to enhance performance.
+
+❌ BAD
+```python
+from pyspark.sql.functions import udf
+
+@udf
+def multiply_by_two(x):
+    return x * 2
+
+df.withColumn("new_column", multiply_by_two(df["existing_column"]))
+```
+
+✅ GOOD
+```python
+from pyspark.sql.functions import col
+
+df.withColumn("new_column", col("existing_column") * 2)
+```
+
+## Performance Considerations
+
+### Optimize File Sizes
+Aim for output file sizes between 128 MB and 512 MB to avoid small file issues.
+
+✅ GOOD
+```python
+# Configure output partitioning
+output_dynamic_frame = glueContext.write_dynamic_frame.from_options(
+    frame=dynamic_frame,
+    connection_type="s3",
+    connection_options={"path": "s3://bucket/path"},
+    format="parquet",
+    format_options={"compression": "SNAPPY"},
+    partitionKeys=["year", "month"]
+)
+```
+
+### Enable Adaptive Query Execution
+Ensure Adaptive Query Execution (AQE) is enabled for runtime optimization. This is the default in Glue 5.0+.
+
+✅ GOOD
+```python
+spark.conf.set("spark.sql.adaptive.enabled", "true")
+```
+
+## Common Pitfalls and Gotchas
+
+### Idempotency is Key
+Design jobs to be idempotent, allowing safe re-runs without adverse effects.
+
+❌ BAD
+```python
+# Directly writing to the same location
+output_dynamic_frame.write.format("parquet").save("s3://bucket/output/")
+```
+
+✅ GOOD
+```python
+# Use a timestamp or unique identifier for output paths
+output_dynamic_frame.write.format("parquet").save(f"s3://bucket/output/{uuid.uuid4()}/")
+```
+
+### Monitor Job Performance
+Utilize Job Run Insights and Spark UI to identify performance bottlenecks and failures.
+
+✅ GOOD
+```python
+# Enable logging for monitoring
+spark.sparkContext.setLogLevel("INFO")
+```
+
+## Testing Approaches
+
+### Implement Unit Tests
+Use pytest or unittest to create unit tests for your Glue scripts. This ensures that your transformations work as expected.
+
+✅ GOOD
+```python
+import unittest
+
+class TestTransformations(unittest.TestCase):
+    def test_multiply_by_two(self):
+        self.assertEqual(multiply_by_two(3), 6)
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+### Use Local Development with Glue Local
+Develop and test your Glue scripts locally using AWS Glue Local, which simulates the Glue environment.
+
+✅ GOOD
+```bash
+# Run Glue Local with your script
+glue-local run my_script.py
+```
+
+## Conclusion
+By following these best practices for AWS Glue, you can enhance the reliability, performance, and maintainability of your ETL processes. Always prioritize modular code, efficient data handling, and thorough testing to ensure your data pipelines run smoothly.

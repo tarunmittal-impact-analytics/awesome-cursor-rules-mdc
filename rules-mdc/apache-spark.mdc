@@ -1,44 +1,196 @@
 ---
-description: Best practices and coding standards for Apache Spark.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides actionable best practices for developing with Apache Spark, focusing on code organization, performance optimization, and testing.
+globs: **/*
 ---
+# apache-spark Best Practices
 
-# Apache Spark Best Practices
+This document outlines essential best practices for Apache Spark development, emphasizing modularity, performance, and clarity in code. Follow these guidelines to enhance your data engineering workflow.
 
-Tags: data-engineering, big-data, distributed, analytics
+## Code Organization and Structure
 
-## Code organization
+### Use Pure Python Modules for Business Logic
 
-- Follow idiomatic Apache Spark project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```python
+# Business logic mixed in the notebook
+df = spark.read.csv("data.csv")
+result = df.filter(df['age'] > 30).groupBy('country').count()
+result.show()
+```
 
-## Data quality
+✅ GOOD
+```python
+# Move business logic to a separate module
+from my_module import process_data
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+df = spark.read.csv("data.csv")
+result = process_data(df)
+result.show()
+```
+**When to apply:** Always separate business logic from orchestration to improve testability and maintainability.
 
-## Performance
+### Keep Notebooks Thin
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+❌ BAD
+```python
+# Notebooks with excessive logic
+df = spark.read.csv("data.csv")
+# Multiple transformations and actions here
+df = df.filter(df['age'] > 30).groupBy('country').agg({'count': 'sum'})
+df.show()
+```
 
-## Security
+✅ GOOD
+```python
+# Thin notebooks focusing on orchestration
+from my_module import load_data, transform_data
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+df = load_data("data.csv")
+result = transform_data(df)
+result.show()
+```
+**When to apply:** Use notebooks strictly for data loading, calling functions, and displaying results.
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Prefer DataFrame API Over RDDs
 
-## Operations
+❌ BAD
+```python
+# Using RDDs for transformations
+rdd = spark.sparkContext.textFile("data.txt")
+result = rdd.filter(lambda x: "error" in x).count()
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD
+```python
+# Using DataFrame API for transformations
+df = spark.read.text("data.txt")
+result = df.filter(df.value.contains("error")).count()
+```
+**Why:** The DataFrame API allows Catalyst optimizations, improving performance.
+
+### Avoid UDFs When Possible
+
+❌ BAD
+```python
+from pyspark.sql.functions import udf
+
+@udf
+def custom_function(value):
+    return value * 2
+
+df = spark.read.csv("data.csv")
+df = df.withColumn("new_col", custom_function(df['existing_col']))
+```
+
+✅ GOOD
+```python
+from pyspark.sql.functions import col, expr
+
+df = spark.read.csv("data.csv")
+df = df.withColumn("new_col", col("existing_col") * 2)
+```
+**Why:** UDFs disable optimizations; use built-in functions whenever possible.
+
+## Performance Considerations
+
+### Enable Adaptive Query Execution (AQE)
+
+❌ BAD
+```python
+# AQE not enabled
+spark.conf.set("spark.sql.adaptive.enabled", "false")
+```
+
+✅ GOOD
+```python
+# Enable AQE for better performance
+spark.conf.set("spark.sql.adaptive.enabled", "true")
+```
+**When to apply:** Always enable AQE to allow Spark to optimize query execution dynamically.
+
+### Use Broadcast Joins for Small Tables
+
+❌ BAD
+```python
+# Regular join that may lead to shuffling
+result = large_df.join(small_df, "key")
+```
+
+✅ GOOD
+```python
+# Broadcast join for small DataFrame
+from pyspark.sql import functions as F
+
+result = large_df.join(F.broadcast(small_df), "key")
+```
+**Why:** Broadcast joins minimize data shuffling and improve performance.
+
+## Common Pitfalls and Gotchas
+
+### Explicitly Define Schemas for Semi-structured Data
+
+❌ BAD
+```python
+# Inferring schema can be slow and error-prone
+df = spark.read.json("data.json")
+```
+
+✅ GOOD
+```python
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+
+schema = StructType([
+    StructField("name", StringType(), True),
+    StructField("age", IntegerType(), True)
+])
+
+df = spark.read.json("data.json", schema=schema)
+```
+**Why:** Defining schemas avoids expensive inference and improves performance.
+
+### Limit Logical Expressions in Filters
+
+❌ BAD
+```python
+# Complex filter logic
+filtered_df = df.filter((df['age'] > 30) & (df['country'] == 'USA') & (df['salary'] > 50000))
+```
+
+✅ GOOD
+```python
+# Refactor complex logic into a function
+def is_valid_record(row):
+    return row['age'] > 30 and row['country'] == 'USA' and row['salary'] > 50000
+
+filtered_df = df.filter(is_valid_record)
+```
+**When to apply:** Keep filter expressions simple; refactor complex logic into named functions for clarity.
+
+## Testing Approaches
+
+### Use Unit Tests for Business Logic
+
+❌ BAD
+```python
+# No tests for business logic
+result = process_data(df)
+```
+
+✅ GOOD
+```python
+import unittest
+
+class TestDataProcessing(unittest.TestCase):
+    def test_process_data(self):
+        df = spark.createDataFrame([(25, 'USA'), (35, 'Canada')], ['age', 'country'])
+        result = process_data(df)
+        self.assertEqual(result.count(), 1)  # Example assertion
+
+if __name__ == "__main__":
+    unittest.main()
+```
+**Why:** Always write unit tests for business logic to ensure correctness and facilitate refactoring.
+
+By following these guidelines, you will enhance your Apache Spark development practices, leading to more efficient, maintainable, and scalable data processing solutions.

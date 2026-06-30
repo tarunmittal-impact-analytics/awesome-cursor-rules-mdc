@@ -1,44 +1,168 @@
 ---
-description: Best practices and coding standards for Milvus.
-globs: **/*.{py,ts,tsx}
+description: This guide provides essential best practices for using Milvus effectively in modern RAG pipelines, ensuring optimal performance and maintainability.
+globs: **/*
 ---
+# milvus Best Practices
 
-# Milvus Best Practices
+Milvus is a powerful vector database designed for AI and machine learning applications. This comprehensive guide outlines critical best practices to help developers leverage Milvus effectively, focusing on code organization, common patterns, performance considerations, and testing approaches.
 
-Tags: ai, vector-database, rag, ml, gen-ai
+## Code Organization and Structure
 
-## Code organization
+### Use the MilvusClient Interface
+Always use the `MilvusClient` interface from `PyMilvus v2.4+`. This is crucial for interacting with Milvus efficiently.
 
-- Follow idiomatic Milvus project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```python
+from pymilvus import connections, Collection
 
-## AI-specific
+connections.connect("default", host="localhost", port="19530")
+collection = Collection("my_collection")
+```
 
-- Version prompts, models, and retrieval indexes together.
-- Log token usage, latency, and model version per request.
-- Treat LLM output as untrusted until validated.
+✅ GOOD
+```python
+from pymilvus import MilvusClient
 
-## Performance
+client = MilvusClient("localhost", "19530")
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Define a Clear Schema
+When creating collections, define a clear schema that includes partition keys for multi-tenancy. This avoids unnecessary complexity and improves data organization.
 
-## Security
+❌ BAD
+```python
+# No schema definition
+client.create_collection("my_collection")
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+✅ GOOD
+```python
+from pymilvus import CollectionSchema, FieldSchema, DataType
 
-## Testing
+fields = [
+    FieldSchema(name="id", dtype=DataType.INT64, is_primary=True),
+    FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=128),
+    FieldSchema(name="tenant_id", dtype=DataType.INT64)
+]
+schema = CollectionSchema(fields=fields, description="My collection schema")
+client.create_collection("my_collection", schema=schema)
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+## Common Patterns and Anti-patterns
 
-## Operations
+### Batch Inserts
+For optimal performance, always batch your inserts in chunks of 1024 rows with a 10-second flush interval.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD
+```python
+data = [...]  # Large dataset
+client.insert("my_collection", data)
+```
+
+✅ GOOD
+```python
+data_chunks = [data[i:i + 1024] for i in range(0, len(data), 1024)]
+for chunk in data_chunks:
+    client.insert("my_collection", chunk)
+    client.flush()  # Ensure data is flushed every 10 seconds
+```
+
+### Use Hybrid Retrieval
+Define BM25 and text analyzers during collection creation to enable hybrid retrieval.
+
+❌ BAD
+```python
+client.create_collection("my_collection")  # No analyzers defined
+```
+
+✅ GOOD
+```python
+from pymilvus import IndexType
+
+client.create_collection("my_collection", schema=schema, 
+                         text_analyzer={"type": "BM25", "params": {"k1": 1.2, "b": 0.75}})
+```
+
+## Performance Considerations
+
+### Choose the Right Index
+For read-heavy workloads, use HNSW indices, while IVF_FLAT is better suited for write-heavy scenarios.
+
+❌ BAD
+```python
+client.create_index("my_collection", index_type="IVF_FLAT")
+```
+
+✅ GOOD
+```python
+# For read-heavy workloads
+client.create_index("my_collection", index_type="HNSW", params={"M": 16, "efConstruction": 200})
+
+# For write-heavy workloads
+client.create_index("my_collection", index_type="IVF_FLAT", params={"nlist": 128})
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Legacy ORM APIs
+Do not use legacy ORM APIs as they are deprecated and can lead to performance issues. Always stick to the `MilvusClient`.
+
+❌ BAD
+```python
+from pymilvus import Collection
+
+# Using legacy ORM API
+collection = Collection("my_collection")
+```
+
+✅ GOOD
+```python
+from pymilvus import MilvusClient
+
+client = MilvusClient("localhost", "19530")
+```
+
+### Properly Handle Upserts
+When updating data, always use `client.upsert` to ensure data integrity.
+
+❌ BAD
+```python
+# Directly inserting new data instead of upserting
+client.insert("my_collection", new_data)
+```
+
+✅ GOOD
+```python
+client.upsert("my_collection", new_data)
+```
+
+## Testing Approaches
+
+### Unit Testing with Mocking
+Use mocking to test your interactions with Milvus without requiring a live instance.
+
+```python
+from unittest.mock import MagicMock
+from pymilvus import MilvusClient
+
+def test_insert_data():
+    client = MilvusClient("localhost", "19530")
+    client.insert = MagicMock()
+    
+    data = [...]  # Test data
+    client.insert("my_collection", data)
+    
+    client.insert.assert_called_once_with("my_collection", data)
+```
+
+### Integration Testing
+Ensure to have a dedicated test environment for integration tests to validate the entire pipeline.
+
+```python
+def test_integration():
+    client = MilvusClient("localhost", "19530")
+    # Create collection, insert data, and perform searches
+    # Validate results to ensure correctness
+```
+
+By following these best practices, you will ensure that your use of Milvus is efficient, maintainable, and scalable, setting a strong foundation for your RAG pipelines.

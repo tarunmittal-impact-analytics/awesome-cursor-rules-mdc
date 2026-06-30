@@ -1,44 +1,221 @@
 ---
-description: Best practices and coding standards for Langsmith.
-globs: **/*.{py,ts,tsx}
+description: This guide provides essential best practices for using langsmith effectively, focusing on code organization, common patterns, performance considerations, and testing strategies.
+globs: **/*
 ---
+# langsmith Best Practices
 
-# Langsmith Best Practices
+Langsmith is a powerful tool for LLM development, and following best practices is crucial for building robust applications. This guide outlines the most effective strategies for code organization, common patterns, performance considerations, and testing approaches.
 
-Tags: ai, llm, observability, langchain
+## Code Organization and Structure
 
-## Code organization
+### Use a Modular Structure
+Organize your code into modules based on functionality. This promotes reusability and maintainability.
 
-- Follow idiomatic Langsmith project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```python
+# All functions in a single file
+def function_one():
+    pass
 
-## AI-specific
+def function_two():
+    pass
+```
 
-- Version prompts, models, and retrieval indexes together.
-- Log token usage, latency, and model version per request.
-- Treat LLM output as untrusted until validated.
+✅ GOOD
+```python
+# Separate files for different functionalities
+# my_module.py
+def function_one():
+    pass
 
-## Performance
+# another_module.py
+def function_two():
+    pass
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Keep Configuration Separate
+Store configuration settings, such as API keys and environment variables, in a dedicated config file. This enhances security and makes it easier to manage different environments.
 
-## Security
+❌ BAD
+```python
+# Hardcoded API key in the source code
+API_KEY = "my_secret_key"
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+✅ GOOD
+```python
+# config.py
+import os
 
-## Testing
+API_KEY = os.getenv("API_KEY")
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+## Common Patterns and Anti-patterns
 
-## Operations
+### Use the @traceable Decorator
+Always instrument your functions with the `@traceable` decorator to enable automatic observability. This is essential for debugging and performance monitoring.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD
+```python
+def my_function(input_data):
+    # No tracing
+    return output
+```
+
+✅ GOOD
+```python
+from langsmith import traceable
+
+@traceable
+def my_function(input_data):
+    return output
+```
+
+### Avoid Hardcoding Prompts
+Never hardcode prompts directly in your source files. Instead, utilize LangSmith Hub for managing prompts. This ensures version control and immutability.
+
+❌ BAD
+```python
+# Hardcoded prompt
+PROMPT = "What is the capital of France?"
+```
+
+✅ GOOD
+```python
+# Use LangSmith Hub for prompts
+from langsmith import Hub
+
+PROMPT = Hub.get_prompt("capital_question")
+```
+
+## Performance Considerations
+
+### Optimize Data Processing
+When processing large datasets, use generators to handle data efficiently and reduce memory consumption.
+
+❌ BAD
+```python
+# Loading all data into memory
+data = [load_data(i) for i in range(10000)]
+```
+
+✅ GOOD
+```python
+# Using a generator
+def data_generator():
+    for i in range(10000):
+        yield load_data(i)
+
+for data in data_generator():
+    process(data)
+```
+
+### Use Caching for Repeated Calls
+Implement caching for functions that are called frequently with the same parameters. This can significantly improve performance.
+
+❌ BAD
+```python
+def expensive_function(param):
+    # Some heavy computation
+    return result
+```
+
+✅ GOOD
+```python
+from functools import lru_cache
+
+@lru_cache(maxsize=128)
+def expensive_function(param):
+    # Some heavy computation
+    return result
+```
+
+## Common Pitfalls and Gotchas
+
+### Be Cautious with Global State
+Avoid using global variables as they can lead to unpredictable behavior and make your code harder to test.
+
+❌ BAD
+```python
+# Global state
+global_state = {}
+
+def update_state(key, value):
+    global global_state
+    global_state[key] = value
+```
+
+✅ GOOD
+```python
+# Use a class to encapsulate state
+class StateManager:
+    def __init__(self):
+        self.state = {}
+
+    def update_state(self, key, value):
+        self.state[key] = value
+```
+
+### Handle Exceptions Gracefully
+Always implement error handling to manage exceptions effectively. This prevents crashes and provides better user experiences.
+
+❌ BAD
+```python
+def risky_function():
+    result = some_operation()
+    return result
+```
+
+✅ GOOD
+```python
+def risky_function():
+    try:
+        result = some_operation()
+    except Exception as e:
+        handle_error(e)
+        return None
+    return result
+```
+
+## Testing Approaches
+
+### Use Dataset-Driven Evaluation
+Build datasets from production traces and run them as regression tests before deployment. This ensures your model performs reliably.
+
+❌ BAD
+```python
+# No evaluation strategy
+def deploy_model():
+    # Deploy without testing
+    pass
+```
+
+✅ GOOD
+```python
+def deploy_model():
+    evaluate_model_on_datasets()
+    # Proceed with deployment
+```
+
+### Implement Unit Tests for Critical Functions
+Write unit tests for all critical functions to ensure they behave as expected. Use a testing framework like pytest.
+
+❌ BAD
+```python
+# No tests implemented
+def my_function():
+    return True
+```
+
+✅ GOOD
+```python
+import pytest
+
+def my_function():
+    return True
+
+def test_my_function():
+    assert my_function() is True
+```
+
+By following these best practices, you will ensure that your use of langsmith is efficient, maintainable, and robust. Always prioritize observability, modularity, and testing in your development workflow.

@@ -1,44 +1,190 @@
 ---
-description: Best practices and coding standards for Trino.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides actionable best practices for using Trino, focusing on performance-oriented SQL analytics, effective Java development, and practical coding patterns.
+globs: **/*
 ---
-
 # Trino Best Practices
 
-Tags: data-engineering, sql, analytics, distributed
+## Code Organization and Structure
 
-## Code organization
+### Use Proper Naming Conventions
+Acronyms in naming should follow title casing. This improves readability and maintains consistency across the codebase.
 
-- Follow idiomatic Trino project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```java
+HttpClient client = new HttpClient();
+```
 
-## Data quality
+✅ GOOD
+```java
+HttpClient client = new HttpClient();
+```
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+### Organize Code by Functionality
+Group related classes and functions together. This makes the codebase easier to navigate and maintain.
 
-## Performance
+❌ BAD
+```
+src/
+  ├── utils/
+  ├── models/
+  ├── services/
+  └── controllers/
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD
+```
+src/
+  ├── user/
+  │   ├── UserService.java
+  │   └── UserController.java
+  ├── order/
+  │   ├── OrderService.java
+  │   └── OrderController.java
+  └── utils/
+```
 
-## Security
+## Common Patterns and Anti-patterns
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+### Avoid SELECT *
+Using `SELECT *` can lead to unnecessary data retrieval, which increases I/O and degrades performance. Always specify the columns you need.
 
-## Testing
+❌ BAD
+```sql
+SELECT * FROM orders;
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+✅ GOOD
+```sql
+SELECT order_id, customer_id, total_amount FROM orders;
+```
 
-## Operations
+### Optimize Joins with Smaller Tables First
+When joining tables, ensure the smaller table is on the build (right) side of the join to optimize memory usage.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD
+```sql
+SELECT *
+FROM large_table lt
+JOIN small_table st ON lt.id = st.large_table_id;
+```
+
+✅ GOOD
+```sql
+SELECT *
+FROM small_table st
+JOIN large_table lt ON lt.id = st.large_table_id;
+```
+
+## Performance Considerations
+
+### Maintain Up-to-Date Table Statistics
+Regularly run the `ANALYZE` command to keep table statistics current. This helps the Cost-Based Optimizer (CBO) generate efficient execution plans.
+
+❌ BAD
+```sql
+-- Forgetting to analyze tables
+SELECT * FROM orders WHERE order_date > '2023-01-01';
+```
+
+✅ GOOD
+```sql
+ANALYZE orders;
+SELECT * FROM orders WHERE order_date > '2023-01-01';
+```
+
+### Use Dynamic Filtering
+When joining large fact tables to small dimension tables, leverage dynamic filtering to push down predicates and skip unnecessary data.
+
+❌ BAD
+```sql
+SELECT *
+FROM large_fact_table lft
+JOIN small_dimension_table sdt ON lft.dim_id = sdt.id
+WHERE sdt.category = 'electronics';
+```
+
+✅ GOOD
+```sql
+SELECT *
+FROM large_fact_table lft
+JOIN small_dimension_table sdt ON lft.dim_id = sdt.id
+WHERE sdt.category = 'electronics' 
+  AND lft.order_date > '2023-01-01';
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Mutable Collections
+Use immutable collections to prevent unintended side effects and improve code clarity.
+
+❌ BAD
+```java
+List<String> names = new ArrayList<>();
+names.add("Alice");
+names.add("Bob");
+```
+
+✅ GOOD
+```java
+List<String> names = List.of("Alice", "Bob");
+```
+
+### Follow Effective Java Guidelines
+Adhere strictly to Effective Java guidelines for better code quality and maintainability.
+
+❌ BAD
+```java
+CompletableFuture<String> future = new CompletableFuture<>();
+```
+
+✅ GOOD
+```java
+ListenableFuture<String> future = Futures.immediateFuture("result");
+```
+
+## Testing Approaches
+
+### Use Unit Tests for Critical Logic
+Ensure that all critical business logic is covered with unit tests. This helps catch issues early and ensures code reliability.
+
+❌ BAD
+```java
+// No unit tests for business logic
+public void processOrder(Order order) {
+    // processing logic
+}
+```
+
+✅ GOOD
+```java
+@Test
+public void testProcessOrder() {
+    Order order = new Order();
+    // setup order
+    processOrder(order);
+    // assert expected outcomes
+}
+```
+
+### Integration Tests for SQL Queries
+Implement integration tests to validate SQL queries against the database. This ensures that queries perform as expected in a real environment.
+
+❌ BAD
+```java
+// No integration tests for SQL queries
+public void fetchOrders() {
+    // SQL query logic
+}
+```
+
+✅ GOOD
+```java
+@Test
+public void testFetchOrders() {
+    List<Order> orders = fetchOrders();
+    assertFalse(orders.isEmpty());
+}
+```
+
+## Conclusion
+By following these best practices, you will ensure that your Trino development is efficient, maintainable, and high-performing. Always prioritize performance in your SQL queries and adhere to effective coding standards in Java.

@@ -1,38 +1,222 @@
 ---
-description: Best practices and coding standards for Google Cloud Run.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This guide provides essential best practices for developing applications on Google Cloud Run, focusing on performance, security, and effective code organization.
+globs: **/*
 ---
+# google-cloud-run Best Practices
 
-# Google Cloud Run Best Practices
+This document outlines the best practices for developing applications using Google Cloud Run. It covers code organization, common patterns, performance considerations, pitfalls, and testing approaches to ensure your applications are efficient, secure, and maintainable.
 
-Tags: gcp, cloud, serverless, containers
+## Code Organization and Structure
 
-## Code organization
+### Use a Single Entry Point
 
-- Follow idiomatic Google Cloud Run project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+Always define a single entry point for your application. This keeps your deployment simple and predictable.
 
-## Performance
+❌ BAD
+```python
+# Multiple entry points can cause confusion
+from flask import Flask
+app1 = Flask(__name__)
+app2 = Flask(__name__)
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+@app1.route('/')
+def hello1():
+    return "Hello from app1!"
 
-## Security
+@app2.route('/')
+def hello2():
+    return "Hello from app2!"
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+✅ GOOD
+```python
+from flask import Flask
+app = Flask(__name__)
 
-## Testing
+@app.route('/')
+def hello():
+    return "Hello from the application!"
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Organize Code by Functionality
 
-## Operations
+Structure your code into modules based on functionality. This improves maintainability and readability.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD
+```
+/app
+    app.py
+    utils.py
+    models.py
+    views.py
+```
+
+✅ GOOD
+```
+/app
+    /controllers
+        user_controller.py
+        order_controller.py
+    /models
+        user_model.py
+        order_model.py
+    /services
+        user_service.py
+        order_service.py
+    main.py
+```
+
+## Common Patterns and Anti-patterns
+
+### Stateless Services
+
+Ensure your services are stateless. This allows Cloud Run to scale efficiently.
+
+❌ BAD
+```python
+# Storing state in memory
+current_requests = 0
+
+@app.route('/increment')
+def increment():
+    global current_requests
+    current_requests += 1
+    return str(current_requests)
+```
+
+✅ GOOD
+```python
+# Use a database or external store for state
+@app.route('/increment')
+def increment():
+    # Increment in a database
+    return "Incremented!"
+```
+
+### Use Environment Variables for Configuration
+
+Store configuration in environment variables rather than hardcoding them.
+
+❌ BAD
+```python
+API_KEY = "my-hardcoded-api-key"
+```
+
+✅ GOOD
+```python
+import os
+
+API_KEY = os.getenv('API_KEY')
+```
+
+## Performance Considerations
+
+### Optimize Concurrency Settings
+
+Set concurrency based on the nature of your workload. For CPU-bound tasks, use low concurrency; for I/O-bound tasks, use higher concurrency.
+
+❌ BAD
+```yaml
+# Using default concurrency setting
+concurrency: 80
+```
+
+✅ GOOD
+```yaml
+# Set concurrency based on workload
+concurrency: 5  # For CPU-bound tasks
+```
+
+### Minimize Cold Start Latency
+
+Keep your container warm by using minimum instances if latency is critical.
+
+❌ BAD
+```yaml
+# No minimum instances set
+minInstances: 0
+```
+
+✅ GOOD
+```yaml
+# Set minimum instances for warm starts
+minInstances: 1
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Long-Running Background Tasks
+
+Do not run long background tasks in request-based billing models. Use instance-based billing for such tasks.
+
+❌ BAD
+```python
+@app.route('/long-task')
+def long_task():
+    # This blocks the request
+    for _ in range(100000000):
+        pass
+    return "Task completed!"
+```
+
+✅ GOOD
+```python
+@app.route('/start-long-task')
+def start_long_task():
+    # Start a background task using a queue or pub/sub
+    return "Task started!"
+```
+
+### Ensure Idempotency
+
+Make all functions idempotent to handle retries safely.
+
+❌ BAD
+```python
+@app.route('/process')
+def process():
+    # Non-idempotent operation
+    process_order()
+    return "Order processed!"
+```
+
+✅ GOOD
+```python
+@app.route('/process')
+def process():
+    # Idempotent operation
+    if not order_exists():
+        process_order()
+    return "Order processed!"
+```
+
+## Testing Approaches
+
+### Use Integration Tests for Endpoints
+
+Write integration tests to validate your Cloud Run endpoints.
+
+```python
+import requests
+
+def test_hello_endpoint():
+    response = requests.get('https://your-cloud-run-url/')
+    assert response.status_code == 200
+    assert response.text == "Hello from the application!"
+```
+
+### Mock External Services
+
+When testing, mock external services to avoid dependencies.
+
+```python
+from unittest.mock import patch
+
+@patch('module_name.external_service_call')
+def test_service(mock_service):
+    mock_service.return_value = "mocked response"
+    response = my_service_function()
+    assert response == "expected result"
+```
+
+By following these best practices, you will create efficient, secure, and maintainable applications on Google Cloud Run.

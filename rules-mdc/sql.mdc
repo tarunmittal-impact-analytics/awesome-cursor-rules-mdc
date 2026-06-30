@@ -1,44 +1,182 @@
 ---
-description: Best practices and coding standards for Sql.
-globs: **/*.{sql,py}
+description: This guide provides actionable SQL best practices for enhancing code readability, performance, and security in modern database development.
+globs: **/*.sql
 ---
+# SQL Best Practices
 
-# Sql Best Practices
+This document outlines essential SQL best practices that will help you write clean, efficient, and secure SQL code. Follow these guidelines to improve readability, maintainability, and performance in your database interactions.
 
-Tags: database, sql, query-language, data-engineering
+## Code Organization and Structure
 
-## Code organization
+### Use Uppercase for SQL Keywords
+Always write SQL keywords in uppercase to improve readability and distinguish them from identifiers.
 
-- Follow idiomatic Sql project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```sql
+select name, age from users where age > 18;
+```
 
-## Data quality
+✅ GOOD
+```sql
+SELECT name, age FROM users WHERE age > 18;
+```
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+### Consistent Indentation and Line Breaks
+Align keywords flush left and use consistent indentation for readability.
 
-## Performance
+❌ BAD
+```sql
+SELECT name,
+       age
+FROM users
+WHERE age > 18;
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD
+```sql
+SELECT name,
+       age
+FROM users
+WHERE age > 18;
+```
 
-## Security
+### Avoid SELECT *
+Using `SELECT *` can lead to performance issues and makes it harder to understand what data is being fetched.
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+❌ BAD
+```sql
+SELECT * FROM users;
+```
 
-## Testing
+✅ GOOD
+```sql
+SELECT id, name, age FROM users;
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+## Common Patterns and Anti-patterns
 
-## Operations
+### Use Common Table Expressions (CTEs) for Complex Queries
+CTEs improve readability and help break down complex queries.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD
+```sql
+SELECT name, age FROM users WHERE id IN (
+    SELECT user_id FROM orders WHERE total > 100
+);
+```
+
+✅ GOOD
+```sql
+WITH HighValueOrders AS (
+    SELECT user_id FROM orders WHERE total > 100
+)
+SELECT name, age FROM users WHERE id IN (SELECT user_id FROM HighValueOrders);
+```
+
+## Performance Considerations
+
+### Always Use Indexes on Foreign Keys
+Ensure foreign keys are indexed to improve join performance, especially in large datasets.
+
+❌ BAD
+```sql
+CREATE TABLE orders (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES users(id)
+);
+```
+
+✅ GOOD
+```sql
+CREATE TABLE orders (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX (user_id)
+);
+```
+
+### Leverage Database-Specific Features
+Utilize modern features like PostgreSQL's B-tree skip scans for optimized querying.
+
+✅ GOOD
+```sql
+SELECT * FROM orders WHERE user_id = 1 AND created_at > NOW() - INTERVAL '1 month';
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Implicit Type Conversion
+Always ensure that data types match to prevent unexpected behavior.
+
+❌ BAD
+```sql
+SELECT * FROM users WHERE age = '18';  -- Implicit conversion
+```
+
+✅ GOOD
+```sql
+SELECT * FROM users WHERE age = 18;  -- Explicit match
+```
+
+## Security Best Practices
+
+### Use Parameterized Queries
+Always use parameterized queries to prevent SQL injection attacks.
+
+❌ BAD
+```sql
+EXECUTE IMMEDIATE 'SELECT * FROM users WHERE id = ' || user_input;
+```
+
+✅ GOOD
+```sql
+PREPARE stmt AS SELECT * FROM users WHERE id = $1;
+EXECUTE stmt(user_input);
+```
+
+## Query Optimization
+
+### Analyze and Optimize Queries Regularly
+Use tools like `EXPLAIN ANALYZE` to identify slow queries and optimize them.
+
+✅ GOOD
+```sql
+EXPLAIN ANALYZE SELECT name FROM users WHERE age > 18;
+```
+
+## Data Modeling
+
+### Follow Third Normal Form (3NF)
+Design your schema to comply with 3NF to eliminate redundancy and improve data integrity.
+
+✅ GOOD
+```sql
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    age INT NOT NULL
+);
+```
+
+## Testing Approaches
+
+### Use Test Data for Development
+Always use a separate test database with realistic data for testing queries.
+
+✅ GOOD
+```sql
+INSERT INTO users (name, age) VALUES ('Test User', 30);
+```
+
+## Automate Style Enforcement
+
+### Use SQLFluff for Style Consistency
+Integrate SQLFluff into your CI/CD pipeline to enforce style rules automatically.
+
+✅ GOOD
+```bash
+sqlfluff lint your_script.sql
+```
+
+By following these best practices, you will enhance the quality of your SQL code, making it more maintainable, efficient, and secure. Always strive for clarity and performance in your database interactions.

@@ -1,38 +1,204 @@
 ---
-description: Best practices and coding standards for Rabbitmq.
-globs: **/*.{py,ts,go,rs,java}
+description: This guide provides actionable best practices for using RabbitMQ effectively in backend applications.
+globs: **/*
 ---
+# rabbitmq Best Practices
 
-# Rabbitmq Best Practices
+This document outlines essential guidelines for utilizing RabbitMQ in your backend applications, focusing on reliability, performance, and security. Follow these practices to build robust messaging systems.
 
-Tags: messaging, queue, backend, distributed
+## Code Organization and Structure
 
-## Code organization
+### Use Quorum Queues for Production
 
-- Follow idiomatic Rabbitmq project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+**Why:** Quorum queues provide better durability and fault tolerance using the Raft protocol.
 
-## Performance
+```python
+# ❌ BAD: Using classic queues
+channel.queue_declare(queue='my_queue', durable=False)
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+# ✅ GOOD: Use quorum queues
+channel.queue_declare(queue='my_quorum_queue', durable=True, arguments={"x-queue-type": "quorum"})
+```
 
-## Security
+### Separate Configuration
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+**Why:** Maintain a clean separation of configuration from your application logic.
 
-## Testing
+```python
+# ❌ BAD: Hardcoding configuration
+rabbitmq_host = "localhost"
+rabbitmq_queue = "my_queue"
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+# ✅ GOOD: Use a configuration file or environment variables
+import os
 
-## Operations
+rabbitmq_host = os.getenv("RABBITMQ_HOST", "localhost")
+rabbitmq_queue = os.getenv("RABBITMQ_QUEUE", "my_queue")
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+## Common Patterns and Anti-patterns
+
+### Enable Publisher Confirms
+
+**Why:** Ensure messages are reliably published before proceeding.
+
+```python
+# ❌ BAD: Not using publisher confirms
+channel.basic_publish(exchange='',
+                      routing_key='my_queue',
+                      body='Hello World!')
+
+# ✅ GOOD: Use publisher confirms
+channel.confirm_select()
+channel.basic_publish(exchange='',
+                      routing_key='my_queue',
+                      body='Hello World!')
+if not channel.is_confirm_select():
+    raise Exception("Message not confirmed")
+```
+
+### Manual Acknowledgments
+
+**Why:** Avoid losing messages that have not been processed successfully.
+
+```python
+# ❌ BAD: Auto-acknowledgment
+channel.basic_consume(queue='my_queue', on_message_callback=callback, auto_ack=True)
+
+# ✅ GOOD: Manual acknowledgment
+def callback(ch, method, properties, body):
+    process_message(body)
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+channel.basic_consume(queue='my_queue', on_message_callback=callback, auto_ack=False)
+```
+
+## Performance Considerations
+
+### Set Prefetch Count
+
+**Why:** Control the number of unacknowledged messages sent to consumers to prevent overload.
+
+```python
+# ❌ BAD: Unlimited prefetch
+channel.basic_qos(prefetch_count=0)
+
+# ✅ GOOD: Set a specific prefetch count
+channel.basic_qos(prefetch_count=10)
+```
+
+### Monitor Queue Depth
+
+**Why:** Detect consumer bottlenecks early to avoid message buildup.
+
+```python
+# ✅ GOOD: Regularly check queue depth
+queue_info = channel.queue_declare(queue='my_queue', passive=True)
+print(f"Queue depth: {queue_info.method.message_count}")
+```
+
+## Common Pitfalls and Gotchas
+
+### Idempotent Consumers
+
+**Why:** Ensure that processing the same message multiple times does not cause unintended side effects.
+
+```python
+# ❌ BAD: Non-idempotent operation
+def process_message(body):
+    db.insert(body)  # This could lead to duplicates
+
+# ✅ GOOD: Idempotent operation
+def process_message(body):
+    if not db.exists(body['id']):
+        db.insert(body)
+```
+
+### Use Dead-Letter Exchanges (DLX)
+
+**Why:** Handle messages that cannot be processed successfully.
+
+```python
+# ✅ GOOD: Declare a DLX
+channel.queue_declare(queue='my_queue', durable=True, arguments={
+    'x-dead-letter-exchange': 'dlx_exchange'
+})
+```
+
+## Security Best Practices
+
+### Delete Default Guest User
+
+**Why:** Prevent unauthorized access to RabbitMQ.
+
+```bash
+# ✅ GOOD: Delete the default guest user
+rabbitmqctl delete_user guest
+```
+
+### Use TLS for Connections
+
+**Why:** Secure your message traffic over the network.
+
+```bash
+# ✅ GOOD: Configure RabbitMQ to use TLS
+# Update rabbitmq.conf
+listeners.ssl.default = 5671
+listeners.ssl.default_cert = /path/to/cert.pem
+listeners.ssl.default_key = /path/to/key.pem
+```
+
+## Error Handling
+
+### Implement Retry with Delay
+
+**Why:** Handle transient errors gracefully without overwhelming the system.
+
+```python
+import time
+
+def process_message_with_retry(body, retries=3):
+    for attempt in range(retries):
+        try:
+            process_message(body)
+            break  # Exit loop on success
+        except Exception as e:
+            if attempt < retries - 1:
+                time.sleep(2 ** attempt)  # Exponential backoff
+```
+
+## API Design
+
+### Use Consistent Naming Conventions
+
+**Why:** Improve readability and maintainability of your code.
+
+```python
+# ❌ BAD: Inconsistent naming
+def sendMsg():
+    pass
+
+# ✅ GOOD: Consistent naming
+def send_message():
+    pass
+```
+
+## Testing Approaches
+
+### Mock RabbitMQ in Tests
+
+**Why:** Isolate tests from external dependencies.
+
+```python
+from unittest.mock import MagicMock
+
+# ✅ GOOD: Mock RabbitMQ for unit tests
+mock_channel = MagicMock()
+mock_channel.basic_publish.return_value = None
+
+def test_publish_message():
+    publish_message(mock_channel, 'my_queue', 'test')
+    mock_channel.basic_publish.assert_called_once_with(exchange='', routing_key='my_queue', body='test')
+```
+
+By following these best practices, you will ensure that your RabbitMQ implementation is robust, secure, and efficient. Adopting these guidelines will help you avoid common pitfalls and build a messaging system that scales effectively.

@@ -1,44 +1,173 @@
 ---
-description: Best practices and coding standards for Google Bigquery.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This guide provides definitive best practices for using Google BigQuery effectively, focusing on performance optimization, code organization, and common pitfalls.
+globs: **/*
 ---
+# google-bigquery Best Practices
 
-# Google Bigquery Best Practices
+This document serves as a comprehensive guide to using Google BigQuery, emphasizing performance, maintainability, and best practices that should be adopted by every developer on the team.
 
-Tags: cloud, gcp, data-warehouse, sql, analytics, data-engineering
+## Code Organization and Structure
 
-## Code organization
+### Use Explicit Column Selection
+Avoid using `SELECT *` to improve performance and reduce costs. Always specify the columns you need.
 
-- Follow idiomatic Google Bigquery project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD:
+```sql
+SELECT * FROM my_dataset.my_table;
+```
 
-## Data quality
+✅ GOOD:
+```sql
+SELECT column1, column2, column3 FROM my_dataset.my_table;
+```
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+### Maintain Consistent Indentation
+Use consistent indentation to improve readability. The standard is 2 spaces per indentation level.
 
-## Performance
+✅ GOOD:
+```sql
+SELECT 
+  column1,
+  column2
+FROM 
+  my_dataset.my_table
+WHERE 
+  column1 = 'value';
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Use UPPER CASE for SQL Keywords
+For better readability and consistency, always write SQL keywords in uppercase.
 
-## Security
+✅ GOOD:
+```sql
+SELECT column1, column2 FROM my_dataset.my_table WHERE column1 = 'value';
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+### Use AS for Aliases
+Always use the `AS` keyword when creating aliases for clarity.
 
-## Testing
+✅ GOOD:
+```sql
+SELECT column1 AS c1, column2 AS c2 FROM my_dataset.my_table;
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+## Common Patterns and Anti-patterns
 
-## Operations
+### Prefer Time-Partitioned Tables
+Use time-partitioned tables instead of date-sharded tables for better performance and easier management.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD:
+```sql
+CREATE TABLE my_dataset.my_table
+PARTITION BY DATE(timestamp_column) AS
+SELECT * FROM source_table;
+```
+
+### Use Clustering for Frequent Query Columns
+Cluster tables on columns that are frequently used in `WHERE`, `GROUP BY`, and `JOIN` clauses, ordered by cardinality.
+
+✅ GOOD:
+```sql
+CREATE TABLE my_dataset.my_table
+CLUSTER BY column1, column2 AS
+SELECT * FROM source_table;
+```
+
+### Leverage Materialized Views
+For repeated aggregations, use materialized views to avoid scanning the base table.
+
+✅ GOOD:
+```sql
+CREATE MATERIALIZED VIEW my_dataset.my_view AS
+SELECT column1, COUNT(*) AS count
+FROM my_dataset.my_table
+GROUP BY column1;
+```
+
+## Performance Considerations
+
+### Filter Early in JOINs
+Filter and aggregate data as early as possible in your queries to reduce the amount of data shuffled across the network.
+
+✅ GOOD:
+```sql
+SELECT a.column1, COUNT(b.column2)
+FROM my_dataset.table_a AS a
+JOIN my_dataset.table_b AS b ON a.id = b.a_id
+WHERE a.status = 'active'
+GROUP BY a.column1;
+```
+
+### Use APPROX_COUNT_DISTINCT
+When counting unique values, prefer `APPROX_COUNT_DISTINCT` for better performance over `COUNT(DISTINCT ...)`.
+
+✅ GOOD:
+```sql
+SELECT APPROX_COUNT_DISTINCT(column1) AS unique_count
+FROM my_dataset.my_table;
+```
+
+### Monitor Costs and Performance
+Utilize `INFORMATION_SCHEMA.JOBS` to monitor job performance and costs, identifying any skewed stages.
+
+✅ GOOD:
+```sql
+SELECT *
+FROM `region-us`.INFORMATION_SCHEMA.JOBS_BY_USER
+WHERE user_email = 'your-email@example.com'
+ORDER BY creation_time DESC;
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid SELECT * in Subqueries
+Using `SELECT *` in subqueries can lead to unexpected costs and performance issues. Always specify columns.
+
+❌ BAD:
+```sql
+SELECT * FROM (
+    SELECT * FROM my_dataset.my_table
+) AS subquery;
+```
+
+✅ GOOD:
+```sql
+SELECT column1, column2 FROM (
+    SELECT column1, column2 FROM my_dataset.my_table
+) AS subquery;
+```
+
+### Be Cautious with JOINs
+Joining large tables without filtering can lead to performance degradation. Always apply filters before joining.
+
+❌ BAD:
+```sql
+SELECT a.column1, b.column2
+FROM my_dataset.table_a AS a
+JOIN my_dataset.table_b AS b ON a.id = b.a_id;
+```
+
+✅ GOOD:
+```sql
+SELECT a.column1, b.column2
+FROM my_dataset.table_a AS a
+JOIN my_dataset.table_b AS b ON a.id = b.a_id
+WHERE a.status = 'active';
+```
+
+## Testing Approaches
+
+### Use Query Validation
+Always validate your queries using the BigQuery console before execution to catch syntax errors early.
+
+✅ GOOD:
+```sql
+-- Run this in the BigQuery console to validate
+SELECT column1, column2 FROM my_dataset.my_table WHERE column1 = 'value';
+```
+
+### Automate Formatting
+Use the built-in BigQuery console tool to automate SQL formatting for consistency and readability.
+
+## Conclusion
+By adhering to these best practices, you can ensure your BigQuery usage is efficient, maintainable, and cost-effective. Always remember to review and refactor your queries regularly to align with these guidelines.

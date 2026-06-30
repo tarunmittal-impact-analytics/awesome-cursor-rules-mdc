@@ -1,38 +1,232 @@
 ---
-description: Best practices and coding standards for Lit.
-globs: **/*.{tsx,jsx,vue,svelte,css}
+description: This guide provides actionable best practices for using Lit in modern web development, focusing on component architecture, state management, performance, and accessibility.
+globs: **/*.{js,jsx}
 ---
+# lit Best Practices
 
-# Lit Best Practices
+This document serves as a definitive guide for using Lit effectively in your projects. Follow these best practices to ensure clean, efficient, and maintainable code.
 
-Tags: frontend, framework, web-components, javascript
+## Code Organization and Structure
 
-## Code organization
+### Use Separate Files for Logic and Templates
 
-- Follow idiomatic Lit project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```javascript
+class MyComponent extends LitElement {
+  render() {
+    return html`<div>${this.someMethod()}</div>`;
+  }
 
-## Performance
+  someMethod() {
+    return 'Hello World';
+  }
+}
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD
+```javascript
+// my-component.ts
+export function getGreeting() {
+  return 'Hello World';
+}
 
-## Security
+// my-component.js
+import { LitElement, html } from 'lit';
+import { getGreeting } from './my-component.ts';
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+class MyComponent extends LitElement {
+  render() {
+    return html`<div>${getGreeting()}</div>`;
+  }
+}
+```
+**Why:** Keeping business logic separate from templates improves readability and maintainability.
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Use Properties and State Correctly
 
-## Operations
+❌ BAD
+```javascript
+class MyComponent extends LitElement {
+  @state() count = 0;
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+  increment() {
+    this.count++;
+  }
+}
+```
+
+✅ GOOD
+```javascript
+class MyComponent extends LitElement {
+  @property({ type: Number }) count = 0;
+
+  increment() {
+    this.count++;
+  }
+}
+```
+**Why:** Use `@property` for public APIs to ensure they are reactive. Use `@state` only for internal state management.
+
+## Performance Considerations
+
+### Optimize Rendering with Lifecycle Methods
+
+❌ BAD
+```javascript
+class MyComponent extends LitElement {
+  updated(changedProperties) {
+    if (changedProperties.has('count')) {
+      this.dispatchEvent(new CustomEvent('count-changed'));
+    }
+  }
+}
+```
+
+✅ GOOD
+```javascript
+class MyComponent extends LitElement {
+  async updated(changedProperties) {
+    if (changedProperties.has('count')) {
+      await this.updateComplete; // Ensure DOM is updated
+      this.dispatchEvent(new CustomEvent('count-changed'));
+    }
+  }
+}
+```
+**Why:** Always await `this.updateComplete` before dispatching events that rely on the rendered DOM to avoid inconsistencies.
+
+## Common Pitfalls and Gotchas
+
+### Avoid Browser-Specific APIs in SSR
+
+❌ BAD
+```javascript
+class MyComponent extends LitElement {
+  updated() {
+    console.log(window.innerWidth); // Direct access to window
+  }
+}
+```
+
+✅ GOOD
+```javascript
+class MyComponent extends LitElement {
+  updated() {
+    if (typeof window !== 'undefined') {
+      console.log(window.innerWidth); // Guard against SSR
+    }
+  }
+}
+```
+**Why:** Ensure compatibility with server-side rendering by checking for browser-specific APIs.
+
+## Component Architecture
+
+### Favor Composition Over Inheritance
+
+❌ BAD
+```javascript
+class BaseComponent extends LitElement {
+  // Base functionality
+}
+
+class MyComponent extends BaseComponent {
+  // Inherits from BaseComponent
+}
+```
+
+✅ GOOD
+```javascript
+class MyComponent extends LitElement {
+  render() {
+    return html`<my-other-component></my-other-component>`;
+  }
+}
+```
+**Why:** Component composition leads to more flexible and reusable components compared to inheritance.
+
+## State Management
+
+### Use the Mediator Pattern for Peer Communication
+
+❌ BAD
+```javascript
+class ParentComponent extends LitElement {
+  handleChildEvent(event) {
+    this.childComponent.someMethod();
+  }
+}
+```
+
+✅ GOOD
+```javascript
+class ParentComponent extends LitElement {
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('child-event', this.handleChildEvent.bind(this));
+  }
+
+  handleChildEvent(event) {
+    // Handle event
+  }
+}
+```
+**Why:** Use events to communicate between components, promoting decoupling and reusability.
+
+## Accessibility
+
+### Ensure ARIA Roles and Attributes are Set
+
+❌ BAD
+```javascript
+class MyComponent extends LitElement {
+  render() {
+    return html`<button>${this.label}</button>`;
+  }
+}
+```
+
+✅ GOOD
+```javascript
+class MyComponent extends LitElement {
+  render() {
+    return html`<button aria-label="${this.label}">${this.label}</button>`;
+  }
+}
+```
+**Why:** Always use ARIA roles and attributes to enhance accessibility for assistive technologies.
+
+## Testing Approaches
+
+### Use Lit Testing Utilities
+
+❌ BAD
+```javascript
+import { html } from 'lit';
+import { expect } from 'chai';
+
+describe('MyComponent', () => {
+  it('renders correctly', () => {
+    const el = new MyComponent();
+    document.body.appendChild(el);
+    expect(el.shadowRoot.querySelector('button').textContent).to.equal('Click me');
+  });
+});
+```
+
+✅ GOOD
+```javascript
+import { html, fixture, expect } from '@open-wc/testing';
+
+describe('MyComponent', () => {
+  it('renders correctly', async () => {
+    const el = await fixture(html`<my-component></my-component>`);
+    expect(el.shadowRoot.querySelector('button').textContent).to.equal('Click me');
+  });
+});
+```
+**Why:** Use the testing utilities from the Lit ecosystem to simplify your tests and ensure they are reliable.
+
+By following these guidelines, you will create robust, maintainable, and performant Lit components that adhere to modern best practices. Always remember to keep your code clean, organized, and accessible.

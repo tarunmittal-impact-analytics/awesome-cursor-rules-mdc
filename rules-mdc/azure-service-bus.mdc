@@ -1,38 +1,147 @@
 ---
-description: Best practices and coding standards for Azure Service Bus.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This guide provides best practices for using Azure Service Bus effectively with the Azure.Messaging.ServiceBus SDK, focusing on performance, structure, and common pitfalls.
+globs: **/*
 ---
+# azure-service-bus Best Practices
 
-# Azure Service Bus Best Practices
+This document outlines critical best practices for using Azure Service Bus with the Azure.Messaging.ServiceBus SDK. Following these guidelines will help you build robust, efficient, and maintainable messaging solutions.
 
-Tags: azure, cloud, messaging, queue
+## Code Organization and Structure
 
-## Code organization
+### Use Dependency Injection for ServiceBusClient
 
-- Follow idiomatic Azure Service Bus project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+**Why:** Registering `ServiceBusClient`, `Sender`, and `Receiver` as singletons ensures optimal connection reuse and resource management.
 
-## Performance
+```csharp
+// ❌ BAD: Creating a new instance for every operation
+var client = new ServiceBusClient(connectionString);
+var sender = client.CreateSender("queue-name");
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+// ✅ GOOD: Register as singleton in Startup.cs
+builder.Services.AddAzureClients(clientBuilder => {
+    clientBuilder.AddServiceBusClient(connectionString);
+});
+```
 
-## Security
+## Common Patterns and Anti-patterns
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+### Use ServiceBusProcessor for Message Handling
 
-## Testing
+**Why:** `ServiceBusProcessor` simplifies message processing and provides reliable message handling with built-in concurrency control.
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+```csharp
+// ✅ GOOD: Using ServiceBusProcessor for handling messages
+var processor = client.CreateProcessor("queue-name", new ServiceBusProcessorOptions {
+    MaxConcurrentCalls = 5,
+    AutoCompleteMessages = false,
+    PrefetchCount = 20
+});
 
-## Operations
+processor.ProcessMessageAsync += async args => {
+    // Process message
+    await args.CompleteMessageAsync(args.Message);
+};
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+processor.ProcessErrorAsync += async args => {
+    // Log error
+};
+
+await processor.StartProcessingAsync();
+```
+
+### Avoid Using Sessions Unless Necessary
+
+**Why:** Sessions limit parallelism and should only be used when strict FIFO ordering is required.
+
+```csharp
+// ❌ BAD: Using sessions unnecessarily
+var sessionProcessor = client.CreateSessionProcessor("queue-name", new ServiceBusSessionProcessorOptions {
+    MaxConcurrentSessions = 5
+});
+
+// ✅ GOOD: Use sessions only when FIFO is critical
+var sessionProcessor = client.CreateSessionProcessor("queue-name");
+```
+
+## Performance Considerations
+
+### Batch Sends for Efficiency
+
+**Why:** Batching messages reduces the number of network calls, improving throughput.
+
+```csharp
+// ✅ GOOD: Using CreateMessageBatchAsync for batch sending
+var batch = await sender.CreateMessageBatchAsync();
+foreach (var message in messages) {
+    if (!batch.TryAddMessage(message)) {
+        await sender.SendMessageAsync(batch);
+        batch = await sender.CreateMessageBatchAsync();
+        batch.TryAddMessage(message);
+    }
+}
+await sender.SendMessageAsync(batch);
+```
+
+### Configure PrefetchCount and MaxConcurrentCalls
+
+**Why:** Properly configuring these options can significantly reduce latency and improve throughput.
+
+```csharp
+// ✅ GOOD: Configuring prefetch and concurrency settings
+var processor = client.CreateProcessor("queue-name", new ServiceBusProcessorOptions {
+    MaxConcurrentCalls = 10,
+    PrefetchCount = 50,
+    AutoCompleteMessages = false
+});
+```
+
+## Common Pitfalls and Gotchas
+
+### Disable AutoCompleteMessages
+
+**Why:** Disabling `AutoCompleteMessages` allows explicit control over message settlement, preventing message loss.
+
+```csharp
+// ❌ BAD: Leaving AutoCompleteMessages enabled
+var processor = client.CreateProcessor("queue-name", new ServiceBusProcessorOptions {
+    AutoCompleteMessages = true
+});
+
+// ✅ GOOD: Disable AutoCompleteMessages for explicit control
+var processor = client.CreateProcessor("queue-name", new ServiceBusProcessorOptions {
+    AutoCompleteMessages = false
+});
+```
+
+### Avoid SAS Tokens for Authentication
+
+**Why:** Use Microsoft Entra ID (Managed Identity) for better security and management.
+
+```csharp
+// ❌ BAD: Using SAS tokens for authentication
+var client = new ServiceBusClient(connectionString, new ServiceBusClientOptions {
+    Credential = new AzureSasCredential("your-sas-token")
+});
+
+// ✅ GOOD: Use Managed Identity for authentication
+var client = new ServiceBusClient("your-service-bus-namespace.servicebus.windows.net", new DefaultAzureCredential());
+```
+
+## Testing Approaches
+
+### Use In-Memory Testing for Unit Tests
+
+**Why:** In-memory testing allows for quick and isolated tests of your message handling logic without needing an actual Service Bus instance.
+
+```csharp
+// ✅ GOOD: Mocking ServiceBusClient for unit tests
+var mockClient = new Mock<ServiceBusClient>();
+var mockSender = new Mock<ServiceBusSender>();
+mockClient.Setup(c => c.CreateSender(It.IsAny<string>())).Returns(mockSender.Object);
+
+// Test your message sending logic here
+```
+
+## Conclusion
+
+By following these best practices, you will enhance your Azure Service Bus implementations, ensuring they are efficient, maintainable, and scalable. Always prioritize using the latest SDK features and patterns to avoid deprecated practices as the Azure ecosystem evolves.

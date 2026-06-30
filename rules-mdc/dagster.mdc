@@ -1,44 +1,212 @@
 ---
-description: Best practices and coding standards for Dagster.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides actionable best practices for using Dagster, focusing on code organization, common patterns, performance considerations, and testing approaches to streamline data orchestration workflows.
+globs: **/*.py
 ---
+# dagster Best Practices
 
-# Dagster Best Practices
+## Code Organization and Structure
 
-Tags: data-engineering, orchestration, workflow, python
+### Use an Asset-Centric Model
+**Always define your pipelines as assets using the `@asset` decorator.** This approach enhances observability and allows for independent retries.
 
-## Code organization
+```python
+from dagster import asset
 
-- Follow idiomatic Dagster project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+@asset
+def daily_revenue():
+    # Logic to calculate daily revenue
+    return revenue
+```
 
-## Data quality
+### Modular Project Structure
+**Organize your Dagster project into multiple modules.** This promotes code reuse and isolates dependencies.
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+```plaintext
+my_dagster_project/
+│
+├── assets/
+│   ├── __init__.py
+│   └── revenue.py
+│
+├── jobs/
+│   ├── __init__.py
+│   └── revenue_job.py
+│
+├── resources/
+│   ├── __init__.py
+│   └── database.py
+│
+└── main.py
+```
 
-## Performance
+## Common Patterns and Anti-patterns
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Use Nouns for Asset Naming
+**Name your assets with nouns, not verbs.** This clarifies what the asset represents.
 
-## Security
+```python
+# ❌ BAD
+@asset
+def calculate_daily_revenue():
+    return revenue
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+# ✅ GOOD
+@asset
+def daily_revenue():
+    return revenue
+```
 
-## Testing
+### Dependency Injection with Resources
+**Always use resources for external dependencies.** This avoids hard-coded values and enhances testability.
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+```python
+from dagster import resource
 
-## Operations
+@resource
+def db_resource():
+    return create_database_connection()
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+@asset(required_resource_keys={"db"})
+def daily_revenue(db):
+    # Use the db resource connection
+    return db.query("SELECT SUM(revenue) FROM sales")
+```
+
+## Performance Considerations
+
+### Granular Assets
+**Break down large assets into smaller, granular pieces.** This improves performance and allows for better observability.
+
+```python
+@asset
+def sales_data():
+    # Load sales data
+    return data
+
+@asset(depends_on=[sales_data])
+def daily_revenue(sales_data):
+    # Calculate daily revenue from sales data
+    return sum(sales_data)
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Monolithic Pipelines
+**Do not create monolithic pipelines.** This complicates debugging and makes it harder to manage dependencies.
+
+```python
+# ❌ BAD
+@job
+def monolithic_job():
+    calculate_daily_revenue()
+    send_email_report()
+
+# ✅ GOOD
+@job
+def revenue_job():
+    daily_revenue()
+    send_email_report()
+```
+
+### Environment-Specific Configuration
+**Utilize environment variables for configuration.** This allows for easy switching between development and production environments.
+
+```python
+import os
+
+@resource
+def db_resource():
+    db_url = os.getenv("DATABASE_URL")
+    return create_database_connection(db_url)
+```
+
+## Type Hints
+
+### Use Type Hints for Clarity
+**Always use type hints in your assets and resources.** This improves readability and aids in debugging.
+
+```python
+from typing import Any
+
+@asset
+def daily_revenue() -> float:
+    return revenue
+```
+
+## Virtual Environments
+
+### Use Virtual Environments for Isolation
+**Always develop in a virtual environment.** This avoids dependency conflicts and keeps your project clean.
+
+```bash
+# Create a virtual environment
+python -m venv venv
+
+# Activate the virtual environment
+source venv/bin/activate
+
+# Install Dagster
+pip install dagster
+```
+
+## Packaging
+
+### Package Your Dagster Project
+**Package your Dagster project for easy distribution.** This simplifies deployment and versioning.
+
+```plaintext
+my_dagster_project/
+│
+├── setup.py
+├── MANIFEST.in
+└── my_dagster_project/
+    ├── __init__.py
+    └── ...
+```
+
+```python
+# setup.py
+from setuptools import setup, find_packages
+
+setup(
+    name='my_dagster_project',
+    version='0.1.0',
+    packages=find_packages(),
+    install_requires=[
+        'dagster',
+        'dagster-postgres',
+    ],
+)
+```
+
+## Testing Approaches
+
+### Write Tests for Your Assets
+**Always write tests for your assets and jobs.** This ensures your code behaves as expected.
+
+```python
+from dagster import execute_job
+from my_dagster_project.jobs.revenue_job import revenue_job
+
+def test_revenue_job():
+    result = execute_job(revenue_job)
+    assert result.success
+```
+
+### Mock Resources in Tests
+**Use mocks for resources in your tests.** This allows you to isolate tests from external dependencies.
+
+```python
+from dagster import build_op_context
+
+def test_daily_revenue(mocker):
+    mock_db = mocker.patch('my_dagster_project.resources.db_resource')
+    mock_db.query.return_value = [100, 200, 300]
+
+    context = build_op_context(resources={"db": mock_db})
+    result = daily_revenue(context)
+    
+    assert result == 600
+```
+
+By following these best practices, you will ensure your Dagster projects are maintainable, testable, and scalable.

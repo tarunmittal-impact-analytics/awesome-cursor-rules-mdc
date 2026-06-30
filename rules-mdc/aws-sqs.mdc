@@ -1,38 +1,168 @@
 ---
-description: Best practices and coding standards for Aws Sqs.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This guide provides actionable best practices for using AWS SQS effectively, focusing on code organization, patterns, performance, pitfalls, and testing.
+globs: **/*
 ---
+# aws-sqs Best Practices
 
-# Aws Sqs Best Practices
+AWS SQS (Simple Queue Service) is a powerful messaging service that enables decoupled microservices. To maximize its effectiveness, follow these best practices.
 
-Tags: aws, cloud, messaging, queue
+## Code Organization and Structure
 
-## Code organization
+### Use Environment Variables for Configuration
+Always store sensitive information like AWS credentials and queue URLs in environment variables. This enhances security and allows for easier configuration management.
 
-- Follow idiomatic Aws Sqs project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+```javascript
+// ❌ BAD: Hardcoding credentials
+const AWS = require('aws-sdk');
+AWS.config.update({
+  accessKeyId: 'YOUR_ACCESS_KEY',
+  secretAccessKey: 'YOUR_SECRET_KEY',
+});
 
-## Performance
+// ✅ GOOD: Using environment variables
+const AWS = require('aws-sdk');
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY,
+});
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Modularize SQS Operations
+Encapsulate SQS operations in a dedicated module to enhance code reusability and maintainability.
 
-## Security
+```javascript
+// ✅ GOOD: SQS module
+const AWS = require('aws-sdk');
+const sqs = new AWS.SQS();
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+const sendMessage = async (queueUrl, messageBody) => {
+  const params = {
+    QueueUrl: queueUrl,
+    MessageBody: JSON.stringify(messageBody),
+  };
+  return await sqs.sendMessage(params).promise();
+};
 
-## Testing
+module.exports = { sendMessage };
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+## Common Patterns and Anti-patterns
 
-## Operations
+### Use Standard Queues by Default
+For most use cases, Standard queues are sufficient and provide high throughput.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+```javascript
+// ✅ GOOD: Using Standard Queue
+const queueUrl = process.env.STANDARD_QUEUE_URL;
+await sendMessage(queueUrl, { key: 'value' });
+```
+
+### Use FIFO Queues Only When Necessary
+FIFO queues should only be used when message order or exactly-once processing is critical.
+
+```javascript
+// ✅ GOOD: Using FIFO Queue for critical ordering
+const queueUrl = process.env.FIFO_QUEUE_URL;
+await sendMessage(queueUrl, { key: 'value' }, { MessageGroupId: 'group1' });
+```
+
+## Performance Considerations
+
+### Enable Long Polling
+Set `WaitTimeSeconds` to 20 seconds to reduce costs and avoid empty responses.
+
+```javascript
+// ✅ GOOD: Long polling configuration
+const params = {
+  QueueUrl: process.env.QUEUE_URL,
+  WaitTimeSeconds: 20,
+};
+const data = await sqs.receiveMessage(params).promise();
+```
+
+### Set Visibility Timeout Appropriately
+Set `VisibilityTimeout` to at least 6 times your consumer's function timeout to avoid premature re-processing.
+
+```javascript
+// ✅ GOOD: Visibility timeout configuration
+const params = {
+  QueueUrl: process.env.QUEUE_URL,
+  VisibilityTimeout: 60, // Adjust based on your function timeout
+};
+await sqs.changeMessageVisibility(params).promise();
+```
+
+## Common Pitfalls and Gotchas
+
+### Always Configure a Dead-Letter Queue (DLQ)
+Set up a DLQ with a `maxReceiveCount` of 3 to 5 to capture poison messages.
+
+```javascript
+// ✅ GOOD: DLQ configuration
+const dlqParams = {
+  QueueName: 'MyQueue-DLQ',
+  Attributes: {
+    RedrivePolicy: JSON.stringify({
+      deadLetterTargetArn: process.env.DLQ_ARN,
+      maxReceiveCount: '5',
+    }),
+  },
+};
+await sqs.createQueue(dlqParams).promise();
+```
+
+### Avoid Hardcoding Queue URLs
+Always reference queue URLs from environment variables or configuration files.
+
+```javascript
+// ❌ BAD: Hardcoding queue URL
+const queueUrl = 'https://sqs.us-east-1.amazonaws.com/123456789012/MyQueue';
+
+// ✅ GOOD: Using environment variable for queue URL
+const queueUrl = process.env.QUEUE_URL;
+```
+
+## Testing Approaches
+
+### Mock SQS in Unit Tests
+Use libraries like `aws-sdk-mock` to mock SQS calls in your unit tests.
+
+```javascript
+// ✅ GOOD: Mocking SQS in tests
+const AWSMock = require('aws-sdk-mock');
+const { sendMessage } = require('./sqsModule');
+
+AWSMock.mock('SQS', 'sendMessage', (params, callback) => {
+  callback(null, { MessageId: '12345' });
+});
+
+test('sendMessage sends a message', async () => {
+  const result = await sendMessage(process.env.QUEUE_URL, { key: 'value' });
+  expect(result.MessageId).toBe('12345');
+});
+
+AWSMock.restore('SQS');
+```
+
+### Integration Testing with Real SQS
+For integration tests, use a dedicated test queue and clean up after tests.
+
+```javascript
+// ✅ GOOD: Integration test setup
+const AWS = require('aws-sdk');
+const sqs = new AWS.SQS();
+
+beforeAll(async () => {
+  // Create test queue
+  const params = { QueueName: 'TestQueue' };
+  const data = await sqs.createQueue(params).promise();
+  process.env.QUEUE_URL = data.QueueUrl;
+});
+
+afterAll(async () => {
+  // Clean up test queue
+  await sqs.deleteQueue({ QueueUrl: process.env.QUEUE_URL }).promise();
+});
+```
+
+By following these guidelines, you will ensure that your use of AWS SQS is efficient, maintainable, and robust against common pitfalls.

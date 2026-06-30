@@ -1,38 +1,192 @@
 ---
-description: Best practices and coding standards for Aws Sns.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This document provides comprehensive best practices for using AWS SNS effectively, focusing on reliability, security, performance, and testing approaches.
+globs: **/*
 ---
+# aws-sns Best Practices
 
-# Aws Sns Best Practices
+AWS Simple Notification Service (SNS) is a powerful messaging service that supports various communication patterns. To leverage its full potential, follow these best practices.
 
-Tags: aws, cloud, messaging, pubsub
+## Code Organization and Structure
 
-## Code organization
+### Use the SNS to SQS to Lambda Pattern
 
-- Follow idiomatic Aws Sns project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+For production-grade applications, always implement the SNS to SQS to Lambda pattern. This ensures reliability and durability.
 
-## Performance
+❌ BAD:
+```javascript
+const AWS = require('aws-sdk');
+const sns = new AWS.SNS();
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+sns.publish({
+  Message: JSON.stringify({ key: 'value' }),
+  TopicArn: 'arn:aws:sns:us-east-1:123456789012:MyTopic'
+}).promise();
+```
 
-## Security
+✅ GOOD:
+```javascript
+const AWS = require('aws-sdk');
+const sns = new AWS.SNS();
+const sqs = new AWS.SQS();
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+const message = {
+  key: 'value',
+  correlationId: '12345',
+  eventType: 'MyEvent',
+  timestamp: new Date().toISOString(),
+};
 
-## Testing
+const params = {
+  MessageBody: JSON.stringify(message),
+  QueueUrl: 'https://sqs.us-east-1.amazonaws.com/123456789012/MyQueue',
+};
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+sqs.sendMessage(params).promise();
+```
 
-## Operations
+### Organize Topics and Subscriptions
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+Group related topics and subscriptions logically. Use naming conventions that reflect their purpose.
+
+✅ GOOD:
+```plaintext
+- MyApp
+  - UserRegistrationTopic
+  - UserNotificationsTopic
+  - OrderProcessingTopic
+```
+
+## Common Patterns and Anti-patterns
+
+### Use FIFO Topics for Ordering
+
+When message ordering is critical, always use FIFO topics with high-throughput mode enabled.
+
+❌ BAD:
+```javascript
+sns.publish({
+  Message: 'Order placed',
+  TopicArn: 'arn:aws:sns:us-east-1:123456789012:MyNonFifoTopic'
+});
+```
+
+✅ GOOD:
+```javascript
+sns.publish({
+  Message: 'Order placed',
+  TopicArn: 'arn:aws:sns:us-east-1:123456789012:MyFifoTopic.fifo',
+  MessageGroupId: 'OrderGroup1'
+});
+```
+
+### Implement Subscription Filter Policies
+
+Use subscription filter policies to ensure that only relevant events are delivered to subscribers.
+
+✅ GOOD:
+```javascript
+sns.subscribe({
+  Protocol: 'sqs',
+  TopicArn: 'arn:aws:sns:us-east-1:123456789012:MyTopic',
+  Endpoint: 'https://sqs.us-east-1.amazonaws.com/123456789012/MyQueue',
+  Attributes: {
+    FilterPolicy: JSON.stringify({
+      eventType: ['UserRegistration', 'UserUpdate']
+    })
+  }
+}).promise();
+```
+
+## Performance Considerations
+
+### Optimize Throughput with Message Group IDs
+
+For high-scale applications, utilize Message Group IDs to partition workloads and optimize throughput.
+
+✅ GOOD:
+```javascript
+const params = {
+  MessageBody: JSON.stringify(message),
+  TopicArn: 'arn:aws:sns:us-east-1:123456789012:MyFifoTopic.fifo',
+  MessageGroupId: 'UserGroup1'
+};
+
+sns.publish(params).promise();
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Direct SNS to Lambda Integrations
+
+Direct SNS to Lambda integrations can lead to throttling issues. Always use SQS as a buffer.
+
+❌ BAD:
+```javascript
+const sns = new AWS.SNS();
+sns.publish({
+  Message: 'Critical event',
+  TopicArn: 'arn:aws:sns:us-east-1:123456789012:MyTopic'
+}).promise(); // Direct to Lambda
+```
+
+✅ GOOD:
+```javascript
+const sqs = new AWS.SQS();
+sqs.sendMessage({
+  MessageBody: JSON.stringify({ event: 'Critical event' }),
+  QueueUrl: 'https://sqs.us-east-1.amazonaws.com/123456789012/MyQueue'
+}).promise(); // Use SQS as a buffer
+```
+
+### Ensure Idempotency in Consumers
+
+Design downstream consumers to be idempotent, as deduplication windows are limited.
+
+✅ GOOD:
+```javascript
+const processMessage = async (message) => {
+  const messageId = message.MessageId; // Use this to check if already processed
+  if (await isProcessed(messageId)) {
+    return; // Skip processing
+  }
+  // Process the message
+  await markAsProcessed(messageId);
+};
+```
+
+## Testing Approaches
+
+### Mock SNS and SQS in Unit Tests
+
+Use libraries like `aws-sdk-mock` to mock SNS and SQS interactions in your unit tests.
+
+✅ GOOD:
+```javascript
+const AWSMock = require('aws-sdk-mock');
+const { sendMessage } = require('./myModule'); // Your function that sends messages
+
+AWSMock.mock('SQS', 'sendMessage', (params, callback) => {
+  callback(null, { MessageId: '12345' });
+});
+
+// Test your sendMessage function
+sendMessage('Hello World');
+AWSMock.restore('SQS');
+```
+
+### Use LocalStack for Integration Testing
+
+For integration tests, use LocalStack to simulate AWS services locally.
+
+✅ GOOD:
+```bash
+# Start LocalStack
+localstack start
+
+# Use AWS CLI to create a topic
+aws --endpoint-url=http://localhost:4566 sns create-topic --name MyTopic
+```
+
+## Conclusion
+
+By adhering to these best practices for AWS SNS, you ensure that your messaging architecture is reliable, secure, and performant. Always prioritize the use of SQS as a buffer, implement security best practices, and design your message structures thoughtfully.

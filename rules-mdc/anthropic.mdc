@@ -1,44 +1,253 @@
 ---
-description: Best practices and coding standards for Anthropic.
-globs: **/*.{py,ts,tsx}
+description: This guide provides best practices for using the anthropic library, focusing on code organization, patterns, performance, error handling, and testing.
+globs: **/*
 ---
+# anthropic Best Practices
 
-# Anthropic Best Practices
+This document outlines essential guidelines for effectively using the anthropic library. Following these practices will help you maintain clean, efficient, and secure code while leveraging the capabilities of AI agents.
 
-Tags: ai, llm, gen-ai, api
+## Code Organization and Structure
 
-## Code organization
+### Use Modular Functions
+Organize your code into small, reusable functions. This enhances readability and maintainability.
 
-- Follow idiomatic Anthropic project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```python
+def process_data(data):
+    # All logic in one function
+    cleaned_data = clean(data)
+    analyzed_data = analyze(cleaned_data)
+    return generate_report(analyzed_data)
+```
 
-## AI-specific
+✅ GOOD
+```python
+def clean_data(data):
+    # Cleaning logic
+    return cleaned_data
 
-- Version prompts, models, and retrieval indexes together.
-- Log token usage, latency, and model version per request.
-- Treat LLM output as untrusted until validated.
+def analyze_data(cleaned_data):
+    # Analysis logic
+    return analyzed_data
 
-## Performance
+def generate_report(analyzed_data):
+    # Report generation logic
+    return report
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+def process_data(data):
+    cleaned_data = clean_data(data)
+    analyzed_data = analyze_data(cleaned_data)
+    return generate_report(analyzed_data)
+```
 
-## Security
+### Maintain Clear Documentation
+Create documentation files for each non-trivial task. This includes `plan.md`, `context.md`, and `tasks.md`.
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+- **plan.md**: Outline the blueprint of your task.
+- **context.md**: Document progress and decisions made.
+- **tasks.md**: Maintain checklists for task completion.
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Use Multi-Agent Architecture
+Implement a multi-agent approach with a planner, generator, and evaluator to streamline complex tasks.
 
-## Operations
+❌ BAD
+```python
+# Single agent handling everything
+def execute_task(task):
+    result = generate_code(task)
+    evaluate_code(result)
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD
+```python
+def planner(task):
+    # Plan the task
+    return plan
+
+def generator(plan):
+    # Generate code based on the plan
+    return code
+
+def evaluator(code):
+    # Evaluate the generated code
+    return evaluation
+
+def execute_task(task):
+    plan = planner(task)
+    code = generator(plan)
+    evaluation = evaluator(code)
+    return evaluation
+```
+
+## Performance Considerations
+
+### Optimize LLM Calls
+Keep your LLM calls focused and limit their scope to improve performance.
+
+❌ BAD
+```python
+def handle_request(request):
+    response = llm_call(request)
+    return response
+```
+
+✅ GOOD
+```python
+def handle_request(request):
+    focused_query = extract_relevant_info(request)
+    response = llm_call(focused_query)
+    return response
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Overly Complex Logic
+Complex logic can lead to hard-to-maintain code. Break down tasks into simpler components.
+
+❌ BAD
+```python
+def complex_function(data):
+    if condition1:
+        if condition2:
+            # Do something complex
+        else:
+            # Do something else complex
+```
+
+✅ GOOD
+```python
+def handle_condition1(data):
+    # Logic for condition1
+
+def handle_condition2(data):
+    # Logic for condition2
+
+def complex_function(data):
+    if condition1:
+        handle_condition1(data)
+    elif condition2:
+        handle_condition2(data)
+```
+
+## Error Handling
+
+### Implement Robust Error Handling
+Use try-except blocks to manage errors gracefully and log them for future reference.
+
+❌ BAD
+```python
+def risky_operation():
+    result = perform_operation()
+    return result
+```
+
+✅ GOOD
+```python
+import logging
+
+def risky_operation():
+    try:
+        result = perform_operation()
+        return result
+    except Exception as e:
+        logging.error(f"Error occurred: {e}")
+        raise
+```
+
+## Request/Response Patterns
+
+### Standardize API Requests
+Use a consistent structure for API requests and responses to improve clarity and reduce errors.
+
+❌ BAD
+```python
+def send_request(data):
+    response = requests.post('https://api.example.com/data', json=data)
+    return response.json()
+```
+
+✅ GOOD
+```python
+def send_request(data):
+    payload = {"data": data}
+    response = requests.post('https://api.example.com/data', json=payload)
+    return response.json()
+```
+
+## Rate Limiting
+
+### Implement Rate Limiting
+Use a decorator to manage API call rates and avoid exceeding limits.
+
+❌ BAD
+```python
+def api_call():
+    response = requests.get('https://api.example.com/data')
+    return response.json()
+```
+
+✅ GOOD
+```python
+import time
+from functools import wraps
+
+def rate_limiter(max_calls_per_second):
+    interval = 1.0 / max_calls_per_second
+    last_call = [0.0]
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            elapsed = time.time() - last_call[0]
+            if elapsed < interval:
+                time.sleep(interval - elapsed)
+            last_call[0] = time.time()
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@rate_limiter(2)  # 2 calls per second
+def api_call():
+    response = requests.get('https://api.example.com/data')
+    return response.json()
+```
+
+## Testing Approaches
+
+### Use Hybrid Evaluation Harness
+Combine deterministic checks (like unit tests) with LLM evaluations to ensure quality.
+
+❌ BAD
+```python
+def test_functionality():
+    assert function() == expected_output
+```
+
+✅ GOOD
+```python
+def test_functionality():
+    assert function() == expected_output
+    llm_evaluation = llm_as_judge(function)
+    assert llm_evaluation['score'] >= threshold
+```
+
+### Implement CI Gates
+Set up Continuous Integration (CI) gates that fail builds when quality metrics regress.
+
+```yaml
+# Example CI configuration
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run tests
+        run: pytest
+      - name: Check quality metrics
+        run: ./check_quality.sh
+```
+
+By adhering to these guidelines, you will ensure that your use of the anthropic library is efficient, maintainable, and aligned with best practices for modern software development.

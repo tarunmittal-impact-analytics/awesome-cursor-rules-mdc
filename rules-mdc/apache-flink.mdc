@@ -1,44 +1,181 @@
 ---
-description: Best practices and coding standards for Apache Flink.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides actionable best practices for developing robust and scalable streaming pipelines using Apache Flink.
+globs: **/*
 ---
+# apache-flink Best Practices
 
-# Apache Flink Best Practices
+## Code Organization and Structure
 
-Tags: data-engineering, streaming, big-data, distributed
+### Use Immutable Configuration Objects
+Always use immutable configuration objects for your Flink jobs. This ensures thread-safety and avoids unexpected mutations.
 
-## Code organization
+❌ BAD
+```java
+public class JobConfig {
+    public String inputPath;
+    public String outputPath;
+}
+```
 
-- Follow idiomatic Apache Flink project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+✅ GOOD
+```java
+public final class JobConfig {
+    private final String inputPath;
+    private final String outputPath;
 
-## Data quality
+    public JobConfig(String inputPath, String outputPath) {
+        this.inputPath = inputPath;
+        this.outputPath = outputPath;
+    }
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+    public String getInputPath() {
+        return inputPath;
+    }
 
-## Performance
+    public String getOutputPath() {
+        return outputPath;
+    }
+}
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Constructor Injection for Dependencies
+Pass dependencies through constructors to maintain a clean separation of concerns. This makes your code easier to test and maintain.
 
-## Security
+❌ BAD
+```java
+public class DataProcessor {
+    private DatabaseService databaseService;
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+    public void initialize() {
+        this.databaseService = new DatabaseService();
+    }
+}
+```
 
-## Testing
+✅ GOOD
+```java
+public class DataProcessor {
+    private final DatabaseService databaseService;
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+    public DataProcessor(DatabaseService databaseService) {
+        this.databaseService = databaseService;
+    }
+}
+```
 
-## Operations
+## Common Patterns and Anti-patterns
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+### Use RocksDB for Large Stateful Jobs
+For stateful jobs exceeding 1GB, leverage RocksDB to manage state efficiently and avoid JVM memory pressure.
+
+❌ BAD
+```java
+StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+env.setStateBackend(new MemoryStateBackend());
+```
+
+✅ GOOD
+```java
+StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+env.setStateBackend(new RocksDBStateBackend("s3://my-bucket/flink-checkpoints"));
+```
+
+### Implement Operator UIDs
+Always set UIDs for your operators to ensure state compatibility during job updates.
+
+❌ BAD
+```java
+DataStream<String> stream = env.fromElements("a", "b", "c");
+stream.map(value -> value.toUpperCase());
+```
+
+✅ GOOD
+```java
+DataStream<String> stream = env.fromElements("a", "b", "c");
+stream.map(value -> value.toUpperCase()).uid("map-uppercase-operator");
+```
+
+## Performance Considerations
+
+### Monitor Consumer Lag and Checkpoint Duration
+Regularly monitor consumer lag and checkpoint duration to maintain the health of your Flink jobs.
+
+✅ GOOD
+```java
+env.getConfig().setAutoWatermarkInterval(100);
+```
+
+### Use State TTL
+Implement state Time-To-Live (TTL) to prevent unbounded memory growth in stateful operations.
+
+❌ BAD
+```java
+stateDescriptor.enableTimeToLive(null);
+```
+
+✅ GOOD
+```java
+ValueStateDescriptor<String> stateDescriptor = new ValueStateDescriptor<>("state", String.class);
+stateDescriptor.enableTimeToLive(Time.days(1));
+```
+
+## Common Pitfalls and Gotchas
+
+### Separate Refactoring from Feature Changes
+Always separate refactoring from feature changes in different commits to maintain a clear project history.
+
+❌ BAD
+- Commit message: "Added feature X and refactored Y"
+
+✅ GOOD
+- Commit message 1: "Added feature X"
+- Commit message 2: "Refactored Y for clarity"
+
+### Choose Max Parallelism Wisely
+Set max parallelism based on projected future scale to avoid costly state migration.
+
+❌ BAD
+```java
+env.setParallelism(1);
+```
+
+✅ GOOD
+```java
+env.setParallelism(10); // Choose based on expected scale
+```
+
+## Testing Approaches
+
+### Use Flink's Testing Utilities
+Utilize Flink's built-in testing utilities to create reliable unit tests for your data processing logic.
+
+✅ GOOD
+```java
+@Test
+public void testMapFunction() throws Exception {
+    StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    DataStream<String> input = env.fromElements("a", "b", "c");
+    DataStream<String> result = input.map(new MyMapFunction());
+
+    List<String> output = result.executeAndCollect();
+    assertThat(output).containsExactly("A", "B", "C");
+}
+```
+
+### Document Method Contracts
+Clearly document method contracts, but let code structure and descriptive naming explain the how.
+
+✅ GOOD
+```java
+/**
+ * Converts input string to uppercase.
+ *
+ * @param input the input string
+ * @return the uppercase string
+ */
+public String toUpperCase(String input) {
+    return input.toUpperCase();
+}
+```
+
+By following these best practices, you can ensure that your Apache Flink applications are robust, maintainable, and scalable. Always prioritize clarity, performance, and reliability in your streaming pipelines.

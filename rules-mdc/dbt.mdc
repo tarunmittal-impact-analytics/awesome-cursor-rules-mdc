@@ -1,44 +1,152 @@
 ---
-description: Best practices and coding standards for Dbt.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides actionable best practices for dbt development, focusing on code organization, performance, testing, and common pitfalls to enhance your data transformation workflows.
+globs: **/*
 ---
+# dbt Best Practices
 
-# Dbt Best Practices
+This document outlines essential practices for developing with dbt (data build tool) to ensure clean, efficient, and maintainable data transformation workflows. Follow these guidelines to enhance your dbt projects and avoid common pitfalls.
 
-Tags: data-engineering, analytics, sql, transformation
+## Code Organization and Structure
 
-## Code organization
+### Use Modular Architecture
+Adopt the Staging, Intermediate, and Marts pattern for organizing your dbt models. This modular approach helps maintain clarity and separation of concerns.
 
-- Follow idiomatic Dbt project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+- **Staging**: Raw data from sources, minimally transformed.
+- **Intermediate**: Cleaned and enriched data, ready for analysis.
+- **Marts**: Final data models tailored for specific analytical needs.
 
-## Data quality
+**Example Structure:**
+```
+models/
+├── staging/
+│   └── stg_snowflake_spend.sql
+├── intermediate/
+│   └── int_spend_analysis.sql
+└── marts/
+    └── mart_spend_summary.sql
+```
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+### Naming Conventions
+Use a consistent naming convention: `<type>_<source/topic>_<context>`. This clarity helps understand the purpose and origin of each model.
 
-## Performance
+**Example:**
+- ❌ BAD: `model1.sql`
+- ✅ GOOD: `stg_snowflake_spend.sql`
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Reference Sources and Models
+Always reference sources using `{{ source() }}` and upstream models using `{{ ref() }}`. This practice maintains a clear dependency graph and ensures models are easily traceable.
 
-## Security
+**Example:**
+```sql
+with raw_data as (
+    select * from {{ source('snowflake', 'spend') }}
+),
+cleaned_data as (
+    select * from raw_data
+)
+select * from cleaned_data
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+## Common Patterns and Anti-patterns
 
-## Testing
+### Place CTEs at the Top
+Always place your CTEs at the top of the model file. Name them descriptively to enhance readability.
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+**Example:**
+```sql
+with spend_data as (
+    select * from {{ ref('stg_snowflake_spend') }}
+),
+aggregated_spend as (
+    select category, sum(amount) as total_spend
+    from spend_data
+    group by category
+)
+select * from aggregated_spend
+```
 
-## Operations
+### Avoid Table Aliases
+Do not use table aliases in your SQL queries to maintain clarity. Always write out full table names to avoid confusion.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+- ❌ BAD: 
+```sql
+select a.amount from {{ ref('stg_snowflake_spend') }} as a
+```
+- ✅ GOOD:
+```sql
+select spend.amount from {{ ref('stg_snowflake_spend') }} as spend
+```
+
+## Performance Considerations
+
+### Aggregate Early
+For small datasets, perform aggregations as early as possible in your models to improve performance.
+
+**Example:**
+```sql
+with raw_data as (
+    select * from {{ source('snowflake', 'spend') }}
+),
+aggregated_data as (
+    select category, sum(amount) as total_amount
+    from raw_data
+    group by category
+)
+select * from aggregated_data
+```
+
+### Use Explicit Join Types
+Always specify join types (INNER, LEFT, etc.) instead of relying on default behaviors. This practice makes your intentions clear and avoids unexpected results.
+
+**Example:**
+- ❌ BAD:
+```sql
+select * from table1 join table2 on table1.id = table2.id
+```
+- ✅ GOOD:
+```sql
+select * from table1 inner join table2 on table1.id = table2.id
+```
+
+## Common Pitfalls and Gotchas
+
+### Ensure Primary Key Tests
+Every model should include `unique` and `not_null` tests on its primary key to ensure data integrity.
+
+**Example:**
+```yaml
+models:
+  - name: mart_spend_summary
+    tests:
+      - unique:
+          column_name: id
+      - not_null:
+          column_name: id
+```
+
+### Version Control and Code Reviews
+Manage all dbt projects under version control (e.g., Git) and enforce peer-reviewed pull requests to maintain code quality and collaboration.
+
+## Testing Approaches
+
+### Use SQLFluff for Linting
+Integrate SQLFluff into your workflow for automatic linting of your SQL code. This tool helps maintain coding standards and catches errors before deployment.
+
+**Example Configuration:**
+```yaml
+# .sqlfluff
+[sqlfluff]
+dialect = snowflake
+templater = dbt
+```
+
+### Leverage dbt_project_evaluator
+Utilize the `dbt_project_evaluator` package to assess your project's adherence to best practices. This tool provides insights and recommendations for improvement.
+
+**Example Usage:**
+```bash
+dbt run -m dbt_project_evaluator
+```
+
+## Conclusion
+By adhering to these best practices, you will create cleaner, more efficient, and maintainable dbt projects. Always prioritize modular architecture, clear naming conventions, and robust testing to ensure the success of your data transformation efforts.

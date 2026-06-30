@@ -1,38 +1,149 @@
 ---
-description: Best practices and coding standards for Graph Database.
-globs: **/*.{py,ts,go,rs,java}
+description: This guide provides actionable best practices for developing with graph-database, focusing on performance, security, and data modeling.
+globs: **/*
 ---
+# graph-database Best Practices
 
-# Graph Database Best Practices
+## Code Organization and Structure
 
-Tags: database, graph, backend, neo4j
+### Use Explicit Node Labels and Relationship Types
+Always define explicit node labels and relationship types to maintain clarity and enforce schema. This practice aids in understanding the data model at a glance.
 
-## Code organization
+❌ BAD
+```cypher
+MATCH (a)-[r]->(b) RETURN a, r, b
+```
 
-- Follow idiomatic Graph Database project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+✅ GOOD
+```cypher
+MATCH (p:Person)-[f:FOLLOWS]->(f:Person) RETURN p, f
+```
 
-## Performance
+### Centralized Schema Management
+Utilize `GRAPH TYPE` for centralized schema management. This ensures consistency across your graph database and makes it easier to manage changes.
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+```cypher
+CREATE CONSTRAINT ON (p:Person) ASSERT p.id IS UNIQUE;
+```
 
-## Security
+## Common Patterns and Anti-patterns
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+### Use MERGE for Idempotency
+To avoid creating duplicate entities, always use `MERGE` with unique constraints.
 
-## Testing
+❌ BAD
+```cypher
+CREATE (p:Person {id: '123', name: 'Alice'});
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+✅ GOOD
+```cypher
+MERGE (p:Person {id: '123'}) SET p.name = 'Alice';
+```
 
-## Operations
+### Avoid Unanchored Queries
+Always anchor your queries on indexed properties to improve performance.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD
+```cypher
+MATCH (p:Person) RETURN p;
+```
+
+✅ GOOD
+```cypher
+MATCH (p:Person {id: $userId}) RETURN p;
+```
+
+## Performance Considerations
+
+### Use LIMIT for High-Fanout Traversals
+When traversing relationships with high fan-out, always use `LIMIT` to prevent overwhelming your application with data.
+
+❌ BAD
+```cypher
+MATCH (p:Person)-[:FOLLOWS]->(f:Person) RETURN f;
+```
+
+✅ GOOD
+```cypher
+MATCH (p:Person)-[:FOLLOWS]->(f:Person)
+WITH f
+LIMIT 100
+RETURN f { .name, .email };
+```
+
+### Profile Your Queries
+Utilize the `PROFILE` command to identify performance bottlenecks. This helps you optimize your queries effectively.
+
+```cypher
+PROFILE MATCH (p:Person)-[:FOLLOWS]->(f:Person) RETURN f;
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Heavy Payloads in Relationships
+Keep relationship properties lightweight. Store heavy payloads directly on nodes to optimize performance.
+
+❌ BAD
+```cypher
+CREATE (p:Person)-[:FOLLOWS {data: largePayload}]-(f:Person);
+```
+
+✅ GOOD
+```cypher
+CREATE (p:Person)-[:FOLLOWS]->(f:Person);
+SET f.largeData = largePayload;
+```
+
+## Security Best Practices
+
+### Use Parameters for Queries
+Always use parameters to prevent injection attacks and enhance caching.
+
+```cypher
+MATCH (p:Person {id: $userId}) RETURN p;
+```
+
+## Query Optimization
+
+### Use WITH for Intermediate Results
+Utilize `WITH` to narrow down your result set between stages of complex queries.
+
+❌ BAD
+```cypher
+MATCH (p:Person)-[:FOLLOWS]->(f:Person) RETURN f;
+```
+
+✅ GOOD
+```cypher
+MATCH (p:Person)-[:FOLLOWS]->(f:Person)
+WITH f
+RETURN f { .name, .email };
+```
+
+## Data Modeling
+
+### Follow Traversal Paths, Not Tables
+Design your data model based on traversal paths rather than relational tables. This aligns with how graph databases are optimized for queries.
+
+```cypher
+MATCH (p:Person)-[:FOLLOWS]->(f:Person)-[:LIKES]->(m:Movie)
+RETURN f, m;
+```
+
+## Error Handling
+
+### Handle Errors Gracefully
+Always anticipate potential errors in your queries and handle them gracefully to avoid application crashes.
+
+```cypher
+WITH $userId AS userId
+MATCH (p:Person {id: userId})
+RETURN p
+UNION
+MATCH (p:Person)
+WHERE NOT EXISTS((p)-[:FOLLOWS]->())
+RETURN p;
+```
+
+By following these best practices, you can ensure that your graph-database applications are performant, secure, and maintainable. Always prioritize clarity in your data models and queries to facilitate easier debugging and future development.

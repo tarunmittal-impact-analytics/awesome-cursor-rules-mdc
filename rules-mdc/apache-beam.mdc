@@ -1,44 +1,182 @@
 ---
-description: Best practices and coding standards for Apache Beam.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides actionable best practices for developing Apache Beam pipelines, focusing on code organization, performance, and testing.
+globs: **/*
 ---
+# apache-beam Best Practices
 
-# Apache Beam Best Practices
+This document outlines essential best practices for building and maintaining Apache Beam pipelines. It serves as a definitive guide for structuring code, optimizing performance, and ensuring reliability.
 
-Tags: data-engineering, streaming, batch, distributed
+## Code Organization and Structure
 
-## Code organization
+### Use Pure Functions in DoFns
+Always define your processing logic as pure functions within `DoFn` classes. This ensures that your functions are stateless and can be executed in a distributed manner.
 
-- Follow idiomatic Apache Beam project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```python
+class MyDoFn(beam.DoFn):
+    def process(self, element):
+        self.state += element  # Mutating state
+        yield self.state
+```
 
-## Data quality
+✅ GOOD
+```python
+class MyDoFn(beam.DoFn):
+    def process(self, element):
+        yield pure_function(element)
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+def pure_function(element):
+    return element * 2  # Pure function
+```
 
-## Performance
+### Structure Code with Composite PTransforms
+For complex workflows, encapsulate logic in composite `PTransform` classes. This promotes reusability and cleaner code.
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+❌ BAD
+```python
+def run_pipeline(pipeline):
+    (pipeline
+     | 'Step1' >> beam.Map(lambda x: x + 1)
+     | 'Step2' >> beam.Map(lambda x: x * 2))
+```
 
-## Security
+✅ GOOD
+```python
+class MyCompositeTransform(beam.PTransform):
+    def expand(self, pcoll):
+        return (pcoll
+                | 'Step1' >> beam.Map(lambda x: x + 1)
+                | 'Step2' >> beam.Map(lambda x: x * 2))
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+def run_pipeline(pipeline):
+    (pipeline
+     | 'Initial' >> beam.Create([1, 2, 3])
+     | 'MyTransform' >> MyCompositeTransform())
+```
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Use Setup Methods for Expensive Initialization
+Leverage the `setup` method in your `DoFn` for any expensive initialization. This avoids repeated initialization for each element.
 
-## Operations
+❌ BAD
+```python
+class MyDoFn(beam.DoFn):
+    def process(self, element):
+        self.expensive_resource = create_expensive_resource()  # Expensive on each call
+        yield element
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD
+```python
+class MyDoFn(beam.DoFn):
+    def setup(self):
+        self.expensive_resource = create_expensive_resource()  # Initialized once
+
+    def process(self, element):
+        yield element
+```
+
+### Avoid Shuffle Operations
+Minimize the use of shuffle operations like `GroupByKey` to prevent performance bottlenecks. Use `Combine` or `GroupIntoBatches` when possible.
+
+❌ BAD
+```python
+(pipeline
+ | 'Pair' >> beam.Map(lambda x: (x.key, x.value))
+ | 'Group' >> beam.GroupByKey())  # Potential shuffle
+```
+
+✅ GOOD
+```python
+(pipeline
+ | 'Pair' >> beam.Map(lambda x: (x.key, x.value))
+ | 'Combine' >> beam.CombinePerKey(sum))  # No shuffle
+```
+
+## Performance Considerations
+
+### Use Side Inputs for Small Lookups
+For small datasets that need to be accessed frequently, use side inputs instead of broadcasting the entire dataset.
+
+❌ BAD
+```python
+class MyDoFn(beam.DoFn):
+    def process(self, element, large_dataset):
+        # Accessing large dataset directly
+        yield element
+```
+
+✅ GOOD
+```python
+class MyDoFn(beam.DoFn):
+    def process(self, element, small_lookup):
+        # Using side input
+        yield element + small_lookup[element.key]
+
+def run_pipeline(pipeline, small_lookup):
+    (pipeline
+     | 'Input' >> beam.Create(data)
+     | 'Process' >> beam.ParDo(MyDoFn(), beam.pvalue.AsSideInput(small_lookup)))
+```
+
+## Common Pitfalls and Gotchas
+
+### Implement Dead Letter Queues (DLQ)
+Use `TaggedOutput` to handle failed records without failing the entire pipeline. This allows for error handling and debugging.
+
+❌ BAD
+```python
+class MyDoFn(beam.DoFn):
+    def process(self, element):
+        if not is_valid(element):
+            raise ValueError("Invalid element")  # Fails the pipeline
+        yield element
+```
+
+✅ GOOD
+```python
+class MyDoFn(beam.DoFn):
+    def process(self, element, tagged_output):
+        if not is_valid(element):
+            tagged_output.output('invalid_elements', element)  # Send to DLQ
+        else:
+            yield element
+
+def run_pipeline(pipeline):
+    (pipeline
+     | 'Input' >> beam.Create(data)
+     | 'Process' >> beam.ParDo(MyDoFn()).with_outputs('invalid_elements', main='valid_elements'))
+```
+
+## Testing Approaches
+
+### Use Test Pipelines
+Utilize `TestPipeline` for unit testing your Beam transforms. This allows you to validate your logic without needing to run a full pipeline.
+
+```python
+def test_my_transform():
+    with beam.testing.TestPipeline() as p:
+        input_data = [1, 2, 3]
+        output = (p
+                  | beam.Create(input_data)
+                  | MyCompositeTransform())
+        beam.testing.assert_that(output, beam.testing.equal_to([2, 4, 6]))
+```
+
+### Isolate Tests for DoFns
+When testing `DoFn`, use `beam.testing.utils` to assert the output against expected results.
+
+```python
+def test_my_dofn():
+    do_fn = MyDoFn()
+    input_data = [1, 2, 3]
+    expected_output = [2, 4, 6]
+
+    assert_that(
+        p | beam.Create(input_data) | beam.ParDo(do_fn),
+        equal_to(expected_output)
+    )
+```
+
+By following these best practices, you will create efficient, maintainable, and reliable Apache Beam pipelines that stand the test of time.

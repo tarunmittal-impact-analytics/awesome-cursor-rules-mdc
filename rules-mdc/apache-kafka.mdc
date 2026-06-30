@@ -1,44 +1,142 @@
 ---
-description: Best practices and coding standards for Apache Kafka.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides actionable best practices for using Apache Kafka, focusing on code organization, common patterns, performance considerations, and testing approaches.
+globs: **/*
 ---
+# apache-kafka Best Practices
 
-# Apache Kafka Best Practices
+Apache Kafka is a powerful distributed streaming platform. To leverage its full potential, follow these best practices for code organization, performance, and testing.
 
-Tags: streaming, messaging, data-engineering, distributed
+## Code Organization and Structure
 
-## Code organization
+### Use a Clear Package Structure
+Organize your Kafka-related code into distinct packages for producers, consumers, and configuration. This improves maintainability and readability.
 
-- Follow idiomatic Apache Kafka project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+```plaintext
+src/main/java/com/example/kafka/
+├── config/
+│   └── KafkaConfig.java
+├── producer/
+│   └── UserEventProducer.java
+└── consumer/
+    └── UserEventConsumer.java
+```
 
-## Data quality
+### Centralize Configuration
+Keep all Kafka configurations in a single class. This promotes reuse and makes it easier to manage changes.
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+```java
+public class KafkaConfig {
+    public static Properties producerProps() {
+        Properties props = new Properties();
+        props.put("bootstrap.servers", "localhost:9092");
+        props.put("acks", "all");
+        props.put("compression.type", "lz4");
+        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        return props;
+    }
+}
+```
 
-## Performance
+## Common Patterns and Anti-patterns
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Use Idempotent Producers
+Always configure your producers to be idempotent to prevent duplicate messages.
 
-## Security
+```java
+props.put("enable.idempotence", "true");
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+❌ BAD: Not using idempotent producers can lead to duplicate messages.
+✅ GOOD: Always enable idempotence to ensure exactly-once delivery.
 
-## Testing
+### Implement Manual Offset Management
+Set `enable.auto.commit=false` and manage offsets manually to avoid data loss.
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+```java
+consumer.commitSync();
+```
 
-## Operations
+❌ BAD: Relying on automatic commits can lead to lost messages.
+✅ GOOD: Manually commit offsets after processing messages.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+## Performance Considerations
+
+### Optimize Producer Throughput
+Use `acks=all` and `min.insync.replicas=2` to ensure data safety without sacrificing throughput.
+
+```java
+props.put("acks", "all");
+props.put("min.insync.replicas", "2");
+```
+
+❌ BAD: Using default settings can compromise data integrity.
+✅ GOOD: Configure producers with `acks=all` and `min.insync.replicas=2` for safety.
+
+### Use LZ4 Compression
+Enable LZ4 compression for better throughput without significant latency.
+
+```java
+props.put("compression.type", "lz4");
+```
+
+❌ BAD: Using no compression can lead to increased bandwidth usage.
+✅ GOOD: Use LZ4 for optimal performance.
+
+## Common Pitfalls and Gotchas
+
+### Avoid Unnecessary Rebalances
+Enable static membership by setting `group.instance.id` to prevent unnecessary rebalances.
+
+```java
+props.put("group.instance.id", "my-consumer-instance");
+```
+
+❌ BAD: Not using static membership can lead to frequent rebalances.
+✅ GOOD: Use static membership to stabilize consumer groups.
+
+### Monitor Consumer Lag
+Implement monitoring for consumer lag as a primary operational metric to ensure consumers are keeping up with the producers.
+
+```java
+// Pseudocode for monitoring consumer lag
+long lag = getLag(consumerGroupId);
+if (lag > threshold) {
+    alertAdmin();
+}
+```
+
+❌ BAD: Ignoring consumer lag can lead to data processing delays.
+✅ GOOD: Regularly monitor and alert on consumer lag.
+
+## Testing Approaches
+
+### Use Embedded Kafka for Testing
+Utilize Embedded Kafka for unit tests to simulate Kafka interactions without needing a real Kafka cluster.
+
+```java
+@ClassRule
+public static final EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, true, "test-topic");
+
+@Test
+public void testProducer() {
+    // Your test code here
+}
+```
+
+❌ BAD: Testing against a real Kafka cluster can be slow and error-prone.
+✅ GOOD: Use Embedded Kafka for fast, reliable tests.
+
+### Validate Schema Compatibility
+Always validate message schemas using Schema Registry to ensure backward and forward compatibility.
+
+```java
+// Example of schema validation
+SchemaRegistryClient schemaRegistryClient = new CachedSchemaRegistryClient("http://localhost:8081", 100);
+Schema schema = schemaRegistryClient.getLatestSchema("my-topic-value");
+```
+
+❌ BAD: Not validating schemas can lead to runtime errors.
+✅ GOOD: Always validate schemas against the Schema Registry.
+
+By following these best practices, you will ensure that your Apache Kafka implementation is efficient, maintainable, and robust. Make these guidelines a part of your daily development workflow to optimize your Kafka applications.

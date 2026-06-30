@@ -1,44 +1,208 @@
 ---
-description: Best practices and coding standards for Apache Pulsar.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides best practices for developing with Apache Pulsar, focusing on code organization, performance, testing, and common pitfalls.
+globs: **/*
 ---
+# apache-pulsar Best Practices
 
-# Apache Pulsar Best Practices
+This document outlines essential best practices for developing applications with Apache Pulsar, ensuring that your code is efficient, maintainable, and reliable.
 
-Tags: messaging, streaming, data-engineering, distributed
+## Code Organization and Structure
 
-## Code organization
+### Use a Consistent Package Structure
+Organize your code into a clear package structure to enhance readability and maintainability. Group related classes together.
 
-- Follow idiomatic Apache Pulsar project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+❌ BAD
+```plaintext
+src/main/java/com/example/
+- Producer.java
+- Consumer.java
+- Utils.java
+- SomeOtherClass.java
+```
 
-## Data quality
+✅ GOOD
+```plaintext
+src/main/java/com/example/pulsar/
+- producer/
+  - MyProducer.java
+- consumer/
+  - MyConsumer.java
+- utils/
+  - PulsarUtils.java
+```
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+### Keep Classes Focused
+Each class should have a single responsibility. This makes it easier to test and maintain.
 
-## Performance
+❌ BAD
+```java
+public class PulsarService {
+    public void produceMessage() { /*...*/ }
+    public void consumeMessage() { /*...*/ }
+    public void logMetrics() { /*...*/ }
+}
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD
+```java
+public class MessageProducer {
+    public void produceMessage() { /*...*/ }
+}
 
-## Security
+public class MessageConsumer {
+    public void consumeMessage() { /*...*/ }
+}
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+public class MetricsLogger {
+    public void logMetrics() { /*...*/ }
+}
+```
 
-## Testing
+## Common Patterns and Anti-patterns
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+### Use CompletableFuture for Asynchronous Operations
+Always prefer `CompletableFuture` for async tasks to keep your code non-blocking.
 
-## Operations
+❌ BAD
+```java
+ListenableFuture<String> future = someAsyncMethod();
+future.addListener(() -> { /*...*/ }, executor);
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD
+```java
+CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+    return someAsyncMethod();
+}, executor);
+future.thenAccept(result -> { /*...*/ });
+```
+
+### Implement Thread-Safety
+Ensure all public classes are thread-safe. Use `@NotThreadSafe` annotation for classes that are not.
+
+❌ BAD
+```java
+public class MessageQueue {
+    private List<String> messages = new ArrayList<>();
+    public void addMessage(String message) {
+        messages.add(message);
+    }
+}
+```
+
+✅ GOOD
+```java
+import javax.annotation.concurrent.ThreadSafe;
+
+@ThreadSafe
+public class MessageQueue {
+    private final List<String> messages = Collections.synchronizedList(new ArrayList<>());
+    public void addMessage(String message) {
+        messages.add(message);
+    }
+}
+```
+
+## Performance Considerations
+
+### Use the Schema Registry
+Always utilize Pulsar's Schema Registry for type-safe messaging. This avoids serialization issues and improves performance.
+
+❌ BAD
+```java
+Producer<String> producer = client.newProducer(Schema.STRING)
+    .topic("my-topic")
+    .create();
+```
+
+✅ GOOD
+```java
+Producer<MyMessage> producer = client.newProducer(Schema.AVRO(MyMessage.class))
+    .topic("my-topic")
+    .create();
+```
+
+### Optimize Message Size
+Keep your messages small to reduce latency. If you need to send large payloads, consider breaking them into smaller messages.
+
+❌ BAD
+```java
+producer.send(largeMessage);
+```
+
+✅ GOOD
+```java
+for (String part : splitMessage(largeMessage)) {
+    producer.send(part);
+}
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Reflection in Tests
+Never use reflection in your unit tests. Instead, use package-private visibility or `@VisibleForTesting` to expose necessary methods.
+
+❌ BAD
+```java
+Method method = MyClass.class.getDeclaredMethod("privateMethod");
+method.setAccessible(true);
+```
+
+✅ GOOD
+```java
+class MyClass {
+    void packagePrivateMethod() { /*...*/ }
+}
+
+// In your test
+MyClass myClass = new MyClass();
+myClass.packagePrivateMethod();
+```
+
+### Ensure Backward Compatibility
+When implementing new features, ensure backward compatibility in your wire protocols to avoid breaking existing consumers.
+
+❌ BAD
+```java
+// Changing the message structure without versioning
+```
+
+✅ GOOD
+```java
+// Use versioning in your message schema
+```
+
+## Testing Approaches
+
+### Write Unit Tests for All Changes
+Every change in your codebase must be accompanied by unit tests to maintain code quality.
+
+❌ BAD
+```java
+// No tests for new feature
+```
+
+✅ GOOD
+```java
+@Test
+public void testMessageProduction() {
+    MessageProducer producer = new MessageProducer();
+    producer.produceMessage();
+    // Assertions
+}
+```
+
+### Use Structured Logging
+Adopt SLF4j with structured (JSON) logging for better observability and easier debugging.
+
+❌ BAD
+```java
+logger.info("Message produced: " + message);
+```
+
+✅ GOOD
+```java
+logger.info("Message produced", Markers.append("message", message));
+```
+
+By following these best practices, you will ensure that your Apache Pulsar applications are robust, maintainable, and efficient. Always keep learning and adapting to new features and improvements in the Pulsar ecosystem.

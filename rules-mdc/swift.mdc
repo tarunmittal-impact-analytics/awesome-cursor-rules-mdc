@@ -1,38 +1,222 @@
 ---
-description: Best practices and coding standards for Swift.
-globs: **/*.{swift,kt,kts,dart}
+description: This guide provides actionable best practices for Swift development, focusing on modern patterns, performance, and testing to enhance code quality and maintainability.
+globs: **/*
 ---
-
 # Swift Best Practices
 
-Tags: language, mobile, ios, apple
+This document outlines the definitive best practices for Swift development, emphasizing modern approaches to concurrency, state management, code organization, and testing. Follow these guidelines to ensure your code is safe, performant, and maintainable.
 
-## Code organization
+## Code Organization and Structure
 
-- Follow idiomatic Swift project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+### Organize by Feature
+Organize your codebase by feature rather than by type. This makes it easier to navigate and maintain.
 
-## Performance
+❌ BAD:  
+```
+/Models
+/Views
+/Controllers
+```
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+✅ GOOD:  
+```
+/Features
+  /Login
+    /LoginView.swift
+    /LoginViewModel.swift
+    /LoginService.swift
+  /Profile
+    /ProfileView.swift
+    /ProfileViewModel.swift
+    /ProfileService.swift
+```
 
-## Security
+### Use Opaque Types
+Favor opaque types (`some`) over existentials (`any`) to avoid unnecessary boxing and improve performance.
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+❌ BAD:  
+```swift
+func getView() -> AnyView {
+    return AnyView(Text("Hello"))
+}
+```
 
-## Testing
+✅ GOOD:  
+```swift
+func getView() -> some View {
+    Text("Hello")
+}
+```
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+## Common Patterns and Anti-patterns
 
-## Operations
+### Use `@Observable` for State Management
+Adopt the `@Observable` macro instead of `ObservableObject` and `@Published`. This simplifies state management and improves reactivity.
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+❌ BAD:  
+```swift
+class MyModel: ObservableObject {
+    @Published var count: Int = 0
+}
+```
+
+✅ GOOD:  
+```swift
+struct MyModel {
+    @Observable var count: Int = 0
+}
+```
+
+### Prefer `async/await` Over Combine
+Use `async/await` for asynchronous code instead of Combine or GCD. This leads to cleaner and more readable code.
+
+❌ BAD:  
+```swift
+func fetchData() {
+    URLSession.shared.dataTask(with: url) { data, response, error in
+        // Handle response
+    }.resume()
+}
+```
+
+✅ GOOD:  
+```swift
+func fetchData() async throws -> Data {
+    let (data, _) = try await URLSession.shared.data(for: URLRequest(url: url))
+    return data
+}
+```
+
+## Performance Considerations
+
+### Use `@MainActor` for UI-Bound Types
+Ensure that any mutable state that affects the UI is marked with `@MainActor`. This guarantees thread safety for UI updates.
+
+❌ BAD:  
+```swift
+class SomeModel {
+    var value: Int = 0
+}
+```
+
+✅ GOOD:  
+```swift
+@MainActor
+class SomeModel {
+    var value: Int = 0
+}
+```
+
+### Avoid Nonisolated Functions
+Avoid using `nonisolated(unsafe)` unless absolutely necessary. This bypasses the compiler's safety checks and can lead to race conditions.
+
+❌ BAD:  
+```swift
+actor MyActor {
+    nonisolated func unsafeMethod() {
+        // Unsafe access
+    }
+}
+```
+
+✅ GOOD:  
+```swift
+actor MyActor {
+    func safeMethod() {
+        // Safe access
+    }
+}
+```
+
+## Common Pitfalls and Gotchas
+
+### Don’t Overuse `@Model`
+While `@Model` is great for persistence with SwiftData, avoid overusing it for transient state. Use regular structs or classes where appropriate.
+
+❌ BAD:  
+```swift
+@Model struct User {
+    var name: String
+    var age: Int
+}
+```
+
+✅ GOOD:  
+```swift
+struct User {
+    var name: String
+    var age: Int
+}
+```
+
+### Use NavigationStack for Routing
+For navigation, use `NavigationStack` with typed paths to ensure type safety and clarity in your routing logic.
+
+❌ BAD:  
+```swift
+NavigationView {
+    // Unstructured navigation
+}
+```
+
+✅ GOOD:  
+```swift
+NavigationStack {
+    NavigationLink(destination: DetailView(item: item)) {
+        Text("Go to Detail")
+    }
+}
+```
+
+## Testing Approaches
+
+### Use `@Test` for Swift Testing
+Utilize the `@Test` macro for creating new test suites. This aligns with modern Swift testing practices.
+
+❌ BAD:  
+```swift
+class MyTests: XCTestCase {
+    func testExample() {
+        // Test code
+    }
+}
+```
+
+✅ GOOD:  
+```swift
+@testable import MyApp
+
+class MyTests {
+    @Test
+    func testExample() {
+        // Test code
+    }
+}
+```
+
+### Keep Tests Isolated
+Ensure that your tests are isolated and do not depend on each other. This improves reliability and maintainability.
+
+❌ BAD:  
+```swift
+func testA() {
+    // Setup that affects testB
+}
+
+func testB() {
+    // Relies on setup from testA
+}
+```
+
+✅ GOOD:  
+```swift
+func testA() {
+    // Independent test logic
+}
+
+func testB() {
+    // Independent test logic
+}
+```
+
+By adhering to these best practices, you will create Swift applications that are not only performant and safe but also maintainable and easy to understand.

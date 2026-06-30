@@ -1,44 +1,204 @@
 ---
-description: Best practices and coding standards for Snowflake.
-globs: **/*.{py,ts,yml,yaml,tf,hcl}
+description: This guide helps developers implement best practices for coding in Snowflake, focusing on performance, organization, and common pitfalls.
+globs: **/*
 ---
+# snowflake Best Practices
 
-# Snowflake Best Practices
+This document outlines the best practices for developing in Snowflake. It emphasizes code organization, performance optimization, and common pitfalls to avoid, ensuring you write efficient and maintainable SQL code.
 
-Tags: data-warehouse, cloud, sql, analytics, data-engineering
+## Code Organization and Structure
 
-## Code organization
+### Use snake_case for Identifiers
 
-- Follow idiomatic Snowflake project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+Always use `snake_case` for table names, column names, and other identifiers. This avoids case-sensitivity issues and improves readability.
 
-## Data quality
+❌ BAD
+```sql
+CREATE TABLE MyTable (
+    ID INT,
+    UserName VARCHAR
+);
+```
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+✅ GOOD
+```sql
+CREATE TABLE my_table (
+    id INT,
+    user_name VARCHAR
+);
+```
 
-## Performance
+### Avoid Double Quotes
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+Do not use double quotes for identifiers. This can lead to case sensitivity issues and unexpected behavior.
 
-## Security
+❌ BAD
+```sql
+SELECT "UserName" FROM "MyTable";
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+✅ GOOD
+```sql
+SELECT user_name FROM my_table;
+```
 
-## Testing
+### Use CTEs for Complex Logic
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+For complex queries, prefer Common Table Expressions (CTEs) to improve readability and maintainability.
 
-## Operations
+❌ BAD
+```sql
+SELECT * FROM (
+    SELECT * FROM my_table WHERE id > 10
+) AS subquery WHERE user_name LIKE 'A%';
+```
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+✅ GOOD
+```sql
+WITH filtered_users AS (
+    SELECT * FROM my_table WHERE id > 10
+)
+SELECT * FROM filtered_users WHERE user_name LIKE 'A%';
+```
+
+## Common Patterns and Anti-patterns
+
+### Explicit Column Lists Over SELECT *
+
+Always specify columns explicitly instead of using `SELECT *`. This improves performance and clarity.
+
+❌ BAD
+```sql
+SELECT * FROM my_table;
+```
+
+✅ GOOD
+```sql
+SELECT id, user_name FROM my_table;
+```
+
+### Use CREATE OR REPLACE for Idempotent DDL
+
+When creating or modifying database objects, use `CREATE OR REPLACE` to ensure idempotency.
+
+❌ BAD
+```sql
+CREATE TABLE my_table (
+    id INT,
+    user_name VARCHAR
+);
+```
+
+✅ GOOD
+```sql
+CREATE OR REPLACE TABLE my_table (
+    id INT,
+    user_name VARCHAR
+);
+```
+
+## Performance Considerations
+
+### Filter Data Early
+
+Apply filters as early as possible in your queries to reduce the amount of data processed.
+
+❌ BAD
+```sql
+SELECT * FROM my_table WHERE user_name LIKE 'A%' AND id > 10;
+```
+
+✅ GOOD
+```sql
+SELECT * FROM my_table WHERE id > 10 AND user_name LIKE 'A%';
+```
+
+### Design SARGable WHERE Clauses
+
+Ensure your `WHERE` clauses are SARGable (Search ARGument ABle) to leverage micro-partition pruning effectively.
+
+❌ BAD
+```sql
+SELECT * FROM my_table WHERE YEAR(created_at) = 2023;
+```
+
+✅ GOOD
+```sql
+SELECT * FROM my_table WHERE created_at >= '2023-01-01' AND created_at < '2024-01-01';
+```
+
+### Use Separate Warehouses for Distinct Workloads
+
+Create separate warehouses for different workloads to optimize performance. For example, use XS for ad-hoc queries and XL+ for batch processing.
+
+```sql
+CREATE WAREHOUSE ad_hoc_warehouse WITH 
+    WAREHOUSE_SIZE = 'XSMALL' 
+    AUTO_SUSPEND = 300 
+    AUTO_RESUME = TRUE;
+
+CREATE WAREHOUSE batch_warehouse WITH 
+    WAREHOUSE_SIZE = 'XLARGE' 
+    AUTO_SUSPEND = 600 
+    AUTO_RESUME = TRUE;
+```
+
+## Common Pitfalls and Gotchas
+
+### Always Prefix Variables in Stored Procedures
+
+In stored procedures, always prefix variables with a colon (`:`) to avoid confusion.
+
+❌ BAD
+```sql
+CREATE OR REPLACE PROCEDURE my_procedure()
+RETURNS STRING
+LANGUAGE SQL
+AS
+$$
+DECLARE
+    my_variable STRING;
+BEGIN
+    RETURN my_variable;
+END;
+$$;
+```
+
+✅ GOOD
+```sql
+CREATE OR REPLACE PROCEDURE my_procedure()
+RETURNS STRING
+LANGUAGE SQL
+AS
+$$
+DECLARE
+    :my_variable STRING;
+BEGIN
+    RETURN :my_variable;
+END;
+$$;
+```
+
+## Testing Approaches
+
+### Use Unit Tests for SQL Logic
+
+Implement unit tests for your SQL logic to ensure correctness. Use tools like `dbt` for testing transformations.
+
+```sql
+-- Example test for a transformation
+SELECT COUNT(*) AS failed_tests
+FROM my_transformation
+WHERE expected_value != actual_value;
+```
+
+### Validate Data with Assertions
+
+Use assertions in your SQL scripts to validate data integrity and correctness.
+
+```sql
+-- Example assertion
+ASSERT (SELECT COUNT(*) FROM my_table) > 0, 'Table should not be empty';
+```
+
+By following these guidelines, you will write cleaner, more efficient, and maintainable SQL code in Snowflake, ultimately leading to better performance and easier collaboration within your team.

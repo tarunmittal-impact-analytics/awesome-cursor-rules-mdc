@@ -1,44 +1,140 @@
 ---
-description: Best practices and coding standards for Apache Iceberg.
-globs: **/*.{py,sql,yml,yaml}
+description: This guide provides best practices for using Apache Iceberg, focusing on code organization, performance, and common pitfalls to enhance data engineering workflows.
+globs: **/*
 ---
+# apache-iceberg Best Practices
 
-# Apache Iceberg Best Practices
+Apache Iceberg is a powerful table format for large analytic datasets. This guide outlines the best practices for using Iceberg effectively in your data engineering projects.
 
-Tags: data-engineering, lakehouse, table-format
+## Code Organization and Structure
 
-## Code organization
+### Use the REST Catalog for Engine-Neutral Deployments
+Always configure your tables to use the REST Catalog. This ensures compatibility across different processing engines.
 
-- Follow idiomatic Apache Iceberg project structure and naming conventions.
-- Keep configuration separate from business logic.
-- Prefer small, focused modules over large monolithic files.
+```sql
+CREATE TABLE my_table (
+  id INT,
+  data STRING
+)
+USING iceberg
+LOCATION 's3://my-bucket/my_table'
+TBLPROPERTIES (
+  'format-version' = '2'
+);
+```
 
-## Data quality
+### Maintain a Consistent Naming Convention
+Use a clear and consistent naming convention for your tables and columns. This improves readability and maintainability.
 
-- Validate schema and data types at pipeline boundaries.
-- Make pipelines idempotent where possible.
-- Track data lineage and document transformation logic.
+```sql
+CREATE TABLE sales_data (
+  sale_id INT,
+  sale_date DATE,
+  customer_id INT,
+  amount DECIMAL(10, 2)
+);
+```
 
-## Performance
+## Common Patterns and Anti-patterns
 
-- Profile before optimizing; measure impact of changes.
-- Use connection pooling and caching where appropriate.
-- Avoid N+1 queries and unbounded in-memory operations.
+### Use Partitioning Wisely
+For time-series data, use hidden partitioning with temporal transforms. Avoid partitioning by UUIDs or overly granular keys.
 
-## Security
+#### ✅ GOOD: Temporal Partitioning
+```sql
+CREATE TABLE events (
+  event_id INT,
+  event_time TIMESTAMP,
+  user_id INT
+)
+PARTITIONED BY (day(event_time))
+TBLPROPERTIES (
+  'format-version' = '2'
+);
+```
 
-- Never hardcode secrets; use environment variables or secret managers.
-- Validate and sanitize all external input.
-- Apply least-privilege access for services and credentials.
+#### ❌ BAD: Partitioning by UUID
+```sql
+CREATE TABLE user_sessions (
+  session_id STRING,
+  user_id INT,
+  start_time TIMESTAMP
+)
+PARTITIONED BY (session_id); -- Avoid this
+```
 
-## Testing
+### Automate Table Maintenance
+Implement automated snapshot expiration and orphan file cleanup to maintain table health.
 
-- Write tests for critical paths and edge cases.
-- Use integration tests for external service boundaries.
-- Mock external dependencies in unit tests.
+```sql
+ALTER TABLE my_table SET TBLPROPERTIES (
+  'snapshot.expiration.interval' = '7 days'
+);
+```
 
-## Operations
+## Performance Considerations
 
-- Add structured logging with correlation IDs.
-- Define health checks and graceful shutdown handlers.
-- Document deployment requirements and environment variables.
+### Optimize File Sizes
+Aim for file sizes between 128MB and 512MB for optimal performance. Use the following property to set target file sizes.
+
+```sql
+ALTER TABLE my_table SET TBLPROPERTIES (
+  'write.target-file-size-bytes' = '536870912' -- 512MB
+);
+```
+
+### Use Parquet as the Default Format
+Always set Parquet as the default write format due to its efficiency and compatibility.
+
+```sql
+ALTER TABLE my_table SET TBLPROPERTIES (
+  'write.format.default' = 'parquet'
+);
+```
+
+## Common Pitfalls and Gotchas
+
+### Avoid Manual Schema Rewrites
+Leverage schema evolution instead of manually rewriting schemas. This prevents data loss and simplifies management.
+
+#### ✅ GOOD: Schema Evolution
+```sql
+ALTER TABLE my_table ADD COLUMNS (new_column STRING);
+```
+
+#### ❌ BAD: Manual Schema Rewrite
+```sql
+-- Avoid dropping and recreating the table
+DROP TABLE my_table;
+CREATE TABLE my_table (...); -- This is error-prone
+```
+
+### Be Cautious with Compression
+Use `zstd` for Parquet compression to balance performance and storage efficiency.
+
+```sql
+ALTER TABLE my_table SET TBLPROPERTIES (
+  'write.parquet.compression-codec' = 'zstd'
+);
+```
+
+## Testing Approaches
+
+### Validate Table Properties
+Always validate your table properties after creation. This ensures configurations are correctly applied.
+
+```sql
+DESCRIBE TBLPROPERTIES my_table;
+```
+
+### Implement Unit Tests for Data Ingestion
+Write unit tests for your data ingestion processes to catch issues early.
+
+```python
+def test_data_ingestion():
+    # Sample test for data ingestion
+    assert ingest_data('data.csv') == True  # Replace with actual ingestion logic
+```
+
+## Conclusion
+By following these best practices for Apache Iceberg, you can ensure efficient, maintainable, and high-performance data engineering workflows. Always stay updated with the latest features and improvements in Iceberg to leverage its full potential.
