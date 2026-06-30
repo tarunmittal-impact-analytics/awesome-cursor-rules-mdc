@@ -58,4 +58,4 @@ curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesom
 |------|-------|----------|
 | Library rules | 296 | `rules-mdc/` |
 | Custom rules | 24 | `rules-custom/` |
-| Preset stacks | 54 | `stacks.json` |
+| Preset stacks | 96 | `stacks.json` |

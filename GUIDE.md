@@ -205,7 +205,7 @@ Index for **hand-written workflow and architecture rules** — not tied to a sin
 | Topics | Architecture, RAG, security, distributed systems, token optimization, etc. |
 | Install prefix | `custom:base`, `custom:graph-rag`, or `--custom base` |
 
-#### `stacks.json` — Preset bundles (54 stacks)
+#### `stacks.json` — Preset bundles (96 stacks)
 
 Curated **multi-rule bundles** for common project types. One command installs a whole setup.
 
@@ -371,7 +371,7 @@ curl -fsSL .../install.sh | bash -s -- --stack personal --here
 |----------|------|
 | `rules.json` | Index of 296 library/tech rules + tags |
 | `custom-rules.json` | Index of 24 personal/workflow rules |
-| `stacks.json` | 54 preset bundles mixing library + custom rules |
+| `stacks.json` | 96 preset bundles mixing library + custom rules |
 | `rules-mdc/` | Generated tech-specific rule **content** |
 | `rules-custom/` | Hand-written team/workflow rule **content** |
 | `repo.json` | Fork URL config for installers |
@@ -639,7 +639,7 @@ Open: **https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/
 
 - **Rules** tab — browse 296 library rules, filter by tag, multi-select, copy curl/uv commands
 - **Personal** tab — browse 24 custom rules (RAG, security, architecture)
-- **Stacks** tab — browse 54 preset bundles, copy install command
+- **Stacks** tab — browse 96 preset bundles, copy install command
 
 ### 4. Manual copy
 
@@ -794,7 +794,7 @@ The site has two pages:
 |-----|---------|
 | **Rules** | 296 library rules with tag filters and multi-select |
 | **Personal** | 24 custom rules (RAG, security, architecture, patterns) |
-| **Stacks** | 54 preset bundles with one-click copy |
+| **Stacks** | 96 preset bundles with one-click copy |
 
 ### Documentation sections (`guide.html`)
 
@@ -861,6 +861,13 @@ This updates `docs/catalog.json`, syncs URLs in `install.sh`, and refreshes GitH
 | `gen-ai-rag` | RAG pipeline development |
 | `gen-ai-graph-rag` | Graph RAG with Neo4j |
 | `gen-ai-multi-agent` | Multi-agent systems |
+| `gen-ai-langchain-langgraph` | LangChain + LangGraph + FastAPI |
+| `gen-ai-rag-vector-db` | RAG with Chroma, Pinecone, Qdrant, Weaviate, Milvus |
+| `gen-ai-rag-vectorless` | RAG without vector databases |
+| `gen-ai-neo4j-graph` | Neo4j + knowledge graphs |
+| `gen-ai-multi-agent-full` | LangGraph + CrewAI + AutoGen + FastAPI |
+| `gen-ai-haystack-rag` | Haystack RAG pipelines |
+| `fastapi-gen-ai-platform` | Full AI platform — multi-DB, LangChain, LangGraph, RAG, agents, Neo4j |
 
 ### Security & distributed systems
 
@@ -881,7 +888,60 @@ This updates `docs/catalog.json`, syncs URLs in `install.sh`, and refreshes GitH
 | `gcp-data-engineering` | BigQuery, Dataflow, Pub/Sub |
 | `azure-data-engineering` | Data Factory, Service Bus |
 
-Run `uv run src/install_rules.py stacks` to list all 54 stacks.
+### Python backend stacks
+
+| Stack | Description |
+|-------|-------------|
+| `python-sqlalchemy` | Python + SQLAlchemy ORM |
+| `python-postgresql` | Python + PostgreSQL + SQLAlchemy |
+| `python-mysql` | Python + MySQL + SQLAlchemy |
+| `python-redis` | Python + Redis caching |
+| `fastapi-postgresql` | FastAPI + PostgreSQL |
+| `fastapi-mysql` | FastAPI + MySQL |
+| `fastapi-redis` | FastAPI + Redis |
+| `fastapi-postgresql-redis` | FastAPI + PostgreSQL + Redis |
+| `fastapi-end-to-end` | Production FastAPI — auth, Postgres, Redis, Docker |
+| `fastapi-postgresql-clickhouse` | FastAPI + PostgreSQL + ClickHouse |
+| `fastapi-analytics-platform` | FastAPI + Postgres + ClickHouse + BigQuery |
+| `fastapi-data-platform` | FastAPI + Postgres + ClickHouse + BigQuery + Redis |
+
+### Node.js / TypeScript backend
+
+| Stack | Description |
+|-------|-------------|
+| `nestjs-postgresql` | NestJS + PostgreSQL + Prisma |
+| `nestjs-postgresql-redis` | NestJS + PostgreSQL + Redis |
+| `express-postgresql` | Express + PostgreSQL + Prisma |
+| `express-postgresql-redis` | Express + PostgreSQL + Redis |
+| `graphql-apollo-fullstack` | GraphQL + Apollo + NestJS + PostgreSQL |
+
+### Frontend stacks
+
+| Stack | Description |
+|-------|-------------|
+| `react-vite-ts` | React + Vite + TypeScript + Tailwind |
+| `react-next-tailwind` | Next.js + Tailwind + shadcn |
+| `react-next-radix-framer` | Next.js + Radix UI + Framer Motion |
+| `next-js-prisma-postgres` | Next.js + Prisma + PostgreSQL |
+| `vue-ts-full` | Vue 3 + TypeScript + Tailwind |
+| `svelte-ts` | Svelte + TypeScript + Vite |
+| `nuxt-fullstack` | Nuxt 3 + Vue + TypeScript |
+| `remix-fullstack` | Remix + React + Prisma + PostgreSQL |
+| `frontend-complete` | React + Next.js + Tailwind + Radix + Framer |
+
+### Full-stack combinations
+
+| Stack | Description |
+|-------|-------------|
+| `fullstack-nextjs-fastapi` | Next.js frontend + FastAPI backend |
+| `fullstack-react-fastapi` | React SPA + FastAPI backend |
+| `fullstack-vue-fastapi` | Vue frontend + FastAPI backend |
+| `fullstack-gen-ai-app` | Next.js UI + FastAPI AI backend |
+| `fullstack-gen-ai-graph-rag` | Next.js + FastAPI + Neo4j graph RAG |
+| `full-stack-nextjs-pro` | Next.js + Prisma + Postgres + personal rules |
+| `full-stack-fastapi-pro` | FastAPI + Postgres + ClickHouse + Redis |
+
+Run `uv run src/install_rules.py stacks` to list all 96 stacks.
 
 ### Personal stacks
 
@@ -890,6 +950,11 @@ Run `uv run src/install_rules.py stacks` to list all 54 stacks.
 | `personal` | All personal workflow rules | custom:base, custom:simple, custom:complex, custom:frontend, custom:backend |
 | `personal-python-backend` | Personal + FastAPI | custom:base, custom:backend, custom:complex, fastapi, sqlalchemy, pydantic, pytest |
 | `personal-react-ts` | Personal + React | custom:base, custom:frontend, custom:simple, react, typescript, vite, vitest |
+| `personal-fastapi-postgresql` | Personal + FastAPI + PostgreSQL | custom:base, custom:backend, custom:complex, fastapi, postgresql, sqlalchemy, pydantic, pytest |
+| `personal-fastapi-full` | Personal + full FastAPI production stack | custom:base, custom:backend, custom:complex, custom:authentication, fastapi, postgresql, redis, sqlalchemy, pydantic, pytest, docker |
+| `personal-gen-ai-backend` | Personal + FastAPI gen-AI backend | custom:base, custom:backend, custom:gen-ai-development, custom:rag-development, fastapi, langchain, langgraph, pydantic, postgresql, redis, pytest |
+| `personal-fullstack-nextjs` | Personal + Next.js + Prisma | custom:base, custom:frontend, custom:backend, custom:simple, next-js, react, typescript, tailwind, prisma, postgresql |
+| `personal-fullstack-react-fastapi` | Personal + React + FastAPI | custom:base, custom:frontend, custom:backend, react, typescript, vite, fastapi, postgresql, pydantic, pytest |
 
 ### Install a stack
 
@@ -969,8 +1034,58 @@ curl -fsSL .../install.sh | bash -s -- --stack personal-python-backend --here
 ```bash
 cd ~/my-api
 curl -fsSL https://raw.githubusercontent.com/tarunmittal-impact-analytics/awesome-cursor-rules-mdc/main/install.sh \
-  | bash -s -- --stack personal-python-backend --here
+  | bash -s -- --stack fastapi-end-to-end --here
 git add .cursor/rules && git commit -m "Add Cursor rules"
+```
+
+### FastAPI + PostgreSQL only
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack fastapi-postgresql --here
+```
+
+### Python + SQLAlchemy / PostgreSQL / MySQL (individual)
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack python-sqlalchemy --here
+curl -fsSL .../install.sh | bash -s -- --stack python-postgresql --here
+curl -fsSL .../install.sh | bash -s -- --stack python-mysql --here
+```
+
+### FastAPI analytics platform (Postgres + ClickHouse + BigQuery + Redis)
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack fastapi-data-platform --here
+```
+
+### Full AI platform (FastAPI + LangChain + LangGraph + RAG + Neo4j + multi-DB)
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack fastapi-gen-ai-platform --here
+```
+
+### Full-stack Next.js + FastAPI
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack fullstack-nextjs-fastapi --here
+```
+
+### Full-stack gen-AI app (Next.js UI + FastAPI AI backend)
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack fullstack-gen-ai-app --here
+```
+
+### RAG with vector databases
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack gen-ai-rag-vector-db --here
+```
+
+### Multi-agent systems
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack gen-ai-multi-agent-full --here
 ```
 
 ### New React + Vite frontend

@@ -3438,6 +3438,587 @@
         "vite",
         "eslint"
       ]
+    },
+    "python-sqlalchemy": {
+      "description": "Python with SQLAlchemy ORM and Pydantic models",
+      "rules": [
+        "python",
+        "sqlalchemy",
+        "pydantic",
+        "pytest"
+      ]
+    },
+    "python-postgresql": {
+      "description": "Python with PostgreSQL and SQLAlchemy",
+      "rules": [
+        "python",
+        "postgresql",
+        "sqlalchemy",
+        "sql",
+        "pytest"
+      ]
+    },
+    "python-mysql": {
+      "description": "Python with MySQL and SQLAlchemy",
+      "rules": [
+        "python",
+        "mysql",
+        "sqlalchemy",
+        "sql",
+        "pytest"
+      ]
+    },
+    "python-redis": {
+      "description": "Python with Redis caching patterns",
+      "rules": [
+        "python",
+        "redis",
+        "custom:caching",
+        "pytest"
+      ]
+    },
+    "fastapi-postgresql": {
+      "description": "FastAPI REST API with PostgreSQL and SQLAlchemy",
+      "rules": [
+        "fastapi",
+        "postgresql",
+        "sqlalchemy",
+        "pydantic",
+        "python",
+        "pytest",
+        "docker"
+      ]
+    },
+    "fastapi-mysql": {
+      "description": "FastAPI REST API with MySQL and SQLAlchemy",
+      "rules": [
+        "fastapi",
+        "mysql",
+        "sqlalchemy",
+        "pydantic",
+        "python",
+        "pytest",
+        "docker"
+      ]
+    },
+    "fastapi-redis": {
+      "description": "FastAPI API with Redis caching and sessions",
+      "rules": [
+        "fastapi",
+        "redis",
+        "pydantic",
+        "python",
+        "custom:caching",
+        "pytest",
+        "docker"
+      ]
+    },
+    "fastapi-postgresql-redis": {
+      "description": "FastAPI with PostgreSQL persistence and Redis cache",
+      "rules": [
+        "fastapi",
+        "postgresql",
+        "sqlalchemy",
+        "redis",
+        "pydantic",
+        "python",
+        "custom:caching",
+        "pytest",
+        "docker"
+      ]
+    },
+    "fastapi-end-to-end": {
+      "description": "Production FastAPI backend \u2014 Postgres, Redis, auth, testing, Docker",
+      "rules": [
+        "custom:base",
+        "custom:backend",
+        "custom:authentication",
+        "custom:authorization",
+        "custom:caching",
+        "custom:env-secrets-management",
+        "fastapi",
+        "postgresql",
+        "sqlalchemy",
+        "redis",
+        "pydantic",
+        "python",
+        "pytest",
+        "docker"
+      ]
+    },
+    "fastapi-postgresql-clickhouse": {
+      "description": "FastAPI with PostgreSQL OLTP and ClickHouse analytics",
+      "rules": [
+        "fastapi",
+        "postgresql",
+        "sqlalchemy",
+        "clickhouse",
+        "sql",
+        "pydantic",
+        "python",
+        "docker",
+        "pytest"
+      ]
+    },
+    "fastapi-analytics-platform": {
+      "description": "FastAPI analytics API \u2014 PostgreSQL, ClickHouse, BigQuery",
+      "rules": [
+        "fastapi",
+        "postgresql",
+        "clickhouse",
+        "google-bigquery",
+        "sql",
+        "sqlalchemy",
+        "pydantic",
+        "python",
+        "docker",
+        "pytest"
+      ]
+    },
+    "fastapi-data-platform": {
+      "description": "FastAPI data platform \u2014 Postgres, ClickHouse, BigQuery, Redis",
+      "rules": [
+        "fastapi",
+        "postgresql",
+        "clickhouse",
+        "google-bigquery",
+        "redis",
+        "sqlalchemy",
+        "sql",
+        "pydantic",
+        "python",
+        "custom:caching",
+        "docker",
+        "pytest"
+      ]
+    },
+    "fastapi-gen-ai-platform": {
+      "description": "Full-stack AI platform \u2014 FastAPI, multi-DB, LangChain, LangGraph, RAG, agents, graph DB",
+      "rules": [
+        "custom:base",
+        "custom:backend",
+        "custom:gen-ai-development",
+        "custom:rag-development",
+        "custom:graph-rag",
+        "custom:vectorless-rag",
+        "custom:multi-agent-systems",
+        "custom:ai-design-patterns",
+        "custom:token-optimization",
+        "custom:caching",
+        "fastapi",
+        "pydantic",
+        "python",
+        "postgresql",
+        "clickhouse",
+        "google-bigquery",
+        "redis",
+        "langchain",
+        "langgraph",
+        "neo4j",
+        "graph-database",
+        "chromadb",
+        "pinecone",
+        "openai",
+        "anthropic",
+        "pytest",
+        "docker"
+      ]
+    },
+    "personal-fastapi-postgresql": {
+      "description": "Personal workflow rules plus FastAPI and PostgreSQL",
+      "rules": [
+        "custom:base",
+        "custom:backend",
+        "custom:complex",
+        "fastapi",
+        "postgresql",
+        "sqlalchemy",
+        "pydantic",
+        "pytest"
+      ]
+    },
+    "personal-fastapi-full": {
+      "description": "Personal rules plus full FastAPI production stack",
+      "rules": [
+        "custom:base",
+        "custom:backend",
+        "custom:complex",
+        "custom:authentication",
+        "fastapi",
+        "postgresql",
+        "redis",
+        "sqlalchemy",
+        "pydantic",
+        "pytest",
+        "docker"
+      ]
+    },
+    "personal-gen-ai-backend": {
+      "description": "Personal rules plus FastAPI gen-AI backend",
+      "rules": [
+        "custom:base",
+        "custom:backend",
+        "custom:gen-ai-development",
+        "custom:rag-development",
+        "fastapi",
+        "langchain",
+        "langgraph",
+        "pydantic",
+        "postgresql",
+        "redis",
+        "pytest"
+      ]
+    },
+    "gen-ai-langchain-langgraph": {
+      "description": "LangChain and LangGraph orchestration with FastAPI",
+      "rules": [
+        "langchain",
+        "langgraph",
+        "openai",
+        "anthropic",
+        "pydantic",
+        "fastapi",
+        "python",
+        "langsmith",
+        "pytest"
+      ]
+    },
+    "gen-ai-rag-vector-db": {
+      "description": "RAG with vector databases \u2014 Chroma, Pinecone, Qdrant, Weaviate, Milvus",
+      "rules": [
+        "custom:rag-development",
+        "custom:token-optimization",
+        "chromadb",
+        "pinecone",
+        "qdrant",
+        "weaviate",
+        "milvus",
+        "langchain",
+        "python",
+        "fastapi"
+      ]
+    },
+    "gen-ai-rag-vectorless": {
+      "description": "RAG without vector databases \u2014 keyword and graph retrieval",
+      "rules": [
+        "custom:vectorless-rag",
+        "custom:rag-development",
+        "langchain",
+        "python",
+        "fastapi",
+        "elasticsearch"
+      ]
+    },
+    "gen-ai-neo4j-graph": {
+      "description": "Graph database apps with Neo4j and knowledge graphs",
+      "rules": [
+        "neo4j",
+        "graph-database",
+        "custom:graph-rag",
+        "langchain",
+        "python",
+        "fastapi"
+      ]
+    },
+    "gen-ai-multi-agent-full": {
+      "description": "Multi-agent systems \u2014 LangGraph, CrewAI, AutoGen with FastAPI",
+      "rules": [
+        "custom:multi-agent-systems",
+        "custom:ai-design-patterns",
+        "custom:gen-ai-development",
+        "langgraph",
+        "langchain",
+        "crewai",
+        "autogen",
+        "fastapi",
+        "pydantic",
+        "python",
+        "pytest"
+      ]
+    },
+    "gen-ai-haystack-rag": {
+      "description": "Haystack RAG pipelines with FastAPI backend",
+      "rules": [
+        "haystack",
+        "custom:rag-development",
+        "custom:vectorless-rag",
+        "langchain",
+        "fastapi",
+        "python",
+        "chromadb",
+        "pytest"
+      ]
+    },
+    "nestjs-postgresql": {
+      "description": "NestJS API with PostgreSQL and TypeScript",
+      "rules": [
+        "nestjs",
+        "typescript",
+        "postgresql",
+        "prisma",
+        "docker",
+        "jest"
+      ]
+    },
+    "nestjs-postgresql-redis": {
+      "description": "NestJS API with PostgreSQL and Redis",
+      "rules": [
+        "nestjs",
+        "typescript",
+        "postgresql",
+        "redis",
+        "prisma",
+        "docker",
+        "jest"
+      ]
+    },
+    "express-postgresql": {
+      "description": "Express.js REST API with PostgreSQL",
+      "rules": [
+        "express",
+        "typescript",
+        "postgresql",
+        "prisma",
+        "docker",
+        "jest"
+      ]
+    },
+    "express-postgresql-redis": {
+      "description": "Express.js API with PostgreSQL and Redis caching",
+      "rules": [
+        "express",
+        "typescript",
+        "postgresql",
+        "redis",
+        "prisma",
+        "docker",
+        "jest"
+      ]
+    },
+    "graphql-apollo-fullstack": {
+      "description": "GraphQL API with Apollo and TypeScript backend",
+      "rules": [
+        "graphql",
+        "apollo-graphql",
+        "typescript",
+        "nestjs",
+        "postgresql",
+        "prisma",
+        "docker"
+      ]
+    },
+    "react-vite-ts": {
+      "description": "React SPA with Vite, TypeScript, and Vitest",
+      "rules": [
+        "react",
+        "typescript",
+        "vite",
+        "vitest",
+        "eslint",
+        "tailwind"
+      ]
+    },
+    "react-next-tailwind": {
+      "description": "Next.js with React, TypeScript, and Tailwind CSS",
+      "rules": [
+        "next-js",
+        "react",
+        "typescript",
+        "tailwind",
+        "shadcn",
+        "eslint",
+        "vitest"
+      ]
+    },
+    "react-next-radix-framer": {
+      "description": "Next.js with Radix UI and Framer Motion",
+      "rules": [
+        "next-js",
+        "react",
+        "typescript",
+        "tailwind",
+        "radix-ui",
+        "framer-motion",
+        "shadcn",
+        "eslint"
+      ]
+    },
+    "vue-ts-full": {
+      "description": "Vue 3 with TypeScript, Vite, and Tailwind",
+      "rules": [
+        "vue",
+        "typescript",
+        "vite",
+        "vitest",
+        "eslint",
+        "tailwind"
+      ]
+    },
+    "svelte-ts": {
+      "description": "Svelte with TypeScript and Vite",
+      "rules": [
+        "svelte",
+        "typescript",
+        "vite",
+        "vitest",
+        "eslint",
+        "tailwind"
+      ]
+    },
+    "nuxt-fullstack": {
+      "description": "Nuxt 3 full-stack with Vue and TypeScript",
+      "rules": [
+        "nuxt",
+        "vue",
+        "typescript",
+        "tailwind",
+        "vitest",
+        "eslint"
+      ]
+    },
+    "remix-fullstack": {
+      "description": "Remix full-stack with React and TypeScript",
+      "rules": [
+        "remix",
+        "react",
+        "typescript",
+        "tailwind",
+        "prisma",
+        "postgresql",
+        "eslint"
+      ]
+    },
+    "next-js-prisma-postgres": {
+      "description": "Next.js with Prisma ORM and PostgreSQL",
+      "rules": [
+        "next-js",
+        "react",
+        "typescript",
+        "prisma",
+        "postgresql",
+        "tailwind",
+        "eslint"
+      ]
+    },
+    "fullstack-nextjs-fastapi": {
+      "description": "Next.js frontend plus FastAPI backend (monorepo)",
+      "rules": [
+        "custom:base",
+        "custom:frontend",
+        "custom:backend",
+        "next-js",
+        "react",
+        "typescript",
+        "tailwind",
+        "fastapi",
+        "postgresql",
+        "sqlalchemy",
+        "pydantic",
+        "redis",
+        "docker"
+      ]
+    },
+    "fullstack-react-fastapi": {
+      "description": "React SPA frontend plus FastAPI backend",
+      "rules": [
+        "custom:base",
+        "custom:frontend",
+        "custom:backend",
+        "react",
+        "typescript",
+        "vite",
+        "vitest",
+        "fastapi",
+        "postgresql",
+        "sqlalchemy",
+        "pydantic",
+        "docker"
+      ]
+    },
+    "fullstack-vue-fastapi": {
+      "description": "Vue frontend plus FastAPI backend",
+      "rules": [
+        "custom:base",
+        "custom:frontend",
+        "custom:backend",
+        "vue",
+        "typescript",
+        "vite",
+        "fastapi",
+        "postgresql",
+        "pydantic",
+        "docker"
+      ]
+    },
+    "fullstack-gen-ai-app": {
+      "description": "Full-stack gen-AI app \u2014 Next.js UI plus FastAPI AI backend",
+      "rules": [
+        "custom:base",
+        "custom:frontend",
+        "custom:backend",
+        "custom:gen-ai-development",
+        "custom:rag-development",
+        "next-js",
+        "react",
+        "typescript",
+        "tailwind",
+        "fastapi",
+        "langchain",
+        "langgraph",
+        "chromadb",
+        "postgresql",
+        "redis",
+        "pydantic",
+        "docker"
+      ]
+    },
+    "fullstack-gen-ai-graph-rag": {
+      "description": "Graph RAG full-stack \u2014 Next.js plus FastAPI, Neo4j, LangChain",
+      "rules": [
+        "custom:base",
+        "custom:frontend",
+        "custom:graph-rag",
+        "custom:rag-development",
+        "next-js",
+        "react",
+        "typescript",
+        "fastapi",
+        "neo4j",
+        "graph-database",
+        "langchain",
+        "postgresql",
+        "docker"
+      ]
+    },
+    "personal-fullstack-nextjs": {
+      "description": "Personal rules plus Next.js full-stack with Prisma",
+      "rules": [
+        "custom:base",
+        "custom:frontend",
+        "custom:backend",
+        "custom:simple",
+        "next-js",
+        "react",
+        "typescript",
+        "tailwind",
+        "prisma",
+        "postgresql"
+      ]
+    },
+    "personal-fullstack-react-fastapi": {
+      "description": "Personal rules plus React frontend and FastAPI backend",
+      "rules": [
+        "custom:base",
+        "custom:frontend",
+        "custom:backend",
+        "react",
+        "typescript",
+        "vite",
+        "fastapi",
+        "postgresql",
+        "pydantic",
+        "pytest"
+      ]
     }
   },
   "tags": [

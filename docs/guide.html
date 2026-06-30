@@ -39,7 +39,7 @@
           <h1>Documentation</h1>
           <p class="lead">
             This repo is a <strong>Cursor rules library</strong> and <strong>install toolkit</strong>.
-            It ships 296 technology-specific rules, 24 personal workflow rules, and 54 preset stacks —
+            It ships 296 technology-specific rules, 24 personal workflow rules, and 96 preset stacks —
             so you can give Cursor consistent, stack-aware AI guidance in any project.
           </p>
 
@@ -53,7 +53,7 @@
               <p>Hand-written team conventions: architecture, RAG, security, distributed systems.</p>
             </div>
             <div class="info-card">
-              <h3>54 preset stacks</h3>
+              <h3>96 preset stacks</h3>
               <p>One-command bundles for common project types — data eng, gen-ai, mobile, backend.</p>
             </div>
           </div>
@@ -237,14 +237,24 @@ AI follows your stack + team conventions</div>
               <tr><th>Project type</th><th>Stack</th><th>What you get</th></tr>
             </thead>
             <tbody>
-              <tr><td>FastAPI backend</td><td><code>python-backend</code></td><td>fastapi, sqlalchemy, pydantic, pytest, docker</td></tr>
-              <tr><td>React + TypeScript</td><td><code>react-ts</code></td><td>react, typescript, vite, vitest, eslint</td></tr>
+              <tr><td>Python + SQLAlchemy</td><td><code>python-sqlalchemy</code></td><td>python, sqlalchemy, pydantic, pytest</td></tr>
+              <tr><td>Python + PostgreSQL</td><td><code>python-postgresql</code></td><td>python, postgresql, sqlalchemy, sql</td></tr>
+              <tr><td>Python + MySQL</td><td><code>python-mysql</code></td><td>python, mysql, sqlalchemy, sql</td></tr>
+              <tr><td>FastAPI + PostgreSQL</td><td><code>fastapi-postgresql</code></td><td>fastapi, postgresql, sqlalchemy, pydantic, docker</td></tr>
+              <tr><td>FastAPI end-to-end</td><td><code>fastapi-end-to-end</code></td><td>auth, postgres, redis, pydantic, docker, pytest</td></tr>
+              <tr><td>FastAPI + analytics DBs</td><td><code>fastapi-data-platform</code></td><td>postgres, clickhouse, bigquery, redis</td></tr>
+              <tr><td>Full AI platform</td><td><code>fastapi-gen-ai-platform</code></td><td>langchain, langgraph, neo4j, RAG, agents, multi-DB</td></tr>
+              <tr><td>Next.js + FastAPI</td><td><code>fullstack-nextjs-fastapi</code></td><td>next-js, react, fastapi, postgresql, redis</td></tr>
+              <tr><td>Gen-AI full-stack app</td><td><code>fullstack-gen-ai-app</code></td><td>next-js UI + fastapi AI backend + chromadb</td></tr>
+              <tr><td>Graph RAG full-stack</td><td><code>fullstack-gen-ai-graph-rag</code></td><td>next-js + fastapi + neo4j + langchain</td></tr>
+              <tr><td>RAG + vector DBs</td><td><code>gen-ai-rag-vector-db</code></td><td>chromadb, pinecone, qdrant, weaviate, milvus</td></tr>
+              <tr><td>Vectorless RAG</td><td><code>gen-ai-rag-vectorless</code></td><td>keyword/graph retrieval without embeddings</td></tr>
+              <tr><td>Multi-agent systems</td><td><code>gen-ai-multi-agent-full</code></td><td>langgraph, crewai, autogen, fastapi</td></tr>
+              <tr><td>NestJS + PostgreSQL</td><td><code>nestjs-postgresql</code></td><td>nestjs, typescript, postgresql, prisma</td></tr>
+              <tr><td>React + Vite + Tailwind</td><td><code>react-vite-ts</code></td><td>react, typescript, vite, tailwind, vitest</td></tr>
+              <tr><td>Next.js + Prisma</td><td><code>next-js-prisma-postgres</code></td><td>next-js, react, prisma, postgresql</td></tr>
               <tr><td>Kafka streaming</td><td><code>data-stack-kafka</code></td><td>apache-kafka, docker, python</td></tr>
-              <tr><td>ClickHouse analytics</td><td><code>data-stack-clickhouse</code></td><td>clickhouse, sql, python, docker</td></tr>
-              <tr><td>Gen-AI RAG app</td><td><code>gen-ai-graph-rag</code></td><td>custom base + graph-rag + langchain + pinecone</td></tr>
               <tr><td>Team workflow only</td><td><code>personal</code></td><td>custom base, simple, complex, frontend, backend</td></tr>
-              <tr><td>iOS app</td><td><code>mobile-ios</code></td><td>swift, swiftui, ios-development</td></tr>
-              <tr><td>AWS data pipeline</td><td><code>aws-data-engineering</code></td><td>aws-glue, aws-emr, aws-kinesis, aws-sqs</td></tr>
             </tbody>
           </table>
 
