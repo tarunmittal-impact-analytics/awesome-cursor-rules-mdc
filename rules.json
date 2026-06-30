@@ -72,11 +72,91 @@
       ]
     },
     {
+      "name": "anthropic",
+      "tags": [
+        "ai",
+        "llm",
+        "gen-ai",
+        "api"
+      ]
+    },
+    {
       "name": "anyio",
       "tags": [
         "python",
         "async",
         "compatibility-layer"
+      ]
+    },
+    {
+      "name": "apache-airflow",
+      "tags": [
+        "data-engineering",
+        "orchestration",
+        "workflow",
+        "python"
+      ]
+    },
+    {
+      "name": "apache-beam",
+      "tags": [
+        "data-engineering",
+        "streaming",
+        "batch",
+        "distributed"
+      ]
+    },
+    {
+      "name": "apache-flink",
+      "tags": [
+        "data-engineering",
+        "streaming",
+        "big-data",
+        "distributed"
+      ]
+    },
+    {
+      "name": "apache-iceberg",
+      "tags": [
+        "data-engineering",
+        "lakehouse",
+        "table-format"
+      ]
+    },
+    {
+      "name": "apache-kafka",
+      "tags": [
+        "streaming",
+        "messaging",
+        "data-engineering",
+        "distributed"
+      ]
+    },
+    {
+      "name": "apache-nifi",
+      "tags": [
+        "data-engineering",
+        "etl",
+        "integration",
+        "streaming"
+      ]
+    },
+    {
+      "name": "apache-pulsar",
+      "tags": [
+        "messaging",
+        "streaming",
+        "data-engineering",
+        "distributed"
+      ]
+    },
+    {
+      "name": "apache-spark",
+      "tags": [
+        "data-engineering",
+        "big-data",
+        "distributed",
+        "analytics"
       ]
     },
     {
@@ -188,6 +268,32 @@
       ]
     },
     {
+      "name": "aws-emr",
+      "tags": [
+        "aws",
+        "data-engineering",
+        "spark",
+        "big-data"
+      ]
+    },
+    {
+      "name": "aws-glue",
+      "tags": [
+        "aws",
+        "data-engineering",
+        "etl",
+        "serverless"
+      ]
+    },
+    {
+      "name": "aws-kinesis",
+      "tags": [
+        "aws",
+        "streaming",
+        "data-engineering"
+      ]
+    },
+    {
       "name": "aws-lambda",
       "tags": [
         "cloud",
@@ -202,6 +308,33 @@
         "sql",
         "aws",
         "cloud"
+      ]
+    },
+    {
+      "name": "aws-secrets-manager",
+      "tags": [
+        "aws",
+        "cloud",
+        "security",
+        "secrets"
+      ]
+    },
+    {
+      "name": "aws-sns",
+      "tags": [
+        "aws",
+        "cloud",
+        "messaging",
+        "pubsub"
+      ]
+    },
+    {
+      "name": "aws-sqs",
+      "tags": [
+        "aws",
+        "cloud",
+        "messaging",
+        "queue"
       ]
     },
     {
@@ -220,12 +353,39 @@
       ]
     },
     {
+      "name": "azure-data-factory",
+      "tags": [
+        "azure",
+        "data-engineering",
+        "etl",
+        "cloud"
+      ]
+    },
+    {
+      "name": "azure-key-vault",
+      "tags": [
+        "azure",
+        "cloud",
+        "security",
+        "secrets"
+      ]
+    },
+    {
       "name": "azure-pipelines",
       "tags": [
         "devops",
         "ci-cd",
         "microsoft",
         "cloud"
+      ]
+    },
+    {
+      "name": "azure-service-bus",
+      "tags": [
+        "azure",
+        "cloud",
+        "messaging",
+        "queue"
       ]
     },
     {
@@ -261,6 +421,15 @@
         "python",
         "formatter",
         "linting"
+      ]
+    },
+    {
+      "name": "bootstrap",
+      "tags": [
+        "frontend",
+        "ui",
+        "css",
+        "framework"
       ]
     },
     {
@@ -300,6 +469,15 @@
       ]
     },
     {
+      "name": "cassandra",
+      "tags": [
+        "database",
+        "nosql",
+        "distributed",
+        "backend"
+      ]
+    },
+    {
       "name": "chakra-ui",
       "tags": [
         "ui",
@@ -314,6 +492,16 @@
         "javascript",
         "html-parsing",
         "nodejs"
+      ]
+    },
+    {
+      "name": "chromadb",
+      "tags": [
+        "ai",
+        "vector-database",
+        "rag",
+        "ml",
+        "gen-ai"
       ]
     },
     {
@@ -340,6 +528,16 @@
         "python",
         "utilities",
         "cli"
+      ]
+    },
+    {
+      "name": "clickhouse",
+      "tags": [
+        "database",
+        "analytics",
+        "sql",
+        "columnar",
+        "data-engineering"
       ]
     },
     {
@@ -418,6 +616,15 @@
       ]
     },
     {
+      "name": "dagster",
+      "tags": [
+        "data-engineering",
+        "orchestration",
+        "workflow",
+        "python"
+      ]
+    },
+    {
       "name": "dask",
       "tags": [
         "ai",
@@ -444,6 +651,24 @@
         "observability",
         "devops",
         "cloud"
+      ]
+    },
+    {
+      "name": "dbt",
+      "tags": [
+        "data-engineering",
+        "analytics",
+        "sql",
+        "transformation"
+      ]
+    },
+    {
+      "name": "delta-lake",
+      "tags": [
+        "data-engineering",
+        "lakehouse",
+        "spark",
+        "analytics"
       ]
     },
     {
@@ -697,6 +922,15 @@
       ]
     },
     {
+      "name": "framer-motion",
+      "tags": [
+        "frontend",
+        "react",
+        "animation",
+        "ui"
+      ]
+    },
+    {
       "name": "gcp",
       "tags": [
         "cloud",
@@ -763,12 +997,59 @@
       ]
     },
     {
+      "name": "google-bigquery",
+      "tags": [
+        "cloud",
+        "gcp",
+        "data-warehouse",
+        "sql",
+        "analytics",
+        "data-engineering"
+      ]
+    },
+    {
+      "name": "google-cloud-run",
+      "tags": [
+        "gcp",
+        "cloud",
+        "serverless",
+        "containers"
+      ]
+    },
+    {
+      "name": "google-dataflow",
+      "tags": [
+        "gcp",
+        "data-engineering",
+        "streaming",
+        "batch"
+      ]
+    },
+    {
       "name": "google-maps-js",
       "tags": [
         "maps",
         "geolocation",
         "javascript",
         "api"
+      ]
+    },
+    {
+      "name": "google-pubsub",
+      "tags": [
+        "gcp",
+        "messaging",
+        "streaming",
+        "cloud"
+      ]
+    },
+    {
+      "name": "google-secret-manager",
+      "tags": [
+        "gcp",
+        "cloud",
+        "security",
+        "secrets"
       ]
     },
     {
@@ -790,11 +1071,29 @@
       ]
     },
     {
+      "name": "graph-database",
+      "tags": [
+        "database",
+        "graph",
+        "backend",
+        "neo4j"
+      ]
+    },
+    {
       "name": "graphql",
       "tags": [
         "web",
         "api",
         "query-language"
+      ]
+    },
+    {
+      "name": "great-expectations",
+      "tags": [
+        "data-engineering",
+        "data-quality",
+        "testing",
+        "python"
       ]
     },
     {
@@ -812,6 +1111,16 @@
         "ethereum",
         "development",
         "javascript"
+      ]
+    },
+    {
+      "name": "haystack",
+      "tags": [
+        "ai",
+        "rag",
+        "nlp",
+        "python",
+        "gen-ai"
       ]
     },
     {
@@ -878,6 +1187,15 @@
       ]
     },
     {
+      "name": "ios-development",
+      "tags": [
+        "mobile",
+        "ios",
+        "apple",
+        "swift"
+      ]
+    },
+    {
       "name": "isort",
       "tags": [
         "development",
@@ -893,6 +1211,16 @@
         "backend",
         "enterprise",
         "jvm"
+      ]
+    },
+    {
+      "name": "javascript",
+      "tags": [
+        "language",
+        "frontend",
+        "backend",
+        "web",
+        "javascript"
       ]
     },
     {
@@ -969,6 +1297,15 @@
       ]
     },
     {
+      "name": "kotlin",
+      "tags": [
+        "language",
+        "mobile",
+        "android",
+        "jvm"
+      ]
+    },
+    {
       "name": "kubernetes",
       "tags": [
         "development",
@@ -1007,6 +1344,15 @@
       ]
     },
     {
+      "name": "langsmith",
+      "tags": [
+        "ai",
+        "llm",
+        "observability",
+        "langchain"
+      ]
+    },
+    {
       "name": "laravel",
       "tags": [
         "backend",
@@ -1022,6 +1368,15 @@
         "machine-learning",
         "python",
         "gradient-boosting"
+      ]
+    },
+    {
+      "name": "lit",
+      "tags": [
+        "frontend",
+        "framework",
+        "web-components",
+        "javascript"
       ]
     },
     {
@@ -1081,12 +1436,31 @@
       ]
     },
     {
+      "name": "memcached",
+      "tags": [
+        "caching",
+        "backend",
+        "distributed",
+        "performance"
+      ]
+    },
+    {
       "name": "microsoft-teams",
       "tags": [
         "collaboration",
         "communication",
         "microsoft",
         "enterprise"
+      ]
+    },
+    {
+      "name": "milvus",
+      "tags": [
+        "ai",
+        "vector-database",
+        "rag",
+        "ml",
+        "gen-ai"
       ]
     },
     {
@@ -1148,6 +1522,15 @@
         "python",
         "type-checking",
         "static-analysis"
+      ]
+    },
+    {
+      "name": "mysql",
+      "tags": [
+        "database",
+        "sql",
+        "relational",
+        "backend"
       ]
     },
     {
@@ -1322,6 +1705,16 @@
       ]
     },
     {
+      "name": "pinecone",
+      "tags": [
+        "ai",
+        "vector-database",
+        "rag",
+        "ml",
+        "gen-ai"
+      ]
+    },
+    {
       "name": "playwright",
       "tags": [
         "development",
@@ -1374,6 +1767,24 @@
         "testing",
         "development",
         "http-client"
+      ]
+    },
+    {
+      "name": "preact",
+      "tags": [
+        "frontend",
+        "framework",
+        "javascript",
+        "react"
+      ]
+    },
+    {
+      "name": "prefect",
+      "tags": [
+        "data-engineering",
+        "orchestration",
+        "workflow",
+        "python"
       ]
     },
     {
@@ -1483,11 +1894,39 @@
       ]
     },
     {
+      "name": "qdrant",
+      "tags": [
+        "ai",
+        "vector-database",
+        "rag",
+        "ml",
+        "gen-ai"
+      ]
+    },
+    {
       "name": "qwik",
       "tags": [
         "frontend",
         "framework",
         "javascript"
+      ]
+    },
+    {
+      "name": "rabbitmq",
+      "tags": [
+        "messaging",
+        "queue",
+        "backend",
+        "distributed"
+      ]
+    },
+    {
+      "name": "radix-ui",
+      "tags": [
+        "frontend",
+        "react",
+        "ui",
+        "component-library"
       ]
     },
     {
@@ -1738,6 +2177,16 @@
       ]
     },
     {
+      "name": "snowflake",
+      "tags": [
+        "data-warehouse",
+        "cloud",
+        "sql",
+        "analytics",
+        "data-engineering"
+      ]
+    },
+    {
       "name": "socket-io",
       "tags": [
         "websockets",
@@ -1772,6 +2221,15 @@
       ]
     },
     {
+      "name": "spec-kit",
+      "tags": [
+        "development",
+        "specification",
+        "ai",
+        "workflow"
+      ]
+    },
+    {
       "name": "sphinx",
       "tags": [
         "development",
@@ -1795,6 +2253,15 @@
         "backend",
         "framework",
         "java"
+      ]
+    },
+    {
+      "name": "sql",
+      "tags": [
+        "database",
+        "sql",
+        "query-language",
+        "data-engineering"
       ]
     },
     {
@@ -1868,6 +2335,25 @@
         "javascript",
         "svelte",
         "ssr"
+      ]
+    },
+    {
+      "name": "swift",
+      "tags": [
+        "language",
+        "mobile",
+        "ios",
+        "apple"
+      ]
+    },
+    {
+      "name": "swiftui",
+      "tags": [
+        "mobile",
+        "ios",
+        "ui",
+        "swift",
+        "apple"
       ]
     },
     {
@@ -1967,6 +2453,15 @@
         "nlp",
         "deep-learning",
         "huggingface"
+      ]
+    },
+    {
+      "name": "trino",
+      "tags": [
+        "data-engineering",
+        "sql",
+        "analytics",
+        "distributed"
       ]
     },
     {
@@ -2096,6 +2591,16 @@
         "frontend",
         "framework",
         "javascript"
+      ]
+    },
+    {
+      "name": "weaviate",
+      "tags": [
+        "ai",
+        "vector-database",
+        "rag",
+        "ml",
+        "gen-ai"
       ]
     },
     {

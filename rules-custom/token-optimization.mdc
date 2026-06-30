@@ -1,0 +1,18 @@
+---
+description: LLM token optimization — reduce cost and latency
+globs: **/*.{py,ts,tsx}
+alwaysApply: false
+---
+
+# Token optimization
+
+- Minimize system prompt size; move static reference docs to retrieval, not always-on context.
+- Truncate or summarize conversation history; keep only recent turns + summary of older context.
+- Use smaller models for classification, routing, and extraction; reserve large models for generation.
+- Structured outputs reduce retry loops caused by malformed responses.
+- Batch independent LLM calls where latency allows (parallel, not sequential).
+- Cache responses for idempotent queries (same input → same output expected).
+- Compress retrieved context: deduplicate chunks, strip boilerplate, extract key sentences.
+- Set max_tokens on completions to prevent runaway generation.
+- Count tokens in CI for prompt changes; alert on regressions.
+- Prefer fine-tuned smaller models over giant prompts when patterns are repetitive.

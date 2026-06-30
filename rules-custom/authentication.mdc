@@ -1,0 +1,18 @@
+---
+description: Authentication patterns — identity verification and session management
+globs: **/*.{py,ts,tsx,js,go,rs}
+alwaysApply: false
+---
+
+# Authentication
+
+- Never store passwords in plain text; use bcrypt, argon2, or scrypt with per-user salt.
+- Prefer established auth providers (OAuth2/OIDC, Auth0, Clerk) over custom auth when possible.
+- Use short-lived access tokens + refresh tokens; rotate refresh tokens on use.
+- Store sessions server-side or use signed JWTs with short expiry and secure httpOnly cookies.
+- Validate tokens on every protected request; fail closed (401), never silently degrade.
+- Implement MFA for sensitive operations and admin access.
+- Rate-limit login and password reset endpoints against brute force.
+- Never log passwords, tokens, or secrets.
+- Use constant-time comparison for token/signature verification.
+- Provide secure password reset with time-limited, single-use tokens.

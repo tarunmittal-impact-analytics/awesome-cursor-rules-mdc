@@ -1,0 +1,18 @@
+---
+description: Concurrency and parallelism patterns
+globs: **/*.{py,ts,tsx,go,rs,java}
+alwaysApply: false
+---
+
+# Concurrency and parallelism
+
+- Distinguish I/O-bound (async, threads) from CPU-bound (processes, thread pools) workloads.
+- Prefer async/await for I/O-heavy services; avoid blocking calls inside async contexts.
+- Use bounded thread/process pools — unbounded concurrency exhausts memory and connections.
+- Protect shared mutable state with locks, channels, or actor patterns — never assume thread safety.
+- Set timeouts on all concurrent operations (HTTP, DB, queue consumers).
+- Use backpressure: slow producers when consumers lag (queue limits, semaphores).
+- Parallelize independent tasks; serialize tasks with shared dependencies.
+- Avoid deadlocks: acquire locks in consistent order; prefer lock-free structures when simple.
+- Test concurrent code with race detectors and load tests, not unit tests alone.
+- Log correlation IDs across concurrent requests for debugging.

@@ -1,0 +1,18 @@
+---
+description: Generative AI application development best practices
+globs: **/*.{py,ts,tsx}
+alwaysApply: false
+---
+
+# Gen AI development
+
+- Treat LLM integration as a service layer with clear input/output contracts.
+- Version prompts, models, and retrieval indexes together in deployments.
+- Implement eval harnesses before changing prompts or models in production.
+- Stream responses for UX; buffer only when downstream processing requires full text.
+- Handle provider outages with retries, fallbacks, and user-visible error states.
+- Track cost per request: input tokens, output tokens, embedding calls, retrieval queries.
+- Sanitize user input before prompt injection — never concatenate raw user text into system prompts blindly.
+- Use tool/function calling with strict schemas instead of parsing LLM prose for actions.
+- Separate dev/staging/prod API keys and rate limits.
+- Comply with data retention policies — do not send PII to external LLM APIs without review.

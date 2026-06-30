@@ -71,6 +71,150 @@
     "personal-react-ts": {
       "description": "Personal workflow rules plus React TypeScript stack",
       "rules": ["custom:base", "custom:frontend", "custom:simple", "react", "typescript", "vite", "vitest"]
+    },
+    "data-stack-clickhouse": {
+      "description": "ClickHouse analytics database",
+      "rules": ["clickhouse", "sql", "python", "docker"]
+    },
+    "data-stack-postgres": {
+      "description": "PostgreSQL relational database",
+      "rules": ["postgresql", "sql", "sqlalchemy", "python"]
+    },
+    "data-stack-mysql": {
+      "description": "MySQL relational database",
+      "rules": ["mysql", "sql", "python"]
+    },
+    "data-stack-bigquery": {
+      "description": "Google BigQuery data warehouse",
+      "rules": ["google-bigquery", "sql", "gcp", "dbt"]
+    },
+    "data-stack-snowflake": {
+      "description": "Snowflake cloud data warehouse",
+      "rules": ["snowflake", "sql", "dbt"]
+    },
+    "data-stack-duckdb": {
+      "description": "DuckDB embedded analytics",
+      "rules": ["duckdb", "sql", "python", "pandas"]
+    },
+    "data-stack-spark": {
+      "description": "Apache Spark batch/stream processing",
+      "rules": ["apache-spark", "python", "delta-lake", "docker"]
+    },
+    "data-stack-flink": {
+      "description": "Apache Flink stream processing",
+      "rules": ["apache-flink", "apache-kafka", "java", "docker"]
+    },
+    "data-stack-kafka": {
+      "description": "Apache Kafka event streaming",
+      "rules": ["apache-kafka", "docker", "python"]
+    },
+    "data-stack-airflow": {
+      "description": "Apache Airflow workflow orchestration",
+      "rules": ["apache-airflow", "python", "docker", "dbt"]
+    },
+    "data-stack-dbt": {
+      "description": "dbt data transformation",
+      "rules": ["dbt", "sql", "snowflake", "google-bigquery"]
+    },
+    "data-stack-prefect": {
+      "description": "Prefect workflow orchestration",
+      "rules": ["prefect", "python", "docker"]
+    },
+    "data-stack-dagster": {
+      "description": "Dagster data orchestration",
+      "rules": ["dagster", "python", "dbt", "docker"]
+    },
+    "data-stack-beam": {
+      "description": "Apache Beam unified batch/stream",
+      "rules": ["apache-beam", "python", "google-dataflow"]
+    },
+    "data-stack-cassandra": {
+      "description": "Apache Cassandra distributed database",
+      "rules": ["cassandra", "docker", "python"]
+    },
+    "data-stack-trino": {
+      "description": "Trino distributed SQL query engine",
+      "rules": ["trino", "sql", "docker"]
+    },
+    "messaging-rabbitmq": {
+      "description": "RabbitMQ message broker",
+      "rules": ["rabbitmq", "python", "docker"]
+    },
+    "messaging-aws-sqs": {
+      "description": "AWS SQS queue messaging",
+      "rules": ["aws-sqs", "aws", "boto3", "python"]
+    },
+    "messaging-aws-sns": {
+      "description": "AWS SNS pub/sub messaging",
+      "rules": ["aws-sns", "aws", "boto3", "python"]
+    },
+    "messaging-gcp-pubsub": {
+      "description": "Google Cloud Pub/Sub messaging",
+      "rules": ["google-pubsub", "gcp", "python"]
+    },
+    "gen-ai-full": {
+      "description": "Full generative AI stack with RAG and agents",
+      "rules": ["custom:gen-ai-development", "custom:rag-development", "custom:ai-design-patterns", "custom:token-optimization", "langchain", "langgraph", "openai", "anthropic", "pydantic"]
+    },
+    "gen-ai-rag": {
+      "description": "RAG pipeline development",
+      "rules": ["custom:rag-development", "custom:vectorless-rag", "custom:token-optimization", "chromadb", "pinecone", "langchain", "python"]
+    },
+    "gen-ai-graph-rag": {
+      "description": "Graph RAG with knowledge graphs",
+      "rules": ["custom:graph-rag", "custom:rag-development", "neo4j", "graph-database", "langchain", "python"]
+    },
+    "gen-ai-multi-agent": {
+      "description": "Multi-agent AI systems",
+      "rules": ["custom:multi-agent-systems", "custom:ai-design-patterns", "langgraph", "crewai", "autogen", "python"]
+    },
+    "security-full": {
+      "description": "Auth, secrets, rate limiting, and security patterns",
+      "rules": ["custom:authentication", "custom:authorization", "custom:env-secrets-management", "custom:rate-limiting", "custom:distributed-rate-limiting", "auth0", "clerk"]
+    },
+    "secrets-management": {
+      "description": "Cloud secrets management across providers",
+      "rules": ["custom:env-secrets-management", "google-secret-manager", "aws-secrets-manager", "azure-key-vault"]
+    },
+    "distributed-systems": {
+      "description": "Distributed systems patterns and theory",
+      "rules": ["custom:cap-theorem", "custom:acid-properties", "custom:distributed-locks", "custom:caching", "custom:concurrency-parallelism", "redis"]
+    },
+    "full-stack-nextjs-pro": {
+      "description": "Next.js full-stack with personal rules and security",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "next-js", "react", "typescript", "tailwind", "prisma", "postgresql", "redis"]
+    },
+    "full-stack-fastapi-pro": {
+      "description": "FastAPI backend with ClickHouse/Postgres and caching",
+      "rules": ["custom:base", "custom:backend", "fastapi", "pydantic", "postgresql", "clickhouse", "redis", "docker", "pytest"]
+    },
+    "mobile-ios": {
+      "description": "iOS development with Swift and SwiftUI",
+      "rules": ["swift", "swiftui", "ios-development", "custom:frontend"]
+    },
+    "mobile-android": {
+      "description": "Android development with Kotlin",
+      "rules": ["kotlin", "android-sdk", "jetpack-compose", "custom:frontend"]
+    },
+    "observability": {
+      "description": "Monitoring, logging, and observability",
+      "rules": ["datadog", "grafana", "elk-stack", "sentry", "docker", "kubernetes"]
+    },
+    "aws-data-engineering": {
+      "description": "AWS data engineering services",
+      "rules": ["aws-glue", "aws-emr", "aws-kinesis", "aws-sqs", "amazon-s3", "apache-spark", "terraform"]
+    },
+    "gcp-data-engineering": {
+      "description": "GCP data engineering services",
+      "rules": ["google-bigquery", "google-dataflow", "google-pubsub", "google-secret-manager", "gcp", "dbt"]
+    },
+    "azure-data-engineering": {
+      "description": "Azure data engineering services",
+      "rules": ["azure-data-factory", "azure-service-bus", "azure-key-vault", "azure", "dbt"]
+    },
+    "frontend-complete": {
+      "description": "Modern frontend stack — React, Tailwind, Radix, Framer",
+      "rules": ["react", "typescript", "next-js", "tailwind", "radix-ui", "framer-motion", "shadcn", "vite", "eslint"]
     }
   }
 }

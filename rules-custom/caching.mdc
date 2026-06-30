@@ -1,0 +1,18 @@
+---
+description: Caching strategies — in-memory, distributed, and CDN caching
+globs: **/*.{py,ts,tsx,js,go,rs}
+alwaysApply: false
+---
+
+# Caching
+
+- Cache only data that is expensive to compute/fetch and safe to be slightly stale.
+- Always define TTL; unbounded caches cause memory leaks and stale data bugs.
+- Use cache-aside pattern: app checks cache → on miss, fetch DB → populate cache.
+- Invalidate on write, not just TTL, for user-facing mutable data.
+- Use consistent cache keys: `{entity}:{id}:{version}` — include schema version when needed.
+- Prefer Redis/Memcached for distributed cache; avoid local-only cache in multi-instance deploys.
+- Do not cache error responses unless intentional (with short TTL).
+- Monitor cache hit rate, eviction rate, and memory usage.
+- Cache at the right layer: CDN for static assets, Redis for API responses, in-process for hot paths only.
+- Document cache invalidation strategy in code comments for non-obvious cases.

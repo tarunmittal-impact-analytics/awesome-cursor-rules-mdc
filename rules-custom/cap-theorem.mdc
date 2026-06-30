@@ -1,0 +1,17 @@
+---
+description: CAP theorem — consistency, availability, partition tolerance tradeoffs
+alwaysApply: false
+---
+
+# CAP theorem
+
+- During a network partition, choose between consistency (CP) and availability (AP) — both is impossible.
+- Strong consistency (CP): financial transactions, inventory, auth sessions — accept downtime during partitions.
+- High availability (AP): social feeds, analytics, caches — accept stale reads during partitions.
+- Most systems are neither pure CP nor AP — tune per operation (strong writes, eventual reads).
+- Document consistency guarantees per endpoint in API docs.
+- Use eventual consistency with conflict resolution (CRDTs, last-write-wins, vector clocks) when appropriate.
+- Health checks should detect partition scenarios, not just process crashes.
+- Do not assume single-node databases scale horizontally without CAP tradeoffs.
+- Test split-brain scenarios in staging for distributed systems.
+- Prefer single-region strong consistency until multi-region requirements are proven.

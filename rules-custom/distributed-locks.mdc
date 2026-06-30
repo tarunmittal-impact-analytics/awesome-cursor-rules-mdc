@@ -1,0 +1,18 @@
+---
+description: Distributed locks for coordinating across service instances
+globs: **/*.{py,ts,tsx,js,go,rs}
+alwaysApply: false
+---
+
+# Distributed locks
+
+- Use locks only when necessary — prefer idempotent operations and unique constraints in DB.
+- Redis Redlock or etcd/consul locks for short-lived coordination (< 30s hold time).
+- Always set lock TTL; crashes must not hold locks forever.
+- Include lock owner identity in the lock value; verify ownership before release.
+- Keep critical sections inside locks minimal — no network I/O or LLM calls while holding.
+- Implement lock renewal (heartbeat) for longer operations if unavoidable.
+- Handle lock acquisition failure gracefully (retry with jitter, fallback path).
+- Never use distributed locks for throughput scaling — they serialize work.
+- Test failure scenarios: lock holder crash, network partition, clock drift.
+- Prefer database advisory locks or optimistic locking for data consistency when possible.

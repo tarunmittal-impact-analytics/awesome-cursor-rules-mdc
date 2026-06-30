@@ -1,0 +1,18 @@
+---
+description: AI and LLM application design patterns
+globs: **/*.{py,ts,tsx,js}
+alwaysApply: false
+---
+
+# AI design patterns
+
+- Separate prompt templates from application code; version and test prompts independently.
+- Use structured outputs (JSON schema, Pydantic, Zod) instead of parsing free-form LLM text.
+- Implement guardrails: input validation, output filtering, max token limits, timeout handling.
+- Cache LLM responses for deterministic, repeated queries (with TTL and cache key on prompt+model).
+- Log prompts, completions, latency, token usage, and model version for every LLM call.
+- Human-in-the-loop for high-stakes decisions; never fully automate without review paths.
+- Fallback chain: primary model → cheaper/faster fallback → cached/default response.
+- Evaluate with golden datasets before shipping prompt or model changes.
+- Keep retrieval context minimal and relevant; more tokens ≠ better answers.
+- Treat LLM outputs as untrusted input — validate before DB writes, code execution, or API calls.

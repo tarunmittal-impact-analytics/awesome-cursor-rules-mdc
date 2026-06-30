@@ -1,0 +1,18 @@
+---
+description: Distributed rate limiting across multiple service instances
+globs: **/*.{py,ts,tsx,js,go,rs}
+alwaysApply: false
+---
+
+# Distributed rate limiting
+
+- Use a shared store (Redis) for counters — in-memory limits fail with multiple instances.
+- Prefer atomic increment (Redis INCR + EXPIRE) or Lua scripts for accuracy.
+- Partition limits by tenant/user/key to prevent one abuser affecting all users.
+- Implement global + per-tenant limits (defense in depth).
+- Handle Redis failures: fail open for non-critical paths, fail closed for costly operations.
+- Sync clock skew is less critical with sliding window in Redis sorted sets.
+- Consider leaky bucket at gateway + token bucket at service level for layered protection.
+- Propagate rate limit context in service mesh headers when using microservices.
+- Monitor false positive rate (legitimate users hitting limits).
+- Document limit tiers in API docs so clients can implement backoff.

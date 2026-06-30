@@ -1,0 +1,18 @@
+---
+description: Graph RAG — retrieval augmented generation with knowledge graphs
+globs: **/*.{py,ts,tsx}
+alwaysApply: false
+---
+
+# Graph RAG
+
+- Model entities and relationships explicitly before choosing a graph store (Neo4j, etc.).
+- Extract entities/relations in a dedicated pipeline step; do not rely on the LLM to query raw graphs directly.
+- Combine vector search (semantic similarity) with graph traversal (structural relevance).
+- Limit graph traversal depth (2–3 hops) to control latency and context size.
+- Serialize subgraphs to compact natural language or structured JSON for LLM context.
+- Version graph schema and extraction prompts together.
+- Evaluate retrieval with both factual QA and multi-hop reasoning benchmarks.
+- Cache frequent subgraph queries; graph traversals can be expensive at scale.
+- Handle missing edges gracefully — partial graphs are common in real data.
+- Prefer hybrid retrieval: vector + keyword + graph when accuracy matters.

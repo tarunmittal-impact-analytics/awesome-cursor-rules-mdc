@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "docs/**"
+      - "rules-mdc/**"
       - "rules.json"
       - "custom-rules.json"
       - "rules-custom/**"

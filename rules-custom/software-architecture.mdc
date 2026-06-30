@@ -1,0 +1,17 @@
+---
+description: Software architecture principles for system design and refactors
+alwaysApply: false
+---
+
+# Software architecture
+
+- Prefer the simplest architecture that meets current requirements; defer distributed complexity until justified.
+- Define clear boundaries: API layer, domain logic, data access, infrastructure.
+- Favor dependency inversion — business logic must not depend on frameworks or databases directly.
+- Document key decisions (ADRs) when choosing between viable architectures.
+- Design for observability from day one: structured logs, metrics, traces at service boundaries.
+- Make failure modes explicit: timeouts, retries, circuit breakers, graceful degradation.
+- Avoid shared mutable state across services; prefer event-driven or explicit API contracts.
+- When scaling, identify the bottleneck first (CPU, I/O, DB, network) before adding layers.
+- Keep deployment units small and independently deployable where possible.
+- Question every new dependency — each one is a long-term maintenance cost.

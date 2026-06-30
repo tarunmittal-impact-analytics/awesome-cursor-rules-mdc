@@ -1,0 +1,18 @@
+---
+description: ACID properties for transactional database design
+globs: **/*.{py,ts,sql}
+alwaysApply: false
+---
+
+# ACID properties
+
+- **Atomicity:** Wrap related writes in a single transaction; all succeed or all roll back.
+- **Consistency:** Enforce invariants with DB constraints (FK, UNIQUE, CHECK), not app logic alone.
+- **Isolation:** Choose isolation level deliberately — READ COMMITTED default; SERIALIZABLE for critical financial ops.
+- **Durability:** Rely on WAL/replication; confirm fsync settings in production DB config.
+- Keep transactions short — long transactions block other writers and increase deadlock risk.
+- Avoid user-facing logic or external API calls inside DB transactions.
+- Use savepoints for partial rollback within complex transactions.
+- Handle deadlocks with retry logic and exponential backoff.
+- Test rollback paths — partial failure bugs are common without integration tests.
+- Document which operations require strict ACID vs eventual consistency.

@@ -1,0 +1,18 @@
+---
+description: Multi-agent AI system design and orchestration
+globs: **/*.{py,ts,tsx}
+alwaysApply: false
+---
+
+# Multi-agent systems
+
+- Define each agent's role, tools, and boundaries explicitly — no overlapping responsibilities.
+- Use a supervisor/orchestrator pattern for complex workflows; avoid uncontrolled agent-to-agent loops.
+- Cap iteration count and tool calls per agent run to prevent runaway costs.
+- Pass structured state between agents (JSON), not raw conversation history when possible.
+- Give agents narrow tool sets — fewer tools = fewer hallucinated tool calls.
+- Implement shared memory carefully: prefer explicit handoff documents over global mutable state.
+- Log every agent step: input, tools called, output, tokens, latency.
+- Test multi-agent flows with deterministic mocks before live LLM integration.
+- Fail gracefully: if one agent fails, return partial results with clear error context.
+- Start with single-agent + tools; add agents only when a clear separation of concerns exists.

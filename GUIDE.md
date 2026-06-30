@@ -35,8 +35,8 @@ This document is the full reference for **awesome-cursor-rules-mdc** — what it
 
 This repo is a **Cursor rules library and toolkit**. It provides:
 
-1. **241+ library rules** (`rules-mdc/`) — best-practice MDC files for frameworks and tools (React, FastAPI, Docker, etc.), auto-generated from web research + LLM.
-2. **5 personal rules** (`rules-custom/`) — hand-written workflow rules for how the AI should behave in your projects.
+1. **296 library rules** (`rules-mdc/`) — best-practice MDC files for frameworks, databases, data engineering, cloud, AI, and more.
+2. **24 personal/custom rules** (`rules-custom/`) — hand-written workflow, architecture, security, RAG, and distributed systems rules.
 3. **Install tooling** — CLI, curl script, and web catalog to copy rules into any project's `.cursor/rules/` folder.
 4. **Rule generator** — scripts to create new library rules (requires API keys).
 
@@ -85,8 +85,8 @@ alwaysApply: false
 
 ```
 .
-├── rules-mdc/              # 241 generated library rules (react.mdc, fastapi.mdc, …)
-├── rules-custom/         # 5 personal hand-written rules
+├── rules-mdc/              # 296 library rules (react.mdc, clickhouse.mdc, …)
+├── rules-custom/         # 24 personal/custom rules (RAG, security, architecture, …)
 ├── rules.json            # Catalog of all library rules + tags
 ├── custom-rules.json     # Catalog of personal rules
 ├── stacks.json           # Preset bundles (python-backend, personal, …)
@@ -106,8 +106,8 @@ alwaysApply: false
 
 | Type | Directory | Count | Source | Install prefix |
 |------|-----------|-------|--------|----------------|
-| **Library** | `rules-mdc/` | 241 | Auto-generated | `react`, `fastapi` |
-| **Personal** | `rules-custom/` | 5 | Hand-written | `custom:base` or `--custom base` |
+| **Library** | `rules-mdc/` | 296 | Generated / template + LLM | `react`, `fastapi`, `clickhouse` |
+| **Personal** | `rules-custom/` | 24 | Hand-written | `custom:base` or `--custom base` |
 
 ---
 
@@ -225,7 +225,7 @@ uv run cursor-rules install --stack personal --here
 
 Open: **https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/**
 
-- **Rules** tab — browse 241 library rules, filter by tag, multi-select, copy curl/uv commands
+- **Rules** tab — browse 296 library rules, filter by tag, multi-select, copy curl/uv commands
 - **Personal** tab — browse 5 custom rules
 - **Stacks** tab — browse preset bundles, copy install command
 
@@ -372,9 +372,9 @@ Defaults to values in `repo.json` / `install.sh`.
 
 | Tab | Content |
 |-----|---------|
-| **Rules** | 241 library rules with tag filters and multi-select |
-| **Personal** | 5 custom workflow rules |
-| **Stacks** | 18 preset bundles with one-click copy |
+| **Rules** | 296 library rules with tag filters and multi-select |
+| **Personal** | 24 custom rules (RAG, security, architecture, patterns) |
+| **Stacks** | 54 preset bundles with one-click copy |
 
 ### Regenerate catalog (after editing rules)
 
@@ -408,6 +408,57 @@ This updates `docs/catalog.json`, syncs URLs in `install.sh`, and refreshes GitH
 | `mobile-flutter` | Flutter mobile | flutter, firebase, expo, typescript |
 | `e2e-testing` | Browser testing | playwright, cypress, vitest, eslint, typescript |
 
+### Data engineering stacks (individual tools)
+
+| Stack | Description |
+|-------|-------------|
+| `data-stack-clickhouse` | ClickHouse analytics |
+| `data-stack-postgres` | PostgreSQL |
+| `data-stack-mysql` | MySQL |
+| `data-stack-bigquery` | Google BigQuery |
+| `data-stack-snowflake` | Snowflake |
+| `data-stack-duckdb` | DuckDB |
+| `data-stack-spark` | Apache Spark |
+| `data-stack-flink` | Apache Flink |
+| `data-stack-kafka` | Apache Kafka |
+| `data-stack-airflow` | Apache Airflow |
+| `data-stack-dbt` | dbt |
+| `data-stack-prefect` | Prefect |
+| `data-stack-dagster` | Dagster |
+| `data-stack-beam` | Apache Beam |
+| `data-stack-cassandra` | Cassandra |
+| `data-stack-trino` | Trino |
+
+### Gen AI stacks
+
+| Stack | Description |
+|-------|-------------|
+| `gen-ai-full` | Full gen AI stack with LangChain, LangGraph, RAG |
+| `gen-ai-rag` | RAG pipeline development |
+| `gen-ai-graph-rag` | Graph RAG with Neo4j |
+| `gen-ai-multi-agent` | Multi-agent systems |
+
+### Security & distributed systems
+
+| Stack | Description |
+|-------|-------------|
+| `security-full` | Auth, authorization, rate limiting |
+| `secrets-management` | AWS/GCP/Azure secret managers |
+| `distributed-systems` | CAP, ACID, locks, caching, concurrency |
+| `messaging-rabbitmq` | RabbitMQ |
+| `messaging-aws-sqs` | AWS SQS |
+| `messaging-gcp-pubsub` | Google Pub/Sub |
+
+### Cloud data engineering
+
+| Stack | Description |
+|-------|-------------|
+| `aws-data-engineering` | AWS Glue, EMR, Kinesis, SQS |
+| `gcp-data-engineering` | BigQuery, Dataflow, Pub/Sub |
+| `azure-data-engineering` | Data Factory, Service Bus |
+
+Run `uv run src/install_rules.py stacks` to list all 54 stacks.
+
 ### Personal stacks
 
 | Stack | Description | Rules included |
@@ -439,11 +490,30 @@ Located in `rules-custom/`. These define **how the AI behaves**, not library-spe
 | `complex` | No | — | Step-by-step thinking for architecture and large refactors |
 | `frontend` | No | components, pages, `*.tsx` | UI conventions (server components, 150-line limit) |
 | `backend` | No | api, server, models, db | API/DB conventions (error handling, parameterized queries) |
+| `software-architecture` | No | — | System design principles |
+| `design-patterns` | No | code files | Classic design patterns |
+| `ai-design-patterns` | No | py/ts | LLM application patterns |
+| `multi-agent-systems` | No | py/ts | Multi-agent orchestration |
+| `graph-rag` | No | py/ts | Graph RAG with knowledge graphs |
+| `rag-development` | No | py/ts | Vector RAG pipelines |
+| `vectorless-rag` | No | py/ts | Retrieval without embeddings |
+| `token-optimization` | No | py/ts | LLM cost/token optimization |
+| `authentication` | No | backend files | Auth and session management |
+| `authorization` | No | backend files | Access control |
+| `caching` | No | backend files | Cache strategies |
+| `rate-limiting` | No | backend files | API rate limiting |
+| `distributed-rate-limiting` | No | backend files | Distributed rate limits |
+| `distributed-locks` | No | backend files | Distributed locks |
+| `acid-properties` | No | py/sql | Transactional DB design |
+| `cap-theorem` | No | — | Consistency vs availability |
+| `env-secrets-management` | No | env/config files | .env and secrets management |
+| `gen-ai-development` | No | py/ts | Gen AI app development |
+| `concurrency-parallelism` | No | backend files | Concurrency patterns |
 
 ### Install personal rules
 
 ```bash
-# All 5 rules
+# All 24 custom rules
 curl -fsSL .../install.sh | bash -s -- --custom-all --here
 
 # Specific rules

@@ -1,0 +1,18 @@
+---
+description: Authorization patterns — access control and permissions
+globs: **/*.{py,ts,tsx,js,go,rs}
+alwaysApply: false
+---
+
+# Authorization
+
+- Separate authentication (who) from authorization (what they can do).
+- Check permissions at the API/service layer, not only in UI.
+- Prefer RBAC for most apps; ABAC when fine-grained policy rules are required.
+- Default deny: explicitly grant permissions, never assume access.
+- Validate resource ownership on every read/write (IDOR prevention).
+- Never trust client-side role checks alone.
+- Centralize policy logic; avoid scattered `if user.is_admin` checks across codebase.
+- Log authorization failures for security monitoring.
+- Scope API keys and service accounts to minimum required permissions.
+- Test authorization with multiple role fixtures in integration tests.

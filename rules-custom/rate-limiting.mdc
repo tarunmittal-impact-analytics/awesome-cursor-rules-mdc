@@ -1,0 +1,18 @@
+---
+description: Rate limiting — protect APIs and services from abuse
+globs: **/*.{py,ts,tsx,js,go,rs}
+alwaysApply: false
+---
+
+# Rate limiting
+
+- Apply rate limits at the API gateway or middleware layer before business logic.
+- Use token bucket or sliding window algorithms; fixed windows cause burst edge cases.
+- Limit by user ID, API key, or IP — prefer authenticated identity over IP when available.
+- Return 429 with `Retry-After` header; include rate limit headers (`X-RateLimit-*`).
+- Set stricter limits on expensive endpoints (LLM calls, exports, search).
+- Whitelist internal services; do not rate-limit health checks.
+- Log rate limit violations for abuse detection.
+- Store counters in Redis for distributed rate limiting across instances.
+- Gracefully degrade under load before hard rejection where UX allows (queue, slow mode).
+- Test rate limits in integration tests with burst traffic simulation.

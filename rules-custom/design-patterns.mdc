@@ -1,0 +1,18 @@
+---
+description: Classic and practical design patterns for maintainable code
+globs: **/*.{py,ts,tsx,js,go,rs,java,kt}
+alwaysApply: false
+---
+
+# Design patterns
+
+- Use patterns to solve recurring problems, not to add abstraction for its own sake.
+- Prefer composition over inheritance.
+- Strategy/Factory: when behavior varies by type and switch statements grow.
+- Repository: isolate data access from business logic.
+- Adapter: wrap third-party APIs behind a stable internal interface.
+- Observer/Event: decouple producers and consumers; avoid tight callback chains.
+- Singleton: avoid global state; use DI containers or explicit wiring instead.
+- Builder: for complex object construction with many optional parameters.
+- Do not force Gang of Four patterns where a simple function suffices.
+- Name patterns implicitly in code structure; only comment when the pattern is non-obvious.

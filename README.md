@@ -114,7 +114,7 @@ uv run src/install_rules.py install react fastapi --here --source github
 ### Browse the catalog
 
 ```bash
-uv run src/install_rules.py list                    # all 241 rules
+uv run src/install_rules.py list                    # all 296 rules
 uv run src/install_rules.py list --tag python       # filter by tag
 uv run src/install_rules.py tags                    # all tags with counts
 uv run src/install_rules.py search fastapi          # search by name/tag
@@ -137,7 +137,7 @@ uv run src/install_rules.py install --stack react-ts --here
 uv run src/install_rules.py install --stack ai-llm --here
 ```
 
-Available stacks: `python-backend`, `python-django`, `python-flask`, `react-ts`, `next-js-fullstack`, `vue-frontend`, `angular-frontend`, `data-ml`, `ai-llm`, `devops`, `aws-cloud`, `rust-web`, `go-backend`, `mobile-flutter`, `e2e-testing`, `personal`, `personal-python-backend`, `personal-react-ts`
+Available stacks: run `uv run src/install_rules.py stacks` (54 stacks including data engineering, gen-ai, security, cloud, mobile, frontend). Key stacks: `python-backend`, `personal-python-backend`, `gen-ai-rag`, `gen-ai-graph-rag`, `data-stack-kafka`, `data-stack-spark`, `full-stack-nextjs-pro`, `security-full`, `secrets-management`.
 
 ### Personal / custom rules
 

@@ -1,29 +1,28 @@
 {
   "rules": [
-    {
-      "name": "base",
-      "description": "Base behavior for all tasks (always applied)",
-      "tags": ["personal", "custom", "always-apply"]
-    },
-    {
-      "name": "simple",
-      "description": "Docs, tests, and small files — keep responses minimal",
-      "tags": ["personal", "custom", "docs", "testing"]
-    },
-    {
-      "name": "complex",
-      "description": "Architecture, system design, and large refactors",
-      "tags": ["personal", "custom", "architecture"]
-    },
-    {
-      "name": "frontend",
-      "description": "UI component conventions for React/Next.js",
-      "tags": ["personal", "custom", "frontend"]
-    },
-    {
-      "name": "backend",
-      "description": "API, DB, and server-side code conventions",
-      "tags": ["personal", "custom", "backend"]
-    }
+    {"name": "base", "description": "Base behavior for all tasks (always applied)", "tags": ["personal", "custom", "always-apply"]},
+    {"name": "simple", "description": "Docs, tests, and small files — keep responses minimal", "tags": ["personal", "custom", "docs", "testing"]},
+    {"name": "complex", "description": "Architecture, system design, and large refactors", "tags": ["personal", "custom", "architecture"]},
+    {"name": "frontend", "description": "UI component conventions for React/Next.js", "tags": ["personal", "custom", "frontend"]},
+    {"name": "backend", "description": "API, DB, and server-side code conventions", "tags": ["personal", "custom", "backend"]},
+    {"name": "software-architecture", "description": "Software architecture principles for system design", "tags": ["personal", "custom", "architecture", "design"]},
+    {"name": "design-patterns", "description": "Classic and practical design patterns", "tags": ["personal", "custom", "design", "patterns"]},
+    {"name": "ai-design-patterns", "description": "AI and LLM application design patterns", "tags": ["personal", "custom", "ai", "gen-ai", "design"]},
+    {"name": "multi-agent-systems", "description": "Multi-agent AI orchestration patterns", "tags": ["personal", "custom", "ai", "gen-ai", "multi-agent"]},
+    {"name": "graph-rag", "description": "Graph RAG with knowledge graphs", "tags": ["personal", "custom", "ai", "rag", "graph"]},
+    {"name": "rag-development", "description": "RAG pipeline design — chunking, retrieval, generation", "tags": ["personal", "custom", "ai", "rag", "gen-ai"]},
+    {"name": "vectorless-rag", "description": "Retrieval without vector databases", "tags": ["personal", "custom", "ai", "rag"]},
+    {"name": "token-optimization", "description": "LLM token and cost optimization", "tags": ["personal", "custom", "ai", "gen-ai", "performance"]},
+    {"name": "concurrency-parallelism", "description": "Concurrency and parallelism patterns", "tags": ["personal", "custom", "performance", "backend"]},
+    {"name": "authentication", "description": "Authentication and session management", "tags": ["personal", "custom", "security", "backend"]},
+    {"name": "authorization", "description": "Access control and permissions", "tags": ["personal", "custom", "security", "backend"]},
+    {"name": "caching", "description": "Caching strategies — in-memory, Redis, CDN", "tags": ["personal", "custom", "performance", "backend"]},
+    {"name": "rate-limiting", "description": "API rate limiting patterns", "tags": ["personal", "custom", "security", "backend"]},
+    {"name": "distributed-rate-limiting", "description": "Distributed rate limiting across instances", "tags": ["personal", "custom", "security", "distributed"]},
+    {"name": "distributed-locks", "description": "Distributed lock coordination", "tags": ["personal", "custom", "distributed", "backend"]},
+    {"name": "acid-properties", "description": "ACID transactional database design", "tags": ["personal", "custom", "database", "sql"]},
+    {"name": "cap-theorem", "description": "CAP theorem consistency/availability tradeoffs", "tags": ["personal", "custom", "distributed", "architecture"]},
+    {"name": "env-secrets-management", "description": ".env, secrets.json, and vault best practices", "tags": ["personal", "custom", "security", "devops"]},
+    {"name": "gen-ai-development", "description": "Generative AI application development", "tags": ["personal", "custom", "ai", "gen-ai"]}
   ]
 }

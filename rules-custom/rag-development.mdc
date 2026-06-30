@@ -1,0 +1,18 @@
+---
+description: RAG pipeline design — chunking, embedding, retrieval, generation
+globs: **/*.{py,ts,tsx}
+alwaysApply: false
+---
+
+# RAG development
+
+- Chunk documents by semantic boundaries (headings, paragraphs), not fixed character counts alone.
+- Store chunk metadata: source, page, section, timestamp, access level.
+- Use hybrid search (vector + BM25/keyword) for better recall on exact terms and names.
+- Re-rank retrieved chunks before sending to the LLM (cross-encoder or lightweight reranker).
+- Include source citations in responses; pass source IDs in context for traceability.
+- Tune top-k and similarity thresholds with eval datasets — defaults rarely work.
+- Refresh embeddings when documents or embedding models change.
+- Monitor retrieval precision/recall separately from generation quality.
+- Filter retrieved chunks by user permissions before LLM context injection.
+- Keep the generation prompt separate from the retrieval query prompt.

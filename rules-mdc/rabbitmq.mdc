@@ -1,0 +1,38 @@
+---
+description: Best practices and coding standards for Rabbitmq.
+globs: **/*.{py,ts,go,rs,java}
+---
+
+# Rabbitmq Best Practices
+
+Tags: messaging, queue, backend, distributed
+
+## Code organization
+
+- Follow idiomatic Rabbitmq project structure and naming conventions.
+- Keep configuration separate from business logic.
+- Prefer small, focused modules over large monolithic files.
+
+## Performance
+
+- Profile before optimizing; measure impact of changes.
+- Use connection pooling and caching where appropriate.
+- Avoid N+1 queries and unbounded in-memory operations.
+
+## Security
+
+- Never hardcode secrets; use environment variables or secret managers.
+- Validate and sanitize all external input.
+- Apply least-privilege access for services and credentials.
+
+## Testing
+
+- Write tests for critical paths and edge cases.
+- Use integration tests for external service boundaries.
+- Mock external dependencies in unit tests.
+
+## Operations
+
+- Add structured logging with correlation IDs.
+- Define health checks and graceful shutdown handlers.
+- Document deployment requirements and environment variables.

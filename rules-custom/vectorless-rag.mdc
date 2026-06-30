@@ -1,0 +1,18 @@
+---
+description: Vectorless RAG — retrieval without embedding vector databases
+globs: **/*.{py,ts,tsx}
+alwaysApply: false
+---
+
+# Vectorless RAG
+
+- Use when exact matching, structured metadata, or full-text search suffices over semantic similarity.
+- Leverage BM25/Elasticsearch/OpenSearch for keyword + fuzzy retrieval.
+- SQL-based retrieval: pre-filter with WHERE clauses, then rank with full-text indexes.
+- Graph traversal for relationship-based context without vector embeddings.
+- LLM-generated query expansion: rewrite user query into search terms, not embedding lookup.
+- PageIndex / hierarchical document trees: navigate structure instead of chunk similarity.
+- Cheaper and faster for domains with precise terminology (legal, medical codes, SKUs).
+- Combine with small vector index only for ambiguous natural language queries.
+- Evaluate whether vector search adds value before adding embedding infrastructure.
+- Cache parsed document indexes; rebuilding indexes is often the bottleneck, not search.
