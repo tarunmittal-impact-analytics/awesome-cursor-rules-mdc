@@ -15,7 +15,7 @@ This project generates Cursor MDC (Markdown Cursor) rule files from a structured
 
 - **296 library rules** — frameworks, databases, data engineering, cloud, AI/ML, mobile, frontend
 - **24 custom rules** — architecture, RAG, security, distributed systems, auth patterns
-- **96 preset stacks** — curated bundles by use case (data eng, gen-ai, security, cloud)
+- **152 preset stacks** — curated bundles by use case (data eng, gen-ai, security, cloud)
 - **Install tooling** — curl script, Python CLI, and web catalog
 - Generates comprehensive MDC rule files via Exa + LLM (Gemini)
 - Template fallback generator when API keys unavailable
@@ -141,7 +141,7 @@ uv run src/install_rules.py install --stack data-stack-kafka --here
 uv run src/install_rules.py install --stack full-stack-fastapi-pro --here
 ```
 
-Available stacks: run `uv run src/install_rules.py stacks` (96 stacks including Python backend, FastAPI, PostgreSQL, MySQL, Redis, ClickHouse, BigQuery, gen-ai, RAG, multi-agent, frontend, full-stack). Key stacks: `fastapi-end-to-end`, `fastapi-gen-ai-platform`, `fastapi-postgresql`, `python-sqlalchemy`, `python-postgresql`, `python-mysql`, `fullstack-nextjs-fastapi`, `fullstack-gen-ai-app`, `gen-ai-rag-vector-db`, `gen-ai-multi-agent-full`.
+Available stacks: run `uv run src/install_rules.py stacks` (152 stacks). Key stacks: `backend-e2e-fastapi`, `frontend-e2e-react`, `mern-full`, `pern-full`, `t3-stack`, `fullstack-genai-e2e`, `genai-python-backend-e2e`, `fastapi-gen-ai-platform`.
 
 ### Rule catalog overview
 

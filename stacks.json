@@ -383,6 +383,230 @@
     "personal-fullstack-react-fastapi": {
       "description": "Personal rules plus React frontend and FastAPI backend",
       "rules": ["custom:base", "custom:frontend", "custom:backend", "react", "typescript", "vite", "fastapi", "postgresql", "pydantic", "pytest"]
+    },
+    "backend-e2e-fastapi": {
+      "description": "End-to-end FastAPI backend — auth, Postgres, Redis, caching, secrets, CI/CD",
+      "rules": ["custom:base", "custom:backend", "custom:complex", "custom:software-architecture", "custom:authentication", "custom:authorization", "custom:caching", "custom:rate-limiting", "custom:env-secrets-management", "custom:concurrency-parallelism", "fastapi", "pydantic", "python", "postgresql", "sqlalchemy", "redis", "docker", "pytest", "github-actions"]
+    },
+    "backend-e2e-django": {
+      "description": "End-to-end Django backend — DRF, ORM, auth, Postgres, Docker, testing",
+      "rules": ["custom:base", "custom:backend", "custom:complex", "custom:authentication", "custom:authorization", "custom:env-secrets-management", "django", "django-orm", "django-rest-framework", "postgresql", "redis", "python", "pytest", "docker", "github-actions"]
+    },
+    "backend-e2e-flask": {
+      "description": "End-to-end Flask backend — SQLAlchemy, auth, Postgres, Redis, Docker",
+      "rules": ["custom:base", "custom:backend", "custom:authentication", "custom:caching", "custom:env-secrets-management", "flask", "sqlalchemy", "pydantic", "postgresql", "redis", "python", "pytest", "docker", "github-actions"]
+    },
+    "backend-e2e-nestjs": {
+      "description": "End-to-end NestJS backend — Prisma, Postgres, Redis, auth, Docker, Jest",
+      "rules": ["custom:base", "custom:backend", "custom:software-architecture", "custom:authentication", "custom:authorization", "custom:rate-limiting", "custom:env-secrets-management", "nestjs", "typescript", "prisma", "postgresql", "redis", "docker", "jest", "github-actions"]
+    },
+    "backend-e2e-express": {
+      "description": "End-to-end Express.js backend — Prisma, Postgres, Redis, auth, Docker",
+      "rules": ["custom:base", "custom:backend", "custom:authentication", "custom:authorization", "custom:caching", "custom:rate-limiting", "custom:env-secrets-management", "express", "typescript", "prisma", "postgresql", "redis", "docker", "jest", "github-actions"]
+    },
+    "backend-e2e-node-mongodb": {
+      "description": "End-to-end Node.js backend — Express, MongoDB, Redis, auth, Docker",
+      "rules": ["custom:base", "custom:backend", "custom:authentication", "custom:authorization", "custom:caching", "custom:env-secrets-management", "express", "mongodb", "typescript", "redis", "socket-io", "docker", "jest", "github-actions"]
+    },
+    "backend-e2e-spring": {
+      "description": "End-to-end Spring Boot backend — Java, PostgreSQL, Redis, Docker",
+      "rules": ["custom:base", "custom:backend", "custom:software-architecture", "custom:authentication", "custom:authorization", "spring", "java", "postgresql", "redis", "docker", "github-actions"]
+    },
+    "backend-e2e-go": {
+      "description": "End-to-end Go backend — Fiber, PostgreSQL, Redis, Docker, CI/CD",
+      "rules": ["custom:base", "custom:backend", "custom:software-architecture", "custom:authentication", "custom:caching", "go", "fiber", "postgresql", "redis", "docker", "github-actions"]
+    },
+    "backend-e2e-laravel": {
+      "description": "End-to-end Laravel backend — PHP, MySQL, Redis, Docker",
+      "rules": ["custom:base", "custom:backend", "custom:authentication", "custom:authorization", "laravel", "php", "mysql", "redis", "docker", "github-actions"]
+    },
+    "backend-e2e-aspnet": {
+      "description": "End-to-end ASP.NET backend — C#, PostgreSQL, Docker",
+      "rules": ["custom:base", "custom:backend", "custom:software-architecture", "custom:authentication", "asp-net", "c-sharp", "postgresql", "redis", "docker", "github-actions"]
+    },
+    "backend-e2e-genai-python": {
+      "description": "End-to-end Gen-AI Python backend — FastAPI, LangChain, LangGraph, RAG, agents, Postgres, Redis",
+      "rules": ["custom:base", "custom:backend", "custom:complex", "custom:gen-ai-development", "custom:rag-development", "custom:graph-rag", "custom:vectorless-rag", "custom:multi-agent-systems", "custom:ai-design-patterns", "custom:token-optimization", "custom:authentication", "custom:env-secrets-management", "fastapi", "pydantic", "python", "langchain", "langgraph", "langsmith", "openai", "anthropic", "postgresql", "redis", "chromadb", "pinecone", "neo4j", "graph-database", "pytest", "docker", "github-actions"]
+    },
+    "genai-python-backend-e2e": {
+      "description": "Gen-AI Python backend production stack — LLM API, RAG, observability, deployment",
+      "rules": ["custom:base", "custom:backend", "custom:gen-ai-development", "custom:rag-development", "custom:multi-agent-systems", "custom:token-optimization", "fastapi", "pydantic", "python", "langchain", "langgraph", "openai", "anthropic", "huggingface", "transformers", "langsmith", "postgresql", "redis", "chromadb", "pytest", "docker", "github-actions"]
+    },
+    "genai-fastapi-rag-e2e": {
+      "description": "Gen-AI RAG backend end-to-end — FastAPI, vector DBs, chunking, retrieval, generation",
+      "rules": ["custom:base", "custom:backend", "custom:rag-development", "custom:vectorless-rag", "custom:token-optimization", "fastapi", "pydantic", "python", "langchain", "chromadb", "pinecone", "qdrant", "weaviate", "milvus", "openai", "postgresql", "pytest", "docker"]
+    },
+    "genai-fastapi-agents-e2e": {
+      "description": "Gen-AI multi-agent backend end-to-end — LangGraph, CrewAI, AutoGen, FastAPI",
+      "rules": ["custom:base", "custom:backend", "custom:multi-agent-systems", "custom:ai-design-patterns", "custom:gen-ai-development", "fastapi", "pydantic", "python", "langgraph", "langchain", "crewai", "autogen", "openai", "anthropic", "redis", "postgresql", "pytest", "docker"]
+    },
+    "genai-streamlit-app": {
+      "description": "Streamlit Gen-AI apps — LLM UI, RAG demos, HuggingFace",
+      "rules": ["custom:base", "custom:gen-ai-development", "custom:rag-development", "streamlit", "python", "langchain", "openai", "huggingface", "chromadb", "pandas"]
+    },
+    "genai-huggingface-stack": {
+      "description": "HuggingFace ML stack — transformers, PyTorch, inference, FastAPI serving",
+      "rules": ["custom:gen-ai-development", "huggingface", "transformers", "pytorch", "fastapi", "python", "pydantic", "docker"]
+    },
+    "frontend-e2e-react": {
+      "description": "End-to-end React frontend — Vite, TypeScript, Tailwind, shadcn, state, testing",
+      "rules": ["custom:base", "custom:frontend", "custom:simple", "react", "typescript", "vite", "vitest", "eslint", "tailwind", "shadcn", "radix-ui", "zustand", "react-query", "axios", "playwright", "cypress"]
+    },
+    "frontend-e2e-nextjs": {
+      "description": "End-to-end Next.js frontend — App Router, Tailwind, shadcn, Prisma-ready, testing",
+      "rules": ["custom:base", "custom:frontend", "custom:simple", "next-js", "react", "typescript", "tailwind", "shadcn", "radix-ui", "framer-motion", "eslint", "vitest", "playwright", "vercel"]
+    },
+    "frontend-e2e-vue": {
+      "description": "End-to-end Vue 3 frontend — Vite, TypeScript, Tailwind, testing",
+      "rules": ["custom:base", "custom:frontend", "custom:simple", "vue", "typescript", "vite", "vitest", "eslint", "tailwind", "playwright", "cypress"]
+    },
+    "frontend-e2e-angular": {
+      "description": "End-to-end Angular frontend — TypeScript, testing, Cypress",
+      "rules": ["custom:base", "custom:frontend", "angular", "typescript", "eslint", "jest", "cypress", "playwright"]
+    },
+    "frontend-e2e-svelte": {
+      "description": "End-to-end Svelte frontend — Vite, TypeScript, Tailwind, Vitest",
+      "rules": ["custom:base", "custom:frontend", "custom:simple", "svelte", "typescript", "vite", "vitest", "eslint", "tailwind", "playwright"]
+    },
+    "frontend-e2e-remix": {
+      "description": "End-to-end Remix frontend — React, TypeScript, Tailwind, full-stack ready",
+      "rules": ["custom:base", "custom:frontend", "remix", "react", "typescript", "tailwind", "eslint", "vitest", "playwright"]
+    },
+    "frontend-e2e-astro": {
+      "description": "End-to-end Astro frontend — content sites, React islands, Tailwind",
+      "rules": ["custom:base", "custom:frontend", "astro", "react", "typescript", "tailwind", "eslint", "vite"]
+    },
+    "frontend-e2e-solidjs": {
+      "description": "End-to-end SolidJS frontend — Vite, TypeScript, Tailwind",
+      "rules": ["custom:base", "custom:frontend", "solidjs", "typescript", "vite", "vitest", "eslint", "tailwind"]
+    },
+    "frontend-e2e-nuxt": {
+      "description": "End-to-end Nuxt 3 frontend — Vue, TypeScript, Tailwind, Vitest",
+      "rules": ["custom:base", "custom:frontend", "nuxt", "vue", "typescript", "tailwind", "vitest", "eslint", "playwright"]
+    },
+    "mern": {
+      "description": "MERN stack — MongoDB, Express, React, Node.js",
+      "rules": ["mongodb", "express", "react", "typescript", "axios", "jest", "eslint", "docker"]
+    },
+    "mern-full": {
+      "description": "MERN full stack — MongoDB, Express, React, auth, Redis, Docker, CI/CD",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "custom:authentication", "custom:authorization", "mongodb", "express", "react", "typescript", "redis", "socket-io", "axios", "jest", "eslint", "docker", "github-actions"]
+    },
+    "mean": {
+      "description": "MEAN stack — MongoDB, Express, Angular, Node.js",
+      "rules": ["mongodb", "express", "angular", "typescript", "jest", "eslint", "docker"]
+    },
+    "pern": {
+      "description": "PERN stack — PostgreSQL, Express, React, Node.js",
+      "rules": ["postgresql", "express", "react", "typescript", "prisma", "axios", "jest", "eslint", "docker"]
+    },
+    "pern-full": {
+      "description": "PERN full stack — PostgreSQL, Express, React, auth, Redis, Docker",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "custom:authentication", "custom:authorization", "postgresql", "express", "react", "typescript", "prisma", "redis", "axios", "jest", "docker", "github-actions"]
+    },
+    "pevn": {
+      "description": "PEVN stack — PostgreSQL, Express, Vue, Node.js",
+      "rules": ["postgresql", "express", "vue", "typescript", "prisma", "axios", "jest", "eslint", "docker"]
+    },
+    "t3-stack": {
+      "description": "T3 stack — Next.js, tRPC, Prisma, Tailwind, TypeScript",
+      "rules": ["next-js", "react", "typescript", "trpc", "prisma", "postgresql", "tailwind", "eslint", "vitest", "zod"]
+    },
+    "t3-stack-full": {
+      "description": "T3 full stack with auth, Redis, and deployment",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "custom:authentication", "next-js", "react", "typescript", "trpc", "prisma", "postgresql", "tailwind", "redis", "eslint", "vitest", "vercel", "github-actions"]
+    },
+    "nextjs-mongodb": {
+      "description": "Next.js with MongoDB backend",
+      "rules": ["next-js", "react", "typescript", "mongodb", "tailwind", "eslint", "vitest"]
+    },
+    "nextjs-supabase": {
+      "description": "Next.js with Supabase backend",
+      "rules": ["next-js", "react", "typescript", "supabase", "tailwind", "eslint", "vitest"]
+    },
+    "fullstack-mern": {
+      "description": "Full-stack MERN — React frontend + Express/MongoDB backend (monorepo)",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "react", "typescript", "vite", "vitest", "mongodb", "express", "redis", "axios", "jest", "docker", "eslint"]
+    },
+    "fullstack-pern": {
+      "description": "Full-stack PERN — React frontend + Express/PostgreSQL backend",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "react", "typescript", "vite", "vitest", "express", "postgresql", "prisma", "redis", "axios", "jest", "docker"]
+    },
+    "fullstack-mean": {
+      "description": "Full-stack MEAN — Angular frontend + Express/MongoDB backend",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "angular", "typescript", "mongodb", "express", "jest", "docker", "eslint"]
+    },
+    "fullstack-t3": {
+      "description": "Full-stack T3 — Next.js + tRPC + Prisma + Tailwind with personal rules",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "next-js", "react", "typescript", "trpc", "prisma", "postgresql", "tailwind", "zod", "eslint", "vitest"]
+    },
+    "fullstack-graphql": {
+      "description": "Full-stack GraphQL — Apollo Client + NestJS/GraphQL + PostgreSQL",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "graphql", "apollo-graphql", "apollo-client", "nestjs", "typescript", "react", "postgresql", "prisma", "docker"]
+    },
+    "fullstack-genai-e2e": {
+      "description": "Full-stack Gen-AI end-to-end — Next.js UI + FastAPI AI backend + RAG + agents",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "custom:gen-ai-development", "custom:rag-development", "custom:graph-rag", "custom:multi-agent-systems", "custom:ai-design-patterns", "custom:token-optimization", "next-js", "react", "typescript", "tailwind", "fastapi", "pydantic", "python", "langchain", "langgraph", "openai", "anthropic", "chromadb", "pinecone", "neo4j", "postgresql", "redis", "docker", "pytest", "github-actions"]
+    },
+    "fullstack-genai-python-backend": {
+      "description": "React frontend + Gen-AI Python backend end-to-end",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "custom:gen-ai-development", "custom:rag-development", "react", "typescript", "vite", "vitest", "tailwind", "fastapi", "pydantic", "python", "langchain", "langgraph", "openai", "chromadb", "postgresql", "redis", "docker", "pytest"]
+    },
+    "fullstack-genai-rag-e2e": {
+      "description": "Full-stack RAG app — Next.js + FastAPI + vector DBs + LangChain",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "custom:rag-development", "custom:token-optimization", "next-js", "react", "typescript", "tailwind", "fastapi", "langchain", "chromadb", "pinecone", "qdrant", "openai", "postgresql", "docker", "pytest"]
+    },
+    "fullstack-genai-agents-e2e": {
+      "description": "Full-stack multi-agent app — Next.js + FastAPI + LangGraph + CrewAI",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "custom:multi-agent-systems", "custom:ai-design-patterns", "next-js", "react", "typescript", "fastapi", "langgraph", "langchain", "crewai", "autogen", "openai", "redis", "postgresql", "docker"]
+    },
+    "fullstack-nextjs-genai-backend": {
+      "description": "Next.js frontend with dedicated Gen-AI FastAPI backend",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "custom:gen-ai-development", "next-js", "react", "typescript", "tailwind", "shadcn", "fastapi", "langchain", "langgraph", "pydantic", "openai", "anthropic", "postgresql", "redis", "docker"]
+    },
+    "bun-fullstack": {
+      "description": "Bun runtime full-stack — Express/React/TypeScript",
+      "rules": ["bun", "express", "react", "typescript", "postgresql", "prisma", "eslint", "vitest"]
+    },
+    "drizzle-fullstack": {
+      "description": "Drizzle ORM full-stack — Next.js + Drizzle + PostgreSQL",
+      "rules": ["next-js", "react", "typescript", "drizzle", "postgresql", "tailwind", "eslint", "vitest", "zod"]
+    },
+    "supabase-fullstack": {
+      "description": "Supabase full-stack — Next.js + Supabase + Tailwind",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "next-js", "react", "typescript", "supabase", "tailwind", "eslint", "vitest"]
+    },
+    "firebase-fullstack": {
+      "description": "Firebase full-stack — React + Firebase auth and data",
+      "rules": ["custom:base", "custom:frontend", "react", "typescript", "firebase", "vite", "eslint", "vitest"]
+    },
+    "stripe-saas-fullstack": {
+      "description": "SaaS full-stack — Next.js + Stripe + Prisma + auth",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "custom:authentication", "custom:authorization", "next-js", "react", "typescript", "stripe", "prisma", "postgresql", "tailwind", "auth0", "docker"]
+    },
+    "saas-nextjs-postgres": {
+      "description": "SaaS backend — Next.js API routes + Prisma + PostgreSQL + Redis",
+      "rules": ["custom:base", "custom:backend", "custom:authentication", "custom:rate-limiting", "next-js", "react", "typescript", "prisma", "postgresql", "redis", "tailwind", "stripe", "docker"]
+    },
+    "microservices-node": {
+      "description": "Node.js microservices — NestJS, Express, RabbitMQ, Redis, Docker, K8s",
+      "rules": ["custom:software-architecture", "nestjs", "express", "typescript", "rabbitmq", "redis", "postgresql", "docker", "kubernetes", "graphql"]
+    },
+    "microservices-python": {
+      "description": "Python microservices — FastAPI, Kafka, Redis, Docker, K8s",
+      "rules": ["custom:software-architecture", "fastapi", "python", "apache-kafka", "redis", "postgresql", "docker", "kubernetes", "pytest"]
+    },
+    "realtime-fullstack": {
+      "description": "Realtime apps — Socket.IO, Redis, Express, React",
+      "rules": ["custom:base", "custom:frontend", "custom:backend", "socket-io", "redis", "express", "react", "typescript", "mongodb", "docker"]
+    },
+    "htmx-fullstack": {
+      "description": "HTMX full-stack — server-driven UI with FastAPI/Django backend",
+      "rules": ["htmx", "fastapi", "python", "postgresql", "tailwind", "docker"]
+    },
+    "personal-backend-e2e-fastapi": {
+      "description": "Personal rules plus end-to-end FastAPI backend",
+      "rules": ["custom:base", "custom:backend", "custom:complex", "custom:authentication", "custom:authorization", "custom:caching", "custom:env-secrets-management", "fastapi", "pydantic", "python", "postgresql", "sqlalchemy", "redis", "docker", "pytest", "github-actions"]
     }
   }
 }

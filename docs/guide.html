@@ -39,7 +39,7 @@
           <h1>Documentation</h1>
           <p class="lead">
             This repo is a <strong>Cursor rules library</strong> and <strong>install toolkit</strong>.
-            It ships 296 technology-specific rules, 24 personal workflow rules, and 96 preset stacks —
+            It ships 296 technology-specific rules, 24 personal workflow rules, and 152 preset stacks —
             so you can give Cursor consistent, stack-aware AI guidance in any project.
           </p>
 
@@ -53,7 +53,7 @@
               <p>Hand-written team conventions: architecture, RAG, security, distributed systems.</p>
             </div>
             <div class="info-card">
-              <h3>96 preset stacks</h3>
+              <h3>152 preset stacks</h3>
               <p>One-command bundles for common project types — data eng, gen-ai, mobile, backend.</p>
             </div>
           </div>
@@ -237,7 +237,16 @@ AI follows your stack + team conventions</div>
               <tr><th>Project type</th><th>Stack</th><th>What you get</th></tr>
             </thead>
             <tbody>
-              <tr><td>Python + SQLAlchemy</td><td><code>python-sqlalchemy</code></td><td>python, sqlalchemy, pydantic, pytest</td></tr>
+              <tr><td>End-to-end FastAPI backend</td><td><code>backend-e2e-fastapi</code></td><td>auth, postgres, redis, CI/CD, secrets</td></tr>
+              <tr><td>End-to-end React frontend</td><td><code>frontend-e2e-react</code></td><td>vite, tailwind, shadcn, playwright, cypress</td></tr>
+              <tr><td>MERN full stack</td><td><code>mern-full</code></td><td>mongodb, express, react, auth, redis</td></tr>
+              <tr><td>PERN full stack</td><td><code>pern-full</code></td><td>postgresql, express, react, prisma</td></tr>
+              <tr><td>T3 stack</td><td><code>t3-stack-full</code></td><td>next.js, trpc, prisma, tailwind, vercel</td></tr>
+              <tr><td>Gen-AI Python backend E2E</td><td><code>genai-python-backend-e2e</code></td><td>langchain, langgraph, huggingface, fastapi</td></tr>
+              <tr><td>Full-stack Gen-AI E2E</td><td><code>fullstack-genai-e2e</code></td><td>next.js + fastapi + RAG + agents</td></tr>
+              <tr><td>Gen-AI RAG backend E2E</td><td><code>genai-fastapi-rag-e2e</code></td><td>vector DBs, chunking, retrieval</td></tr>
+              <tr><td>Stripe SaaS</td><td><code>stripe-saas-fullstack</code></td><td>next.js, stripe, prisma, auth0</td></tr>
+              <tr><td>Realtime app</td><td><code>realtime-fullstack</code></td><td>socket.io, redis, express, react</td></tr>
               <tr><td>Python + PostgreSQL</td><td><code>python-postgresql</code></td><td>python, postgresql, sqlalchemy, sql</td></tr>
               <tr><td>Python + MySQL</td><td><code>python-mysql</code></td><td>python, mysql, sqlalchemy, sql</td></tr>
               <tr><td>FastAPI + PostgreSQL</td><td><code>fastapi-postgresql</code></td><td>fastapi, postgresql, sqlalchemy, pydantic, docker</td></tr>

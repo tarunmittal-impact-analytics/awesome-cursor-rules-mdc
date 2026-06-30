@@ -205,7 +205,7 @@ Index for **hand-written workflow and architecture rules** — not tied to a sin
 | Topics | Architecture, RAG, security, distributed systems, token optimization, etc. |
 | Install prefix | `custom:base`, `custom:graph-rag`, or `--custom base` |
 
-#### `stacks.json` — Preset bundles (96 stacks)
+#### `stacks.json` — Preset bundles (152 stacks)
 
 Curated **multi-rule bundles** for common project types. One command installs a whole setup.
 
@@ -371,7 +371,7 @@ curl -fsSL .../install.sh | bash -s -- --stack personal --here
 |----------|------|
 | `rules.json` | Index of 296 library/tech rules + tags |
 | `custom-rules.json` | Index of 24 personal/workflow rules |
-| `stacks.json` | 96 preset bundles mixing library + custom rules |
+| `stacks.json` | 152 preset bundles mixing library + custom rules |
 | `rules-mdc/` | Generated tech-specific rule **content** |
 | `rules-custom/` | Hand-written team/workflow rule **content** |
 | `repo.json` | Fork URL config for installers |
@@ -639,7 +639,7 @@ Open: **https://tarunmittal-impact-analytics.github.io/awesome-cursor-rules-mdc/
 
 - **Rules** tab — browse 296 library rules, filter by tag, multi-select, copy curl/uv commands
 - **Personal** tab — browse 24 custom rules (RAG, security, architecture)
-- **Stacks** tab — browse 96 preset bundles, copy install command
+- **Stacks** tab — browse 152 preset bundles, copy install command
 
 ### 4. Manual copy
 
@@ -794,7 +794,7 @@ The site has two pages:
 |-----|---------|
 | **Rules** | 296 library rules with tag filters and multi-select |
 | **Personal** | 24 custom rules (RAG, security, architecture, patterns) |
-| **Stacks** | 96 preset bundles with one-click copy |
+| **Stacks** | 152 preset bundles with one-click copy |
 
 ### Documentation sections (`guide.html`)
 
@@ -941,7 +941,89 @@ This updates `docs/catalog.json`, syncs URLs in `install.sh`, and refreshes GitH
 | `full-stack-nextjs-pro` | Next.js + Prisma + Postgres + personal rules |
 | `full-stack-fastapi-pro` | FastAPI + Postgres + ClickHouse + Redis |
 
-Run `uv run src/install_rules.py stacks` to list all 96 stacks.
+### End-to-end backend stacks
+
+| Stack | Description |
+|-------|-------------|
+| `backend-e2e-fastapi` | FastAPI — auth, Postgres, Redis, caching, secrets, CI/CD |
+| `backend-e2e-django` | Django + DRF + Postgres + Redis |
+| `backend-e2e-flask` | Flask + SQLAlchemy + Postgres + Redis |
+| `backend-e2e-nestjs` | NestJS + Prisma + Postgres + Redis + auth |
+| `backend-e2e-express` | Express + Prisma + Postgres + Redis + auth |
+| `backend-e2e-node-mongodb` | Express + MongoDB + Redis + Socket.IO |
+| `backend-e2e-spring` | Spring Boot + Java + PostgreSQL |
+| `backend-e2e-go` | Go Fiber + PostgreSQL + Redis |
+| `backend-e2e-laravel` | Laravel + PHP + MySQL |
+| `backend-e2e-aspnet` | ASP.NET + C# + PostgreSQL |
+| `backend-e2e-genai-python` | Gen-AI Python backend — LangChain, LangGraph, RAG, agents |
+| `fastapi-end-to-end` | FastAPI production (lighter than backend-e2e-fastapi) |
+
+### End-to-end frontend stacks
+
+| Stack | Description |
+|-------|-------------|
+| `frontend-e2e-react` | React + Vite + Tailwind + shadcn + Zustand + Playwright |
+| `frontend-e2e-nextjs` | Next.js + Tailwind + shadcn + Vercel deployment |
+| `frontend-e2e-vue` | Vue 3 + Vite + Tailwind + Playwright |
+| `frontend-e2e-angular` | Angular + Jest + Cypress |
+| `frontend-e2e-svelte` | Svelte + Vite + Tailwind |
+| `frontend-e2e-remix` | Remix + React + Tailwind |
+| `frontend-e2e-astro` | Astro + React islands + Tailwind |
+| `frontend-e2e-solidjs` | SolidJS + Vite + Tailwind |
+| `frontend-e2e-nuxt` | Nuxt 3 + Vue + TypeScript |
+
+### MERN / MEAN / PERN / T3 stacks
+
+| Stack | Description |
+|-------|-------------|
+| `mern` | MongoDB + Express + React + Node.js |
+| `mern-full` | MERN + auth + Redis + Docker + CI/CD |
+| `mean` | MongoDB + Express + Angular + Node.js |
+| `pern` | PostgreSQL + Express + React + Node.js |
+| `pern-full` | PERN + auth + Redis + Docker |
+| `pevn` | PostgreSQL + Express + Vue + Node.js |
+| `t3-stack` | Next.js + tRPC + Prisma + Tailwind |
+| `t3-stack-full` | T3 + auth + Redis + Vercel |
+| `fullstack-mern` | MERN monorepo (React + Express/MongoDB) |
+| `fullstack-pern` | PERN monorepo (React + Express/PostgreSQL) |
+| `fullstack-mean` | MEAN monorepo (Angular + Express/MongoDB) |
+| `fullstack-t3` | T3 with personal workflow rules |
+
+### Gen-AI end-to-end stacks
+
+| Stack | Description |
+|-------|-------------|
+| `genai-python-backend-e2e` | Gen-AI Python backend — LLM API, RAG, HuggingFace, deployment |
+| `genai-fastapi-rag-e2e` | FastAPI RAG backend — vector DBs, chunking, retrieval |
+| `genai-fastapi-agents-e2e` | FastAPI multi-agent — LangGraph, CrewAI, AutoGen |
+| `genai-streamlit-app` | Streamlit Gen-AI demos |
+| `genai-huggingface-stack` | HuggingFace + PyTorch + FastAPI serving |
+| `fastapi-gen-ai-platform` | Full AI platform — multi-DB, LangChain, Neo4j, RAG |
+| `fullstack-genai-e2e` | Next.js + FastAPI Gen-AI — RAG + agents end-to-end |
+| `fullstack-genai-python-backend` | React + Gen-AI Python backend |
+| `fullstack-genai-rag-e2e` | Next.js + FastAPI RAG + vector DBs |
+| `fullstack-genai-agents-e2e` | Next.js + FastAPI multi-agent systems |
+| `fullstack-nextjs-genai-backend` | Next.js + dedicated Gen-AI FastAPI backend |
+
+### SaaS, realtime, and specialty full-stack
+
+| Stack | Description |
+|-------|-------------|
+| `nextjs-mongodb` | Next.js + MongoDB |
+| `nextjs-supabase` | Next.js + Supabase |
+| `supabase-fullstack` | Next.js + Supabase + personal rules |
+| `firebase-fullstack` | React + Firebase |
+| `stripe-saas-fullstack` | Next.js SaaS + Stripe + Prisma + Auth0 |
+| `saas-nextjs-postgres` | Next.js API + Prisma + Postgres + Redis + Stripe |
+| `drizzle-fullstack` | Next.js + Drizzle ORM + PostgreSQL |
+| `bun-fullstack` | Bun + Express + React + Prisma |
+| `fullstack-graphql` | Apollo + NestJS GraphQL + React |
+| `realtime-fullstack` | Socket.IO + Redis + Express + React |
+| `htmx-fullstack` | HTMX + FastAPI server-driven UI |
+| `microservices-node` | NestJS/Express microservices + RabbitMQ + K8s |
+| `microservices-python` | FastAPI microservices + Kafka + K8s |
+
+Run `uv run src/install_rules.py stacks` to list all 152 stacks.
 
 ### Personal stacks
 
@@ -1082,10 +1164,52 @@ curl -fsSL .../install.sh | bash -s -- --stack fullstack-gen-ai-app --here
 curl -fsSL .../install.sh | bash -s -- --stack gen-ai-rag-vector-db --here
 ```
 
-### Multi-agent systems
+### Full-stack multi-agent app
 
 ```bash
-curl -fsSL .../install.sh | bash -s -- --stack gen-ai-multi-agent-full --here
+curl -fsSL .../install.sh | bash -s -- --stack fullstack-genai-agents-e2e --here
+```
+
+### End-to-end FastAPI backend only
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack backend-e2e-fastapi --here
+```
+
+### End-to-end React frontend only
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack frontend-e2e-react --here
+```
+
+### MERN stack
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack mern-full --here
+```
+
+### PERN stack
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack pern-full --here
+```
+
+### T3 stack
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack t3-stack-full --here
+```
+
+### Gen-AI Python backend end-to-end
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack genai-python-backend-e2e --here
+```
+
+### Full-stack Gen-AI end-to-end (Next.js + FastAPI)
+
+```bash
+curl -fsSL .../install.sh | bash -s -- --stack fullstack-genai-e2e --here
 ```
 
 ### New React + Vite frontend
